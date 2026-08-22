@@ -47,11 +47,21 @@ def _fts5_escape(query: str) -> str:
     '-', phrase/prefix operators, etc.) -- raw user/query text must be
     escaped or it can be misparsed as a query operator rather than search
     terms (e.g. a query containing "area:" raises "no such column: area").
-    Quoting each token as a literal string sidesteps all of that; terms
-    stay implicitly AND-ed, matching FTS5's default between phrases.
+    Quoting each token as a literal string sidesteps that.
+
+    FTS5's default combining operator between space-separated tokens is
+    AND, not OR -- that would require every query term to co-occur in a
+    document, which is boolean search, not the ranked best-match
+    retrieval BM25 is supposed to provide (and returns zero hits for any
+    multi-term query where no single document contains every term).
+    Joining with explicit OR restores normal ranked-retrieval behavior;
+    bm25() still scores AND-satisfying documents higher via term
+    coverage, it just no longer excludes partial matches entirely.
     """
     tokens = query.split()
-    return " ".join('"' + t.replace('"', '""') + '"' for t in tokens)
+    if not tokens:
+        return ""
+    return " OR ".join('"' + t.replace('"', '""') + '"' for t in tokens)
 
 
 def search(query: str, db_path: str, k: int = 100) -> list[Hit]:
@@ -69,3 +79,53 @@ def search(query: str, db_path: str, k: int = 100) -> list[Hit]:
         con.close()
     # sqlite's bm25() is lower-is-better; flip sign so higher = more relevant.
     return [(doc_id, -score) for doc_id, score in rows]
+
+
+def get_texts(doc_ids: Iterable[str], db_path: str) -> dict[str, str]:
+    doc_ids = list(doc_ids)
+    if not doc_ids:
+        return {}
+    con = sqlite3.connect(db_path)
+    try:
+        placeholders = ",".join("?" for _ in doc_ids)
+        rows = con.execute(
+            f"SELECT doc_id, text FROM docs WHERE doc_id IN ({placeholders})", doc_ids
+        ).fetchall()
+    finally:
+        con.close()
+    return dict(rows)
+
+
+def doc_count(db_path: str) -> int:
+    con = sqlite3.connect(db_path)
+    try:
+        (n,) = con.execute("SELECT count(*) FROM docs").fetchone()
+    finally:
+        con.close()
+    return n
+
+
+def doc_frequency(term: str, db_path: str) -> int:
+    """Number of documents containing `term` (single token, no MATCH operators)."""
+    escaped = _fts5_escape(term)
+    if not escaped:
+        return 0
+    con = sqlite3.connect(db_path)
+    try:
+        (n,) = con.execute(
+            "SELECT count(*) FROM docs WHERE docs MATCH ?", (escaped,)
+        ).fetchone()
+    finally:
+        con.close()
+    return n
+
+
+def idf(term: str, db_path: str, total_docs: int | None = None) -> float:
+    """Inductive-free IDF over the indexed corpus: log((N+1)/(df+1)) + 1,
+    a smoothed variant that stays finite and positive for df in [0, N].
+    """
+    import math
+
+    n = total_docs if total_docs is not None else doc_count(db_path)
+    df = doc_frequency(term, db_path)
+    return math.log((n + 1) / (df + 1)) + 1.0

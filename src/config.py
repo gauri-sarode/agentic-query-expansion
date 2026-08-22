@@ -38,7 +38,10 @@ class Config:
 
     # Generation.
     llm_provider: str = os.getenv("LLM_PROVIDER", "ollama")
-    expansion_model: str = os.getenv("EXPANSION_MODEL", "qwen3.5:2b")
+    # Brief recommends Qwen3.5-2B (4-bit); not pulled locally yet -- default
+    # to the closest available local Ollama model (qwen2.5:3b) so the
+    # pipeline runs today, swap via EXPANSION_MODEL once 3.5-2B is pulled.
+    expansion_model: str = os.getenv("EXPANSION_MODEL", "qwen2.5:3b")
     ollama_base_url: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     hf_api_token: str | None = os.getenv("HF_API_TOKEN")
     anthropic_api_key: str | None = os.getenv("ANTHROPIC_API_KEY")
