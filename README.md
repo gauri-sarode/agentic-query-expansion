@@ -137,6 +137,32 @@ cp .env.example .env
 
 ## Status
 
-Early scaffold. See `docs/milestones.md` for the execution plan and
-go/no-go checkpoints, and `docs/sources.md` for the source bibliography
-this project is built on.
+The full closed-loop agent runs end to end (rule-based v0
+controller/verifier -- see `src/agent/controller.py` for why v0 is
+rule-based rather than learned). TripClick's IR Benchmark package is
+downloaded, parsed, and indexed (1,523,878 docs; 1,175 queries each for
+HEAD/TORSO/TAIL test).
+
+BM25-only retrieval floor (no expansion, no agent):
+
+| Split | MRR | Recall@100 | NDCG@10 |
+|---|---|---|---|
+| NFCorpus | 0.514 | 0.232 | 0.303 |
+| TripClick HEAD | 0.324 | 0.411 | 0.179 |
+| TripClick TORSO | 0.261 | 0.582 | 0.182 |
+| TripClick TAIL | 0.225 | 0.646 | 0.228 |
+
+On a small NFCorpus sample the observable agent already beats this floor
+directionally (NDCG@10 0.276 -> 0.301 on 10 queries) -- far too small a
+sample to mean anything on its own, but the plumbing (fuse, verify,
+rollback) is doing real work, not passing through untouched.
+
+Current bottleneck: p95 episode latency is ~7.5s/query, dominated by
+local LLM inference (Ollama, qwen2.5:3b, CPU). Expect this to shape the
+`configs/default.yaml` SLO's `max_p95_latency_ms` once frozen per
+`docs/milestones.md`, and is a reason to keep trying smaller/quantized
+models as they become available locally.
+
+See `docs/milestones.md` for the execution plan and go/no-go checkpoints,
+and `docs/sources.md` for the source bibliography this project is built
+on.
