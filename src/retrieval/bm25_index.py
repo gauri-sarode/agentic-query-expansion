@@ -42,13 +42,28 @@ def build_index(docs: Iterable[tuple[str, str]], db_path: str, batch_size: int =
     print(f"[bm25_index] done: {n} docs in {time.time() - t0:.1f}s -> {db_path}")
 
 
+def _fts5_escape(query: str) -> str:
+    """FTS5 MATCH has its own query syntax (column filters via ':', NOT via
+    '-', phrase/prefix operators, etc.) -- raw user/query text must be
+    escaped or it can be misparsed as a query operator rather than search
+    terms (e.g. a query containing "area:" raises "no such column: area").
+    Quoting each token as a literal string sidesteps all of that; terms
+    stay implicitly AND-ed, matching FTS5's default between phrases.
+    """
+    tokens = query.split()
+    return " ".join('"' + t.replace('"', '""') + '"' for t in tokens)
+
+
 def search(query: str, db_path: str, k: int = 100) -> list[Hit]:
+    escaped = _fts5_escape(query)
+    if not escaped:
+        return []
     con = sqlite3.connect(db_path)
     try:
         rows = con.execute(
             "SELECT doc_id, bm25(docs) AS score FROM docs WHERE docs MATCH ? "
             "ORDER BY score LIMIT ?",
-            (query, k),
+            (escaped, k),
         ).fetchall()
     finally:
         con.close()
