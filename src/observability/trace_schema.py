@@ -33,6 +33,7 @@ class TraceRecord:
     fault_type: str | None
     controller_decision: str
     rollback_or_retry: bool
+    llm_calls: int
 
     final_run_id: str
     episode_latency_ms: float

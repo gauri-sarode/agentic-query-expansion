@@ -203,6 +203,7 @@ def run_episode(
         fault_type=None,
         controller_decision=controller_decision,
         rollback_or_retry=rollback_or_retry,
+        llm_calls=llm_calls,
         final_run_id=str(uuid.uuid4()),
         episode_latency_ms=(time.time() - episode_t0) * 1000,
     )
