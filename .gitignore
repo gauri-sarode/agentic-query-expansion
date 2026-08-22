@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.DS_Store
+
+data/*
+!data/README.md
+results/
+
+*.sqlite3
+*.parquet
+*.duckdb
