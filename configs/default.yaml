@@ -1,0 +1,32 @@
+# Pinned run configuration. Mirrors src/config.py defaults; override via
+# env vars (.env) for a specific experiment run rather than editing this
+# file per-run, so configs stay reproducible/diffable.
+
+dataset: nfcorpus
+
+retrieval:
+  bm25_db_path: data/bm25_index.sqlite3
+  reranker_model: cross-encoder/ms-marco-MiniLM-L6-v2
+  reranker_top_k: 50
+  reranker_max_candidates: 100
+
+generation:
+  provider: ollama
+  model: qwen3.5:2b
+  context_tokens: 4096
+  output_tokens: 64
+  max_calls_per_query: 2
+
+agent:
+  action_budget: 3
+
+# Frozen from ~100 local dev episodes before main-test evaluation
+# (docs/milestones.md go/no-go checkpoints). null until that calibration
+# run completes.
+slo:
+  max_harm_rate: null
+  max_expected_llm_calls: null
+  max_p95_latency_ms: null
+
+k_values: [10, 100]
+seed: 42
