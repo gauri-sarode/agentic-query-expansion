@@ -152,16 +152,36 @@ BM25-only retrieval floor (no expansion, no agent):
 | TripClick TORSO | 0.261 | 0.582 | 0.182 |
 | TripClick TAIL | 0.225 | 0.646 | 0.228 |
 
-On a small NFCorpus sample the observable agent already beats this floor
-directionally (NDCG@10 0.276 -> 0.301 on 10 queries) -- far too small a
-sample to mean anything on its own, but the plumbing (fuse, verify,
-rollback) is doing real work, not passing through untouched.
+The critical comparison from the experiment matrix -- **observable agent
+vs. the strong static failure-conditioned QE comparator**
+(`scripts/06_agent_vs_static.py`), same operator-selection policy,
+generator, verifier, and fusion mechanism for both (`src/agent/steps.py`)
+-- run at n=100 on NFCorpus:
 
-Current bottleneck: p95 episode latency is ~7.5s/query, dominated by
-local LLM inference (Ollama, qwen2.5:3b, CPU). Expect this to shape the
-`configs/default.yaml` SLO's `max_p95_latency_ms` once frozen per
-`docs/milestones.md`, and is a reason to keep trying smaller/quantized
-models as they become available locally.
+| System | NDCG@10 | Recall@100 | MRR |
+|---|---|---|---|
+| BM25 only | 0.332 | 0.252 | 0.542 |
+| Static QE | 0.340 | 0.264 | 0.532 |
+| Agent | 0.341 | 0.265 | 0.537 |
+
+Both expansion pipelines beat plain BM25. But **agent vs. static is not
+yet significant** (paired bootstrap on NDCG@10, mean diff 0.0014, 95% CI
+[0.0000, 0.0042]) -- with the current rule-based v0 controller, REPLAN
+fires on roughly 1% of queries, so the agent's ROLLBACK decisions land on
+essentially the same fallback-to-original outcome as the static
+comparator's REJECT. The closed loop isn't yet exercised enough to show
+the paper's core claim; the next lever is the controller/verifier
+thresholds, not the plumbing.
+
+Cost is measurably different, though: an isolated, order-alternated
+latency benchmark (`scripts/07_latency_benchmark.py`, n=50 paired
+samples/pipeline, avoiding two real measurement confounds found along
+the way -- see its docstring and git history) shows agent p95 latency
+(4976ms) meaningfully above static's (3141ms), fully explained by the
+agent's occasional second LLM call on REPLAN (mean diff 213ms, 95% CI
+[18, 450], significant). SLO frozen in `configs/default.yaml`:
+`max_harm_rate=0.19`, `max_expected_llm_calls=1.03`,
+`max_p95_latency_ms=4976`.
 
 See `docs/milestones.md` for the execution plan and go/no-go checkpoints,
 and `docs/sources.md` for the source bibliography this project is built
