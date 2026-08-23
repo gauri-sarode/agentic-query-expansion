@@ -66,22 +66,28 @@ def main() -> None:
     baseline_run, static_run, agent_run = {}, {}, {}
     static_traces, agent_traces = [], []
 
+    # Two fully separate passes, not interleaved per query: running static
+    # and agent back-to-back on the *same* prompt let Ollama's backend
+    # reuse a warm KV-cache prefill for the second (agent) call, making
+    # its latency look artificially ~6x faster in an earlier run of this
+    # script. Separating the passes so ~100 unrelated prompts sit between
+    # any repeat gives each pipeline an honest, independent latency read.
+    print("--- static pass ---")
     for qid in query_ids:
         text = queries[qid]
         baseline_run[qid] = dict(search(text, db_path, k=100))
-
         static_ranking, static_trace = run_static_episode(qid, text, db_path, dataset_slice=dataset)
         static_run[qid] = {doc_id: 1.0 / (rank + 1) for rank, doc_id in enumerate(static_ranking)}
         static_traces.append(static_trace)
+        print(f"{qid:>8}  static={static_trace.controller_decision:<8}")
 
+    print("\n--- agent pass ---")
+    for qid in query_ids:
+        text = queries[qid]
         agent_ranking, agent_trace = run_episode(qid, text, db_path, dataset_slice=dataset)
         agent_run[qid] = {doc_id: 1.0 / (rank + 1) for rank, doc_id in enumerate(agent_ranking)}
         agent_traces.append(agent_trace)
-
-        print(
-            f"{qid:>8}  static={static_trace.controller_decision:<8} "
-            f"agent={agent_trace.controller_decision:<8}"
-        )
+        print(f"{qid:>8}  agent={agent_trace.controller_decision:<8}")
 
     q = {qid: qrels[qid] for qid in query_ids}
     baseline_eval = evaluate(q, baseline_run)
