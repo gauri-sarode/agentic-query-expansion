@@ -11,11 +11,18 @@ and paired bootstrap significance on the agent-vs-static NDCG@10 delta --
 the strongest-hypothesis test isn't "agent beats BM25", it's "agent moves
 the quality/harm/cost Pareto frontier past the static comparator".
 
-Usage: python scripts/06_agent_vs_static.py [dataset] [n_queries]
+Usage: python scripts/06_agent_vs_static.py [dataset] [n_queries] [--freeze-slo]
+
+--freeze-slo writes this run's agent harm rate / mean LLM calls / p95
+latency into configs/default.yaml's slo: block (only when n_queries >= 100,
+per the docs/milestones.md go/no-go calibration step -- smaller samples
+refuse to freeze rather than silently locking in a noisy estimate).
 """
 from __future__ import annotations
 
+import re
 import sys
+from pathlib import Path
 
 from src.agent.loop import run_episode
 from src.agent.static_baseline import run_static_episode
@@ -31,10 +38,25 @@ _DB_PATHS = {
     "tripclick-tail": "data/tripclick_bm25.sqlite3",
 }
 
+_CONFIG_PATH = Path("configs/default.yaml")
+
+
+def freeze_slo(harm_rate: float, mean_llm_calls: float, p95_latency_ms: float, path: Path = _CONFIG_PATH) -> None:
+    """Targeted substitution of the three slo: fields, rather than a full
+    YAML round-trip, so the file's comments/formatting survive.
+    """
+    text = path.read_text()
+    text = re.sub(r"max_harm_rate:\s*\S+", f"max_harm_rate: {harm_rate:.4f}", text)
+    text = re.sub(r"max_expected_llm_calls:\s*\S+", f"max_expected_llm_calls: {mean_llm_calls:.4f}", text)
+    text = re.sub(r"max_p95_latency_ms:\s*\S+", f"max_p95_latency_ms: {p95_latency_ms:.1f}", text)
+    path.write_text(text)
+
 
 def main() -> None:
-    dataset = sys.argv[1] if len(sys.argv) > 1 else "nfcorpus"
-    n = int(sys.argv[2]) if len(sys.argv) > 2 else 15
+    args = [a for a in sys.argv[1:] if a != "--freeze-slo"]
+    do_freeze = "--freeze-slo" in sys.argv
+    dataset = args[0] if len(args) > 0 else "nfcorpus"
+    n = int(args[1]) if len(args) > 1 else 15
     db_path = _DB_PATHS[dataset]
 
     queries = load_queries(dataset)
@@ -97,6 +119,22 @@ def main() -> None:
             "\nNOTE: this is a small dev sample -- the bootstrap CI above is illustrative, "
             "not a claim of statistical significance for the paper."
         )
+
+    if do_freeze:
+        harm_rate = helped_unchanged_harmed(baseline_eval, agent_eval)["harmed"]
+        latencies = sorted(t.episode_latency_ms for t in agent_traces)
+        p95_latency = latencies[int(0.95 * (len(latencies) - 1))]
+        if len(query_ids) < 100:
+            print(
+                f"\n--freeze-slo requested but n_queries={len(query_ids)} < 100 -- "
+                "refusing to freeze on an under-sized sample (docs/milestones.md). Not writing configs/default.yaml."
+            )
+        else:
+            freeze_slo(harm_rate, agent_calls, p95_latency)
+            print(
+                f"\nFroze SLO into {_CONFIG_PATH}: max_harm_rate={harm_rate:.4f} "
+                f"max_expected_llm_calls={agent_calls:.4f} max_p95_latency_ms={p95_latency:.1f}"
+            )
 
 
 if __name__ == "__main__":
