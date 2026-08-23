@@ -20,8 +20,12 @@ Usage: python scripts/07_latency_benchmark.py [dataset] [n_queries] [n_repeats]
 """
 from __future__ import annotations
 
+import json
 import statistics
 import sys
+from pathlib import Path
+
+import numpy as np
 
 from src.agent.loop import run_episode
 from src.agent.static_baseline import run_static_episode
@@ -77,7 +81,7 @@ def main() -> None:
     def summarize(name: str, samples: list[float]) -> None:
         print(
             f"{name:>7}: median={statistics.median(samples):.0f}ms  mean={statistics.mean(samples):.0f}ms  "
-            f"stdev={statistics.stdev(samples):.0f}ms  n={len(samples)}"
+            f"stdev={statistics.stdev(samples):.0f}ms  p95={np.percentile(samples, 95):.0f}ms  n={len(samples)}"
         )
 
     print(f"\nn_queries={len(query_ids)}  repeats={repeats}  total_samples_per_pipeline={len(static_samples)}")
@@ -89,6 +93,22 @@ def main() -> None:
         f"\npaired bootstrap, agent - static latency_ms: mean_diff={bootstrap['mean_diff']:.1f} "
         f"95% CI [{bootstrap['ci_lo']:.1f}, {bootstrap['ci_hi']:.1f}]  significant={bootstrap['significant']}"
     )
+
+    out_path = Path(f"results/{dataset}_latency_benchmark.json")
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(
+        json.dumps(
+            {
+                "dataset": dataset,
+                "n_queries": len(query_ids),
+                "repeats": repeats,
+                "static_samples_ms": static_samples,
+                "agent_samples_ms": agent_samples,
+            },
+            indent=2,
+        )
+    )
+    print(f"raw samples written to {out_path}")
 
 
 if __name__ == "__main__":
