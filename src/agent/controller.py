@@ -36,7 +36,18 @@ class SelectorThresholds:
 @dataclass(frozen=True)
 class RecoveryThresholds:
     accept: float = 0.05  # verifier_score >= this -> accept
-    harmful: float = -0.05  # verifier_score <= this -> ROLLBACK
+    # Calibrated from a 40-episode NFCorpus verifier-score sample
+    # (2026-08-24): scores are not tightly clustered near 0 -- the
+    # negative tail ranges from -5.93 to -0.04, with only 2/40 below -1.0
+    # and 6/40 in [-1.0, 0.05). -0.05 as the harmful cutoff left only a
+    # razor-thin REPLAN band that essentially never fired (1/40 episodes,
+    # 1/100 in a separate run) -- ROLLBACK and REPLAN were functionally
+    # the same decision. -1.0 reserves ROLLBACK for clearly-bad cases
+    # (large negative drift/coverage-loss signal) and gives REPLAN real
+    # operating room for "didn't help enough yet, worth a different
+    # operator" cases. See docs/milestones.md's calibration step -- this
+    # should be re-frozen once TripClick-scale data is available.
+    harmful: float = -1.0  # verifier_score <= this -> ROLLBACK
 
 
 class ActionSelector:
