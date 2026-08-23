@@ -12,7 +12,9 @@ retrieval:
 
 generation:
   provider: ollama
-  model: qwen3.5:2b
+  # Brief recommends Qwen3.5-2B; not pulled locally yet, using the closest
+  # available Ollama model instead (see src/config.py).
+  model: qwen2.5:3b
   context_tokens: 4096
   output_tokens: 64
   max_calls_per_query: 2
@@ -20,13 +22,17 @@ generation:
 agent:
   action_budget: 3
 
-# Frozen from ~100 local dev episodes before main-test evaluation
-# (docs/milestones.md go/no-go checkpoints). null until that calibration
-# run completes.
+# Frozen per docs/milestones.md's go/no-go calibration step, from two
+# NFCorpus dev runs (scripts/06_agent_vs_static.py --freeze-slo, n=100,
+# for harm_rate/llm_calls; scripts/07_latency_benchmark.py, n=50 paired
+# samples per pipeline, for p95_latency after an isolated,
+# order-alternated benchmark -- the naive wall-clock comparison in an
+# early scripts/06 run was confounded by KV-cache reuse and long-run
+# drift, see git history on this file and on scripts/07).
 slo:
-  max_harm_rate: null
-  max_expected_llm_calls: null
-  max_p95_latency_ms: null
+  max_harm_rate: 0.1900
+  max_expected_llm_calls: 1.0300
+  max_p95_latency_ms: 4976.0
 
 k_values: [10, 100]
 seed: 42
