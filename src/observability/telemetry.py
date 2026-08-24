@@ -59,6 +59,8 @@ class RetrievalTelemetry:
     reranker_bm25_disagreement: float  # 1 - top-k overlap between BM25 order and reranked order
     result_coherence: float  # mean pairwise lexical Jaccard among top-k docs
     ranking_stability: float  # top-k overlap after dropping the lowest-IDF query term
+    reranker_top_score: float  # cross-encoder score of the top reranked doc (0.0 if reranker unavailable)
+    reranker_score_margin: float  # cross-encoder top_1 - top_2 (0.0 if reranker unavailable/<2 candidates)
 
 
 @dataclass(frozen=True)
@@ -68,6 +70,7 @@ class AgentTelemetry:
     previous_verifier_score: float | None
     rewrite_semantic_drift: float  # 1 - token Jaccard, q_t vs. q_0 (lexical proxy)
     introduced_entities: int  # capitalized tokens in q_t absent from q_0
+    query_length_ratio: float  # len(q_t tokens) / len(q_0 tokens)
     repeated_actions: int
     remaining_budget: int
     accepted: bool | None
@@ -100,6 +103,7 @@ def compute_retrieval_telemetry(
     db_path: str,
     previous_ranking: list[tuple[str, float]] | None = None,
     reranked_order: list[str] | None = None,
+    reranked_scores: list[tuple[str, float]] | None = None,
     coherence_sample: int = 10,
 ) -> RetrievalTelemetry:
     doc_ids = [d for d, _ in ranking]
@@ -170,6 +174,8 @@ def compute_retrieval_telemetry(
         reranker_bm25_disagreement=reranker_bm25_disagreement,
         result_coherence=result_coherence,
         ranking_stability=ranking_stability,
+        reranker_top_score=reranked_scores[0][1] if reranked_scores else 0.0,
+        reranker_score_margin=(reranked_scores[0][1] - reranked_scores[1][1]) if reranked_scores and len(reranked_scores) >= 2 else 0.0,
     )
 
 
@@ -193,6 +199,7 @@ def compute_agent_telemetry(
 
     actions_taken = [step.action for step in history]
     repeated_actions = len(actions_taken) - len(set(actions_taken))
+    query_length_ratio = (len(q_t.split()) / len(q0.split())) if q0.split() else 1.0
 
     return AgentTelemetry(
         selected_operator=selected_operator,
@@ -200,6 +207,7 @@ def compute_agent_telemetry(
         previous_verifier_score=previous_verifier_score,
         rewrite_semantic_drift=rewrite_semantic_drift,
         introduced_entities=introduced_entities,
+        query_length_ratio=query_length_ratio,
         repeated_actions=repeated_actions,
         remaining_budget=remaining_budget,
         accepted=accepted,
