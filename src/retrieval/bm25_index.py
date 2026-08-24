@@ -2,6 +2,16 @@
 TripClick's ~1.52M documents without a JVM dependency -- Pyserini/Lucene
 has previously crashed natively on this machine's JDK in a related
 project, so this avoids re-hitting that wall (see docs/milestones.md).
+
+FTS5 virtual tables only index the column(s) used in MATCH -- `doc_id`
+here is UNINDEXED, so any WHERE/COUNT(*) touching it degrades to a full
+table scan. That's invisible at NFCorpus scale (~3.6K docs) but brutal at
+TripClick scale (~1.52M docs): get_texts() for 10 doc_ids and doc_count()
+each took ~13s in profiling, entirely from that scan -- one full episode's
+telemetry computation calls both several times. A companion regular
+table (`meta`, doc_id PRIMARY KEY) plus a precomputed doc-count row give
+both a real index instead, while `docs` (FTS5) stays dedicated to what it
+does well: MATCH-based search and term document-frequency lookups.
 """
 from __future__ import annotations
 
@@ -21,6 +31,10 @@ def build_index(docs: Iterable[tuple[str, str]], db_path: str, batch_size: int =
     con.execute("PRAGMA journal_mode=MEMORY")
     con.execute("DROP TABLE IF EXISTS docs")
     con.execute("CREATE VIRTUAL TABLE docs USING fts5(doc_id UNINDEXED, text)")
+    con.execute("DROP TABLE IF EXISTS meta")
+    con.execute("CREATE TABLE meta (doc_id TEXT PRIMARY KEY, text TEXT)")
+    con.execute("DROP TABLE IF EXISTS stats")
+    con.execute("CREATE TABLE stats (key TEXT PRIMARY KEY, value INTEGER)")
 
     batch: list[tuple[str, str]] = []
     n = 0
@@ -29,6 +43,7 @@ def build_index(docs: Iterable[tuple[str, str]], db_path: str, batch_size: int =
         batch.append((doc_id, text))
         if len(batch) >= batch_size:
             con.executemany("INSERT INTO docs(doc_id, text) VALUES (?, ?)", batch)
+            con.executemany("INSERT INTO meta(doc_id, text) VALUES (?, ?)", batch)
             con.commit()
             n += len(batch)
             batch = []
@@ -36,8 +51,11 @@ def build_index(docs: Iterable[tuple[str, str]], db_path: str, batch_size: int =
             print(f"[bm25_index] {n} docs indexed in {elapsed:.1f}s ({n / elapsed:.0f} docs/s)", flush=True)
     if batch:
         con.executemany("INSERT INTO docs(doc_id, text) VALUES (?, ?)", batch)
+        con.executemany("INSERT INTO meta(doc_id, text) VALUES (?, ?)", batch)
         con.commit()
         n += len(batch)
+    con.execute("INSERT OR REPLACE INTO stats(key, value) VALUES ('doc_count', ?)", (n,))
+    con.commit()
     con.close()
     print(f"[bm25_index] done: {n} docs in {time.time() - t0:.1f}s -> {db_path}")
 
@@ -89,7 +107,7 @@ def get_texts(doc_ids: Iterable[str], db_path: str) -> dict[str, str]:
     try:
         placeholders = ",".join("?" for _ in doc_ids)
         rows = con.execute(
-            f"SELECT doc_id, text FROM docs WHERE doc_id IN ({placeholders})", doc_ids
+            f"SELECT doc_id, text FROM meta WHERE doc_id IN ({placeholders})", doc_ids
         ).fetchall()
     finally:
         con.close()
@@ -99,7 +117,10 @@ def get_texts(doc_ids: Iterable[str], db_path: str) -> dict[str, str]:
 def doc_count(db_path: str) -> int:
     con = sqlite3.connect(db_path)
     try:
-        (n,) = con.execute("SELECT count(*) FROM docs").fetchone()
+        row = con.execute("SELECT value FROM stats WHERE key = 'doc_count'").fetchone()
+        if row is not None:
+            return row[0]
+        (n,) = con.execute("SELECT count(*) FROM meta").fetchone()
     finally:
         con.close()
     return n
