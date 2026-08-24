@@ -12,15 +12,26 @@ expansion action, then compute (a) the CURRENT verify() score, (b) the
 same 6 telemetry-delta features verify() uses, and (c) the ground-truth
 NDCG@10 delta (candidate ranking vs. original, against real qrels) --
 something only available offline/in calibration, never at inference
-time. Correlates (a) and a fitted linear model of (b) against (c).
+time. Correlates (a), a fitted linear model of (b), and a small
+gradient-boosted (non-linear) model of (b) against (c) -- two prior
+calibration passes (6 features then 10) found linear fits didn't
+meaningfully beat the hand-picked weights; this checks whether that's a
+linearity ceiling or a features ceiling.
 
 Usage: python scripts/08_calibrate_verifier.py [dataset] [n_queries]
+
+Raw (features, true delta_ndcg, current verify() score) samples are
+persisted to results/{dataset}_verifier_calibration.json so future model
+comparisons don't need to re-run the (LLM-call-expensive) collection.
 """
 from __future__ import annotations
 
+import json
 import sys
+from pathlib import Path
 
 import numpy as np
+from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import KFold, cross_val_predict
 
@@ -122,6 +133,23 @@ def main() -> None:
         print(f"{qid:>8}  action={action.value:<16} verify={result.verifier_score:+8.3f}  delta_ndcg={delta_ndcg:+.4f}")
 
     print(f"\nn_samples={len(X)}  (skipped: {skipped_no_expand} NO_EXPAND, {skipped_llm_error} LLM errors)")
+
+    out_path = Path(f"results/{dataset}_verifier_calibration.json")
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(
+        json.dumps(
+            {
+                "dataset": dataset,
+                "feature_names": _FEATURE_NAMES,
+                "X": X,
+                "y_delta_ndcg": y_delta_ndcg,
+                "y_current_verify": y_current_verify,
+            },
+            indent=2,
+        )
+    )
+    print(f"raw samples written to {out_path}")
+
     X = np.array(X)
     y_delta_ndcg = np.array(y_delta_ndcg)
     y_current_verify = np.array(y_current_verify)
@@ -129,30 +157,47 @@ def main() -> None:
     current_corr = np.corrcoef(y_current_verify, y_delta_ndcg)[0, 1]
     print(f"\ncurrent fixed-weight verify() vs. true NDCG@10 delta: Pearson r = {current_corr:.3f}")
 
-    # Cross-validated fit so the reported correlation isn't just training-set overfit.
-    model = LinearRegression(fit_intercept=False)
     kf = KFold(n_splits=5, shuffle=True, random_state=42)
-    cv_pred = cross_val_predict(model, X, y_delta_ndcg, cv=kf)
-    fitted_corr = np.corrcoef(cv_pred, y_delta_ndcg)[0, 1]
-    print(f"fitted linear model (5-fold CV) vs. true NDCG@10 delta: Pearson r = {fitted_corr:.3f}")
 
-    model.fit(X, y_delta_ndcg)
-    print("\nfitted weights (full-data fit, for reference):")
-    for name, coef in zip(_FEATURE_NAMES, model.coef_):
+    # Cross-validated fits so the reported correlation isn't just training-set overfit.
+    linear = LinearRegression(fit_intercept=False)
+    linear_cv_pred = cross_val_predict(linear, X, y_delta_ndcg, cv=kf)
+    linear_corr = np.corrcoef(linear_cv_pred, y_delta_ndcg)[0, 1]
+    print(f"fitted linear model (5-fold CV) vs. true NDCG@10 delta: Pearson r = {linear_corr:.3f}")
+
+    # Shallow, few-estimator GBDT to limit overfitting risk at this sample size.
+    gbdt = GradientBoostingRegressor(n_estimators=30, max_depth=2, learning_rate=0.1, random_state=42)
+    gbdt_cv_pred = cross_val_predict(gbdt, X, y_delta_ndcg, cv=kf)
+    gbdt_corr = np.corrcoef(gbdt_cv_pred, y_delta_ndcg)[0, 1]
+    print(f"fitted GBDT (5-fold CV, non-linear) vs. true NDCG@10 delta: Pearson r = {gbdt_corr:.3f}")
+
+    linear.fit(X, y_delta_ndcg)
+    print("\nlinear model fitted weights (full-data fit, for reference):")
+    for name, coef in zip(_FEATURE_NAMES, linear.coef_):
         print(f"  {name:<20} {coef:+.4f}")
 
-    if fitted_corr > current_corr + 0.05:
+    gbdt.fit(X, y_delta_ndcg)
+    print("\nGBDT feature importances (full-data fit, for reference):")
+    for name, imp in sorted(zip(_FEATURE_NAMES, gbdt.feature_importances_), key=lambda x: -x[1]):
+        print(f"  {name:<20} {imp:.4f}")
+
+    best_name, best_corr = max(
+        [("linear", linear_corr), ("GBDT", gbdt_corr)], key=lambda x: x[1]
+    )
+    if best_corr > current_corr + 0.05:
         print(
-            "\nFitted model meaningfully improves on the current fixed weights -- "
-            "worth adopting into src/agent/verify.py."
+            f"\n{best_name} model meaningfully improves on the current fixed weights "
+            f"(r={best_corr:.3f} vs. baseline {current_corr:.3f}) -- worth adopting."
         )
     else:
         print(
-            "\nFitted model does NOT meaningfully improve on the current fixed weights. "
-            "This is itself a real RQ-Detection finding: with this feature set, "
-            "linear combination of these 6 telemetry signals has limited power to predict "
-            "true relevance-quality change -- either different/more features are needed, or "
-            "a non-linear model, or this is a genuine ceiling on qrel-free detection here."
+            f"\nNeither fitted model meaningfully improves on the current fixed weights "
+            f"(best: {best_name} r={best_corr:.3f} vs. baseline {current_corr:.3f}). "
+            "This is itself a real RQ-Detection finding: with this feature set, neither "
+            "linear nor shallow non-linear combination has much more power than the "
+            "hand-picked weights -- suggests a ceiling on this feature set (not just "
+            "linearity), or that n=80 is too small to resolve a real non-linear signal, "
+            "rather than a modeling-choice problem to keep iterating on."
         )
 
 
