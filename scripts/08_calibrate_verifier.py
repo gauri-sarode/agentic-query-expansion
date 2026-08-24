@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
@@ -92,6 +93,24 @@ def _features(prev_o, new_o) -> list[float]:
     ]
 
 
+def _save(dataset: str, X: list, y_delta_ndcg: list, y_current_verify: list) -> Path:
+    out_path = Path(f"results/{dataset}_verifier_calibration.json")
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(
+        json.dumps(
+            {
+                "dataset": dataset,
+                "feature_names": _FEATURE_NAMES,
+                "X": X,
+                "y_delta_ndcg": y_delta_ndcg,
+                "y_current_verify": y_current_verify,
+            },
+            indent=2,
+        )
+    )
+    return out_path
+
+
 def main() -> None:
     dataset = sys.argv[1] if len(sys.argv) > 1 else "nfcorpus"
     n = int(sys.argv[2]) if len(sys.argv) > 2 else 80
@@ -105,8 +124,9 @@ def main() -> None:
     X, y_delta_ndcg, y_current_verify = [], [], []
     skipped_no_expand = 0
     skipped_llm_error = 0
+    t_start = time.time()
 
-    for qid in query_ids:
+    for i, qid in enumerate(query_ids, 1):
         text = queries[qid]
         init = retrieve_and_observe_initial(text, db_path, k=100)
         action = selector.select(text, init.o0)
@@ -130,25 +150,28 @@ def main() -> None:
         y_delta_ndcg.append(delta_ndcg)
         y_current_verify.append(result.verifier_score)
 
-        print(f"{qid:>8}  action={action.value:<16} verify={result.verifier_score:+8.3f}  delta_ndcg={delta_ndcg:+.4f}")
-
-    print(f"\nn_samples={len(X)}  (skipped: {skipped_no_expand} NO_EXPAND, {skipped_llm_error} LLM errors)")
-
-    out_path = Path(f"results/{dataset}_verifier_calibration.json")
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(
-        json.dumps(
-            {
-                "dataset": dataset,
-                "feature_names": _FEATURE_NAMES,
-                "X": X,
-                "y_delta_ndcg": y_delta_ndcg,
-                "y_current_verify": y_current_verify,
-            },
-            indent=2,
+        print(
+            f"{qid:>8}  action={action.value:<16} verify={result.verifier_score:+8.3f}  delta_ndcg={delta_ndcg:+.4f}",
+            flush=True,
         )
-    )
-    print(f"raw samples written to {out_path}")
+
+        if i % 25 == 0 or i == len(query_ids):
+            elapsed = time.time() - t_start
+            rate = elapsed / i
+            eta_min = rate * (len(query_ids) - i) / 60
+            print(
+                f"  [progress {i}/{len(query_ids)}  {rate:.1f}s/query  "
+                f"elapsed={elapsed / 60:.1f}min  eta={eta_min:.1f}min]",
+                flush=True,
+            )
+        if i % 50 == 0:
+            _save(dataset, X, y_delta_ndcg, y_current_verify)
+            print(f"  [checkpoint saved, n={len(X)}]", flush=True)
+
+    print(f"\nn_samples={len(X)}  (skipped: {skipped_no_expand} NO_EXPAND, {skipped_llm_error} LLM errors)", flush=True)
+
+    out_path = _save(dataset, X, y_delta_ndcg, y_current_verify)
+    print(f"raw samples written to {out_path}", flush=True)
 
     X = np.array(X)
     y_delta_ndcg = np.array(y_delta_ndcg)
