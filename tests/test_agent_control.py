@@ -23,6 +23,8 @@ def _retrieval(**overrides):
         reranker_bm25_disagreement=0.0,
         result_coherence=0.5,
         ranking_stability=1.0,
+        reranker_top_score=0.0,
+        reranker_score_margin=0.0,
     )
     defaults.update(overrides)
     return RetrievalTelemetry(**defaults)
@@ -35,6 +37,7 @@ def _agent(**overrides):
         previous_verifier_score=None,
         rewrite_semantic_drift=0.0,
         introduced_entities=0,
+        query_length_ratio=1.0,
         repeated_actions=0,
         remaining_budget=3,
         accepted=None,

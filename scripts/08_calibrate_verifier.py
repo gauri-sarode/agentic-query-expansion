@@ -47,6 +47,13 @@ _FEATURE_NAMES = [
     "stability",
     "drift",
     "disagreement",
+    # Added after the first calibration pass found current+fitted-linear
+    # correlation both weak (r=0.127 / r=-0.012) on the original 6 --
+    # richer signals, not just re-weighting the same ones.
+    "topk_overlap",  # was computed but unused by verify() -- how much the ranking actually churned
+    "reranker_top_score",  # cross-encoder relevance score, a real trained-model signal vs. lexical proxies
+    "reranker_score_margin",
+    "query_length_ratio",  # how much the rewrite expanded/contracted the query
 ]
 
 
@@ -67,6 +74,10 @@ def _features(prev_o, new_o) -> list[float]:
         new_o.retrieval.ranking_stability,
         new_o.agent.rewrite_semantic_drift,
         new_o.retrieval.reranker_bm25_disagreement,
+        new_o.retrieval.topk_overlap,
+        new_o.retrieval.reranker_top_score,
+        new_o.retrieval.reranker_score_margin,
+        new_o.agent.query_length_ratio,
     ]
 
 

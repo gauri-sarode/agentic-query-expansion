@@ -28,12 +28,19 @@ from src.observability.telemetry import (
 from src.retrieval import bm25_index
 
 
-def try_rerank(query: str, ranking: list[tuple[str, float]], db_path: str) -> tuple[list[str] | None, float, int]:
-    """Best-effort cross-encoder rerank of the top candidates. A missing
-    reranker (e.g. sentence-transformers not installed) or a runtime
-    failure degrades gracefully to "no reranker signal" rather than
-    aborting the episode -- this *is* the tool_degradation failure mode
-    in docs/failure_taxonomy.md, not a bug to hide.
+def try_rerank(
+    query: str, ranking: list[tuple[str, float]], db_path: str
+) -> tuple[list[tuple[str, float]] | None, float, int]:
+    """Best-effort cross-encoder rerank of the top candidates. Returns
+    scored (doc_id, score) pairs, not just an order -- the raw
+    cross-encoder scores are a real relevance-model signal (unlike the
+    lexical BM25-only features), worth keeping for telemetry rather than
+    discarding down to just a reordering.
+
+    A missing reranker (e.g. sentence-transformers not installed) or a
+    runtime failure degrades gracefully to "no reranker signal" rather
+    than aborting the episode -- this *is* the tool_degradation failure
+    mode in docs/failure_taxonomy.md, not a bug to hide.
     """
     t0 = time.time()
     try:
@@ -43,7 +50,7 @@ def try_rerank(query: str, ranking: list[tuple[str, float]], db_path: str) -> tu
         texts = bm25_index.get_texts(candidate_ids, db_path)
         pairs = [(d, texts[d]) for d in candidate_ids if d in texts]
         reranked = cross_encoder_rerank(query, pairs, top_k=CONFIG.reranker_top_k)
-        return [d for d, _ in reranked], (time.time() - t0) * 1000, 0
+        return [(d, float(s)) for d, s in reranked], (time.time() - t0) * 1000, 0
     except Exception:
         return None, (time.time() - t0) * 1000, 1
 
@@ -113,12 +120,15 @@ def act_once(
     bm25_latency_ms = (time.time() - bm25_t1) * 1000
     r1_ids = [d for d, _ in r1]
 
-    reranked_order, reranker_latency_ms, tool_errors = (None, 0.0, 0)
+    reranked, reranker_latency_ms, tool_errors = (None, 0.0, 0)
     if use_reranker:
-        reranked_order, reranker_latency_ms, tool_errors = try_rerank(q_t, r1, db_path)
+        reranked, reranker_latency_ms, tool_errors = try_rerank(q_t, r1, db_path)
+    reranked_order = [d for d, _ in reranked] if reranked else None
 
     r0_ids = [d for d, _ in r0]
-    o1_retrieval = compute_retrieval_telemetry(q_t, r1, db_path, previous_ranking=r0, reranked_order=reranked_order)
+    o1_retrieval = compute_retrieval_telemetry(
+        q_t, r1, db_path, previous_ranking=r0, reranked_order=reranked_order, reranked_scores=reranked
+    )
     o1_agent = compute_agent_telemetry(state.q0, q_t, action.value, state.H_t, state.B_t - 1, None, None, False)
     o1_system = compute_system_telemetry(
         bm25_latency_ms=bm25_latency_ms,
