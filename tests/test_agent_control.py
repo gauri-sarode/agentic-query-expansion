@@ -128,13 +128,12 @@ def test_recovery_rolls_back_below_harmful_threshold():
 
 
 def test_recovery_replans_on_mildly_negative_score():
-    # Calibrated range (docs comment on RecoveryThresholds): mildly
-    # negative scores should get a REPLAN chance rather than an immediate
-    # ROLLBACK -- this is the exact band that was previously razor-thin
-    # (-0.05, 0.05) and essentially never fired in practice.
+    # v1 verify() scale is small (~-0.1 to +0.03); the calibrated band
+    # between harmful (-0.06) and accept (-0.036) should get a REPLAN
+    # chance rather than an immediate ROLLBACK.
     controller = RecoveryController()
     state = AgentState(q0="q", q_t="q", R_t=[], O_t=None, B_t=2)
-    assert controller.decide(state, verifier_score=-0.5) == Action.REPLAN
+    assert controller.decide(state, verifier_score=-0.05) == Action.REPLAN
 
 
 def test_recovery_replans_in_between():
