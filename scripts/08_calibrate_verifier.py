@@ -93,8 +93,24 @@ def _features(prev_o, new_o) -> list[float]:
     ]
 
 
-def _save(dataset: str, X: list, y_delta_ndcg: list, y_current_verify: list) -> Path:
-    out_path = Path(f"results/{dataset}_verifier_calibration.json")
+def _checkpoint_path(dataset: str) -> Path:
+    return Path(f"results/{dataset}_verifier_calibration.json")
+
+
+def _save(
+    dataset: str,
+    X: list,
+    y_delta_ndcg: list,
+    y_current_verify: list,
+    last_index: int,
+    skipped_no_expand: int,
+    skipped_llm_error: int,
+) -> Path:
+    """last_index: how many query_ids (1-based) have been iterated over so
+    far (including skipped ones) -- lets --resume pick up exactly where a
+    killed/restarted run left off instead of reprocessing from scratch.
+    """
+    out_path = _checkpoint_path(dataset)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(
         json.dumps(
@@ -104,6 +120,9 @@ def _save(dataset: str, X: list, y_delta_ndcg: list, y_current_verify: list) -> 
                 "X": X,
                 "y_delta_ndcg": y_delta_ndcg,
                 "y_current_verify": y_current_verify,
+                "last_index": last_index,
+                "skipped_no_expand": skipped_no_expand,
+                "skipped_llm_error": skipped_llm_error,
             },
             indent=2,
         )
@@ -114,6 +133,7 @@ def _save(dataset: str, X: list, y_delta_ndcg: list, y_current_verify: list) -> 
 def main() -> None:
     dataset = sys.argv[1] if len(sys.argv) > 1 else "nfcorpus"
     n = int(sys.argv[2]) if len(sys.argv) > 2 else 80
+    resume = "--resume" in sys.argv
     db_path = _DB_PATHS[dataset]
 
     queries = load_queries(dataset)
@@ -124,9 +144,32 @@ def main() -> None:
     X, y_delta_ndcg, y_current_verify = [], [], []
     skipped_no_expand = 0
     skipped_llm_error = 0
+    start_index = 0
+
+    if resume:
+        checkpoint_path = _checkpoint_path(dataset)
+        if checkpoint_path.exists():
+            saved = json.loads(checkpoint_path.read_text())
+            if saved.get("feature_names") != _FEATURE_NAMES:
+                print("WARNING: checkpoint feature set differs from current -- starting fresh instead.", flush=True)
+            else:
+                X = saved["X"]
+                y_delta_ndcg = saved["y_delta_ndcg"]
+                y_current_verify = saved["y_current_verify"]
+                start_index = saved.get("last_index", 0)
+                skipped_no_expand = saved.get("skipped_no_expand", 0)
+                skipped_llm_error = saved.get("skipped_llm_error", 0)
+                print(
+                    f"Resuming from checkpoint: {len(X)} samples, "
+                    f"{start_index}/{len(query_ids)} query_ids already processed.",
+                    flush=True,
+                )
+        else:
+            print("--resume requested but no checkpoint found -- starting fresh.", flush=True)
+
     t_start = time.time()
 
-    for i, qid in enumerate(query_ids, 1):
+    for i, qid in enumerate(query_ids[start_index:], start_index + 1):
         text = queries[qid]
         init = retrieve_and_observe_initial(text, db_path, k=100)
         action = selector.select(text, init.o0)
@@ -157,7 +200,8 @@ def main() -> None:
 
         if i % 25 == 0 or i == len(query_ids):
             elapsed = time.time() - t_start
-            rate = elapsed / i
+            done_this_session = i - start_index
+            rate = elapsed / done_this_session
             eta_min = rate * (len(query_ids) - i) / 60
             print(
                 f"  [progress {i}/{len(query_ids)}  {rate:.1f}s/query  "
@@ -165,12 +209,12 @@ def main() -> None:
                 flush=True,
             )
         if i % 50 == 0:
-            _save(dataset, X, y_delta_ndcg, y_current_verify)
-            print(f"  [checkpoint saved, n={len(X)}]", flush=True)
+            _save(dataset, X, y_delta_ndcg, y_current_verify, i, skipped_no_expand, skipped_llm_error)
+            print(f"  [checkpoint saved, n={len(X)}, last_index={i}]", flush=True)
 
     print(f"\nn_samples={len(X)}  (skipped: {skipped_no_expand} NO_EXPAND, {skipped_llm_error} LLM errors)", flush=True)
 
-    out_path = _save(dataset, X, y_delta_ndcg, y_current_verify)
+    out_path = _save(dataset, X, y_delta_ndcg, y_current_verify, len(query_ids), skipped_no_expand, skipped_llm_error)
     print(f"raw samples written to {out_path}", flush=True)
 
     X = np.array(X)
