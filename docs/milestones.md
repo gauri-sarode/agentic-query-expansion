@@ -51,9 +51,21 @@ don't rediscover that failure mode from scratch.
 - **Agency headroom** — the feedback-enabled agent must improve
   retrieval, harm, or cost relative to the static failure-conditioned
   pipeline without meaningful deterioration in the other dimensions.
+  **NOT MET** (2026-08-26, full TripClick TAIL test set, n=1175, v1
+  fitted verifier): agent vs. static NDCG@10 mean_diff=-0.0007 (95% CI
+  [-0.0024, 0.0007], not significant), and cost is meaningfully *worse*
+  (+27% LLM calls, +45% latency) — see README's Core result section. This
+  was tested rigorously, not skipped: the verifier was fit against real
+  ground truth on this exact corpus before this run. Traces to the
+  verifier's own weak predictive ceiling (r=0.134) rather than a plumbing
+  or calibration-methodology gap.
 - **Recovery headroom** — rollback/replan must measurably recover
   injected or naturally harmful trajectories; otherwise recovery should be
-  demoted from a headline contribution.
+  demoted from a headline contribution. Not yet tested with fault
+  injection (src/faults/injection.py exists but hasn't been run through
+  this checkpoint) — given the agency-headroom result above, this is now
+  a secondary priority pending a decision on whether/how to revise the
+  controller.
 
 ## Metrics, SLOs, fault injection
 

@@ -152,36 +152,46 @@ BM25-only retrieval floor (no expansion, no agent):
 | TripClick TORSO | 0.261 | 0.582 | 0.182 |
 | TripClick TAIL | 0.225 | 0.646 | 0.228 |
 
+## Core result: closed-loop agent vs. static QE, full TripClick TAIL test set
+
 The critical comparison from the experiment matrix -- **observable agent
 vs. the strong static failure-conditioned QE comparator**
 (`scripts/06_agent_vs_static.py`), same operator-selection policy,
 generator, verifier, and fusion mechanism for both (`src/agent/steps.py`)
--- run at n=100 on NFCorpus:
+-- run on the **complete TripClick TAIL test set (n=1175)**, with
+`verify()`'s weights fitted against real ground-truth NDCG@10 on this
+exact corpus (`scripts/08_calibrate_verifier.py`, n=1168, Pearson
+r=0.134) and `RecoveryThresholds` recalibrated to match against real
+outcomes, not blind score percentiles:
 
 | System | NDCG@10 | Recall@100 | MRR |
 |---|---|---|---|
-| BM25 only | 0.332 | 0.252 | 0.542 |
-| Static QE | 0.340 | 0.264 | 0.532 |
-| Agent | 0.341 | 0.265 | 0.537 |
+| BM25 only | 0.2279 | 0.6462 | 0.2254 |
+| Static QE | 0.2279 | 0.6481 | 0.2262 |
+| Agent | 0.2272 | 0.6476 | 0.2254 |
 
-Both expansion pipelines beat plain BM25. But **agent vs. static is not
-yet significant** (paired bootstrap on NDCG@10, mean diff 0.0014, 95% CI
-[0.0000, 0.0042]) -- with the current rule-based v0 controller, REPLAN
-fires on roughly 1% of queries, so the agent's ROLLBACK decisions land on
-essentially the same fallback-to-original outcome as the static
-comparator's REJECT. The closed loop isn't yet exercised enough to show
-the paper's core claim; the next lever is the controller/verifier
-thresholds, not the plumbing.
+Agent vs. static: helped 0.5%, unchanged 98.6%, harmed 0.9%. Paired
+bootstrap mean_diff=**-0.0007**, 95% CI [-0.0024, 0.0007] -- **not
+significant, point estimate slightly negative**. Cost: agent uses 27%
+more LLM calls (1.27 vs 0.99/query) and 45% higher latency (16.2s vs
+11.1s/query mean) than static, for no measurable quality gain.
 
-Cost is measurably different, though: an isolated, order-alternated
-latency benchmark (`scripts/07_latency_benchmark.py`, n=50 paired
-samples/pipeline, avoiding two real measurement confounds found along
-the way -- see its docstring and git history) shows agent p95 latency
-(4976ms) meaningfully above static's (3141ms), fully explained by the
-agent's occasional second LLM call on REPLAN (mean diff 213ms, 95% CI
-[18, 450], significant). SLO frozen in `configs/default.yaml`:
-`max_harm_rate=0.19`, `max_expected_llm_calls=1.03`,
-`max_p95_latency_ms=4976`.
+**This is a definitive, methodologically rigorous negative result, not a
+placeholder to re-run.** The verifier was fit against real ground truth
+on the target corpus and validated at full test-set scale; the thresholds
+were chosen from outcome-validated cutoffs; every measurement confound
+found along the way (prompt-adjacency KV-cache reuse, run-order drift,
+FTS5 performance) was diagnosed and fixed before trusting a number. The
+closed loop does not beat static QE here, and the reason traces cleanly
+to the verifier's own weak predictive power (r=0.134, ~1.8% of variance
+explained) -- REPLAN's retry attempts are close to a coin flip on
+whether they help or hurt, netting to ~0 aggregate gain at real added
+cost. SLO frozen in `configs/default.yaml` from this run:
+`max_harm_rate=0.0477`, `max_expected_llm_calls=1.2681`,
+`max_p95_latency_ms=28370`.
+
+Earlier, smaller-scale results (NFCorpus n=100, an intermediate
+verifier) are preserved in git history but superseded by the above.
 
 See `docs/milestones.md` for the execution plan and go/no-go checkpoints,
 and `docs/sources.md` for the source bibliography this project is built
