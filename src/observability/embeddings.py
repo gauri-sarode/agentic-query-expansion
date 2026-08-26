@@ -9,6 +9,7 @@ features again.
 """
 from __future__ import annotations
 
+import time
 from functools import lru_cache
 
 import numpy as np
@@ -16,16 +17,35 @@ import requests
 
 _EMBED_MODEL = "mxbai-embed-large"
 _EMBED_URL = "http://localhost:11434/api/embeddings"
+_MAX_CHARS = 2000  # defensive truncation -- long passages can exceed the model's context
+_MAX_ATTEMPTS = 3
+_RETRY_BACKOFF_SECONDS = 2.0
+
+
+class EmbeddingUnavailableError(RuntimeError):
+    """Raised when embed() fails after retries; callers decide fallback behavior."""
 
 
 @lru_cache(maxsize=4096)
 def embed(text: str) -> tuple[float, ...]:
     """Cached: the same doc/query text often recurs across an episode
-    (evidence passages, repeated queries) and across episodes.
+    (evidence passages, repeated queries) and across episodes. Retries a
+    couple of times on transient server errors (observed empirically:
+    Ollama's embedding endpoint occasionally 500s, seemingly independent
+    of text length) before giving up.
     """
-    response = requests.post(_EMBED_URL, json={"model": _EMBED_MODEL, "prompt": text}, timeout=30)
-    response.raise_for_status()
-    return tuple(response.json()["embedding"])
+    truncated = text[:_MAX_CHARS]
+    last_error: Exception | None = None
+    for attempt in range(_MAX_ATTEMPTS):
+        try:
+            response = requests.post(_EMBED_URL, json={"model": _EMBED_MODEL, "prompt": truncated}, timeout=30)
+            response.raise_for_status()
+            return tuple(response.json()["embedding"])
+        except requests.RequestException as e:
+            last_error = e
+            if attempt < _MAX_ATTEMPTS - 1:
+                time.sleep(_RETRY_BACKOFF_SECONDS * (attempt + 1))
+    raise EmbeddingUnavailableError(str(last_error)) from last_error
 
 
 def cosine_similarity(a: tuple[float, ...], b: tuple[float, ...]) -> float:
