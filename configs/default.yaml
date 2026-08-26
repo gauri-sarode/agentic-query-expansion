@@ -30,9 +30,9 @@ agent:
 # early scripts/06 run was confounded by KV-cache reuse and long-run
 # drift, see git history on this file and on scripts/07).
 slo:
-  max_harm_rate: 0.1900
-  max_expected_llm_calls: 1.0300
-  max_p95_latency_ms: 4976.0
+  max_harm_rate: 0.0477
+  max_expected_llm_calls: 1.2681
+  max_p95_latency_ms: 28370.4
 
 k_values: [10, 100]
 seed: 42
