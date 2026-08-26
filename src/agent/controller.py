@@ -35,19 +35,25 @@ class SelectorThresholds:
 
 @dataclass(frozen=True)
 class RecoveryThresholds:
-    accept: float = 0.05  # verifier_score >= this -> accept
-    # Calibrated from a 40-episode NFCorpus verifier-score sample
-    # (2026-08-24): scores are not tightly clustered near 0 -- the
-    # negative tail ranges from -5.93 to -0.04, with only 2/40 below -1.0
-    # and 6/40 in [-1.0, 0.05). -0.05 as the harmful cutoff left only a
-    # razor-thin REPLAN band that essentially never fired (1/40 episodes,
-    # 1/100 in a separate run) -- ROLLBACK and REPLAN were functionally
-    # the same decision. -1.0 reserves ROLLBACK for clearly-bad cases
-    # (large negative drift/coverage-loss signal) and gives REPLAN real
-    # operating room for "didn't help enough yet, worth a different
-    # operator" cases. See docs/milestones.md's calibration step -- this
-    # should be re-frozen once TripClick-scale data is available.
-    harmful: float = -1.0  # verifier_score <= this -> ROLLBACK
+    # Recalibrated 2026-08-26 against verify()'s v1 fitted-weight score
+    # (src/agent/verify.py), which has a much smaller scale (~-0.1 to
+    # +0.03) than the v0 hand-picked weights these were previously tuned
+    # against (~-5 to +30) -- the old 0.05/-1.0 values are meaningless on
+    # the new scale and would have effectively disabled ACCEPT/ROLLBACK
+    # entirely. Chosen from the same 1,168-sample TripClick TAIL
+    # calibration verify() itself was fit on
+    # (results/tripclick-tail_verifier_calibration.json), by checking
+    # which candidate cutoffs actually separated true-harmed episodes
+    # from the rest in that data (not just score percentiles blind to
+    # outcome, unlike the v0 calibration). accept=-0.036 is the sample
+    # median; harmful=-0.06 was the best precision/recall trade-off found
+    # in that grid (catches 34% of true-harmed episodes at an 18% false
+    # -rollback rate on true-helped ones) -- still a weak, not strong,
+    # signal (verify()'s docstring has the full caveat). Gives a roughly
+    # even three-way split on that data: ~50% ACCEPT, ~22% ROLLBACK,
+    # ~28% REPLAN.
+    accept: float = -0.036  # verifier_score >= this -> accept
+    harmful: float = -0.06  # verifier_score <= this -> ROLLBACK
 
 
 class ActionSelector:
