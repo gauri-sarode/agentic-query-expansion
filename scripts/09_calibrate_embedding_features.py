@@ -96,16 +96,34 @@ def _embedding_features(q0: str, q_t: str, evidence: list[str], candidate_texts:
     return [embedding_drift, embedding_coherence, embedding_groundedness]
 
 
-def _save(dataset: str, samples: list[dict]) -> Path:
-    out_path = Path(f"results/{dataset}_embedding_calibration.json")
+def _checkpoint_path(dataset: str) -> Path:
+    return Path(f"results/{dataset}_embedding_calibration.json")
+
+
+def _save(dataset: str, samples: list[dict], last_index: int, skipped_no_expand: int, skipped_llm_error: int) -> Path:
+    out_path = _checkpoint_path(dataset)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps({"dataset": dataset, "feature_names": _ALL_FEATURE_NAMES, "samples": samples}, indent=2))
+    out_path.write_text(
+        json.dumps(
+            {
+                "dataset": dataset,
+                "feature_names": _ALL_FEATURE_NAMES,
+                "samples": samples,
+                "last_index": last_index,
+                "skipped_no_expand": skipped_no_expand,
+                "skipped_llm_error": skipped_llm_error,
+            },
+            indent=2,
+        )
+    )
     return out_path
 
 
 def main() -> None:
-    dataset = sys.argv[1] if len(sys.argv) > 1 else "nfcorpus"
-    n = int(sys.argv[2]) if len(sys.argv) > 2 else 150
+    args = [a for a in sys.argv[1:] if a != "--resume"]
+    resume = "--resume" in sys.argv
+    dataset = args[0] if len(args) > 0 else "nfcorpus"
+    n = int(args[1]) if len(args) > 1 else 150
     db_path = _DB_PATHS[dataset]
 
     queries = load_queries(dataset)
@@ -116,9 +134,26 @@ def main() -> None:
     samples: list[dict] = []
     skipped_no_expand = 0
     skipped_llm_error = 0
+    start_index = 0
+
+    if resume:
+        checkpoint_path = _checkpoint_path(dataset)
+        if checkpoint_path.exists():
+            saved = json.loads(checkpoint_path.read_text())
+            if saved.get("feature_names") == _ALL_FEATURE_NAMES:
+                samples = saved["samples"]
+                start_index = saved.get("last_index", 0)
+                skipped_no_expand = saved.get("skipped_no_expand", 0)
+                skipped_llm_error = saved.get("skipped_llm_error", 0)
+                print(f"Resuming: {len(samples)} samples, {start_index}/{len(query_ids)} query_ids already processed.", flush=True)
+            else:
+                print("WARNING: checkpoint feature set differs -- starting fresh.", flush=True)
+        else:
+            print("--resume requested but no checkpoint found -- starting fresh.", flush=True)
+
     t_start = time.time()
 
-    for i, qid in enumerate(query_ids, 1):
+    for i, qid in enumerate(query_ids[start_index:], start_index + 1):
         text = queries[qid]
         init = retrieve_and_observe_initial(text, db_path, k=100)
         action = selector.select(text, init.o0)
@@ -169,15 +204,16 @@ def main() -> None:
 
         if i % 10 == 0 or i == len(query_ids):
             elapsed = time.time() - t_start
-            rate = elapsed / i
+            done_this_session = i - start_index
+            rate = elapsed / done_this_session
             eta_min = rate * (len(query_ids) - i) / 60
             print(f"  [progress {i}/{len(query_ids)}  {rate:.1f}s/query  elapsed={elapsed / 60:.1f}min  eta={eta_min:.1f}min]", flush=True)
         if i % 25 == 0:
-            _save(dataset, samples)
-            print(f"  [checkpoint saved, n={len(samples)}]", flush=True)
+            _save(dataset, samples, i, skipped_no_expand, skipped_llm_error)
+            print(f"  [checkpoint saved, n={len(samples)}, last_index={i}]", flush=True)
 
     print(f"\nn_samples={len(samples)}  (skipped: {skipped_no_expand} NO_EXPAND, {skipped_llm_error} LLM errors)", flush=True)
-    out_path = _save(dataset, samples)
+    out_path = _save(dataset, samples, len(query_ids), skipped_no_expand, skipped_llm_error)
     print(f"raw samples written to {out_path}", flush=True)
 
     X = np.array([s["features"] for s in samples])
