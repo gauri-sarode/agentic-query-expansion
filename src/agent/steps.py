@@ -141,9 +141,31 @@ def act_once(
     else:
         final_ids = r1_ids
 
+    # Telemetry (coverage/coherence/top_score/margin/etc.) must reflect
+    # the ranking actually being evaluated (final_ids), not raw BM25 --
+    # otherwise the verifier judges a different top-k than the one that
+    # gets accepted, a real inconsistency found when the reranker-vs-R_t
+    # fix above was first made without this companion fix (see git
+    # history: two fault types' recovery gains went negative/collapsed
+    # because of exactly this mismatch). Reordering r1's own BM25 scores
+    # to match final_ids keeps every score-based feature on one
+    # homogeneous scale while reflecting the real accepted order.
+    # bm25_ids=r1_ids anchors reranker_bm25_disagreement to the raw BM25
+    # pool explicitly; harmless no-op today since final_ids is always a
+    # full reordering of r1_ids (same set either way), but keeps that
+    # comparison correct if this ever passes a truncated ranking.
+    bm25_score_by_id = dict(r1)
+    telemetry_ranking = [(d, bm25_score_by_id[d]) for d in final_ids]
+
     r0_ids = [d for d, _ in r0]
     o1_retrieval = compute_retrieval_telemetry(
-        q_t, r1, db_path, previous_ranking=r0, reranked_order=reranked_order, reranked_scores=reranked
+        q_t,
+        telemetry_ranking,
+        db_path,
+        previous_ranking=r0,
+        reranked_order=reranked_order,
+        reranked_scores=reranked,
+        bm25_ids=r1_ids,
     )
     o1_agent = compute_agent_telemetry(state.q0, q_t, action.value, state.H_t, state.B_t - 1, None, None, False)
     o1_system = compute_system_telemetry(
