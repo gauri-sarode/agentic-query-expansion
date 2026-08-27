@@ -125,6 +125,22 @@ def act_once(
         reranked, reranker_latency_ms, tool_errors = try_rerank(q_t, r1, db_path)
     reranked_order = [d for d, _ in reranked] if reranked else None
 
+    # The reranked top-k should actually lead the accepted ranking, not
+    # just feed telemetry -- previously R_t was unconditionally raw BM25
+    # order even when reranking succeeded, so the reranker never
+    # influenced anything but its own disagreement/score telemetry (see
+    # git history: this was found while investigating why a
+    # disable_reranker fault-injection test showed almost no effect --
+    # disabling it changed nothing because it was never wired into the
+    # outcome even when enabled). Remaining BM25-order candidates beyond
+    # the reranked top-k are appended after, to preserve full Recall@100
+    # depth rather than truncating to just the reranked subset.
+    if reranked_order:
+        reranked_set = set(reranked_order)
+        final_ids = reranked_order + [d for d in r1_ids if d not in reranked_set]
+    else:
+        final_ids = r1_ids
+
     r0_ids = [d for d, _ in r0]
     o1_retrieval = compute_retrieval_telemetry(
         q_t, r1, db_path, previous_ranking=r0, reranked_order=reranked_order, reranked_scores=reranked
@@ -139,7 +155,7 @@ def act_once(
     candidate = AgentState(
         q0=state.q0,
         q_t=q_t,
-        R_t=r1_ids,
+        R_t=final_ids,
         O_t=ObservabilityState(retrieval=o1_retrieval, agent=o1_agent, system=o1_system),
         H_t=list(state.H_t),
         B_t=state.B_t - 1,
