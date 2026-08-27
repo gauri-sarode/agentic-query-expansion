@@ -99,11 +99,13 @@ class ObservabilityState:
 
 def compute_retrieval_telemetry(
     query: str,
-    ranking: list[tuple[str, float]],  # (doc_id, score), BM25 order, already top-k
+    ranking: list[tuple[str, float]],  # (doc_id, score) -- the ranking actually being evaluated/accepted
     db_path: str,
     previous_ranking: list[tuple[str, float]] | None = None,
     reranked_order: list[str] | None = None,
     reranked_scores: list[tuple[str, float]] | None = None,
+    bm25_ids: list[str] | None = None,  # raw BM25 order, for reranker_bm25_disagreement specifically;
+    # defaults to `ranking`'s own order if not given (e.g. the initial, never-reranked retrieval)
     coherence_sample: int = 10,
 ) -> RetrievalTelemetry:
     doc_ids = [d for d, _ in ranking]
@@ -138,7 +140,8 @@ def compute_retrieval_telemetry(
         topk_overlap = 1.0
 
     if reranked_order:
-        reranker_bm25_disagreement = 1.0 - _jaccard(set(doc_ids), set(reranked_order))
+        bm25_comparison_ids = set(bm25_ids) if bm25_ids is not None else set(doc_ids)
+        reranker_bm25_disagreement = 1.0 - _jaccard(bm25_comparison_ids, set(reranked_order))
     else:
         reranker_bm25_disagreement = 0.0
 
