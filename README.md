@@ -193,6 +193,32 @@ cost. SLO frozen in `configs/default.yaml` from this run:
 Earlier, smaller-scale results (NFCorpus n=100, an intermediate
 verifier) are preserved in git history but superseded by the above.
 
+### Why the verifier is stuck at r=0.13: three converged attempts to raise it
+
+After the result above, two follow-up investigations tried to raise the
+verifier's r=0.134 ceiling rather than accept it as final:
+
+- **Learned model, not hand-tuning**: `verify()` now loads a trained
+  artifact (`models/verifier_v1.joblib`, `scripts/10_train_verifier_model.py`)
+  instead of hardcoded coefficients -- proper train-script/artifact
+  separation, confirmed behaviorally identical to the prior hardcoded
+  version. Still linear: a GBDT (non-linear) fit was tried on the same
+  data and scored worse (r=0.045).
+- **Richer features**: added embedding-based signals (`src/observability/embeddings.py`,
+  local `mxbai-embed-large`, previously unused) -- embedding drift,
+  cross-document embedding coherence, expansion-to-evidence
+  groundedness, a qualitatively different (dense semantic) family vs.
+  everything lexical/BM25/reranker-scalar tried before. Tested at a
+  properly powered n=368 (`scripts/09_calibrate_embedding_features.py`):
+  lexical-only 5-fold CV r=0.070, lexical+embedding r=0.094 -- a +0.024
+  gain, under the 0.05 adoption bar, and still below the real n=1168
+  lexical-only baseline (0.134). **Not adopted.**
+
+Three feature families (6, 10, and 13 features) and two model classes
+(linear, GBDT) now converge on the same ~r=0.13 ceiling. This looks like
+a genuine detection-difficulty limit on this corpus with this telemetry,
+not a fixable feature-richness or modeling-choice gap.
+
 See `docs/milestones.md` for the execution plan and go/no-go checkpoints,
 and `docs/sources.md` for the source bibliography this project is built
 on.
