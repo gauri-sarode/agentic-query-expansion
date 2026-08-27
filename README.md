@@ -219,6 +219,40 @@ Three feature families (6, 10, and 13 features) and two model classes
 a genuine detection-difficulty limit on this corpus with this telemetry,
 not a fixable feature-richness or modeling-choice gap.
 
+## RQ-Recovery: the weak verifier as a safety net against injected faults
+
+Given the above, the paper's core question was reframed: not "does the
+closed-loop agent improve retrieval" (no), but "is observability-driven
+recovery still useful as a safety net against large, obvious failures,
+even with a verifier too weak to help on subtle natural variation?"
+`scripts/11_fault_injection_recovery_study.py` reuses the live agent's
+exact pipeline with three fault types injected at their natural point,
+comparing an always-accept ablation against the real calibrated
+`RecoveryController` on the identical corrupted state (paired, no LLM
+call re-run). Full run, TripClick TAIL, n=149-150/fault type:
+
+| Fault | Detection Recall | False Alarm Rate | Recovery gain (NDCG@10) |
+|---|---|---|---|
+| inject_unsupported_entity | 1.000 | 0.992 | +0.0238 |
+| replace_grounding_passage | 0.773 | 0.465 | +0.0278 |
+| disable_reranker | 0.185 | 0.115 | +0.0038 |
+
+**Content-level corruption is caught reliably** -- entity injection with
+perfect (if blunt/near-blanket) recall, and grounding-passage corruption
+with genuinely discriminating detection (77% recall, a moderate 46.5%
+false-alarm rate, not blanket rejection) and the largest recovery gain of
+the three. Both recovery gains are an order of magnitude larger than
+anything seen on natural queries (-0.0007, not significant). **System-level
+degradation is mostly missed** -- disabling the reranker is caught only
+18.5% of the time, because the fitted verifier's weights are almost
+entirely lexical/content features with near-zero reranker-specific
+weight; it wasn't built to notice that failure mode.
+
+This is the paper's strongest, most defensible result: a weak
+general-purpose qrel-free detector (r~0.13 on subtle natural variation)
+is still a genuinely effective safety net against large, obvious content
+corruption -- just not against failure modes outside its feature family.
+
 See `docs/milestones.md` for the execution plan and go/no-go checkpoints,
 and `docs/sources.md` for the source bibliography this project is built
 on.

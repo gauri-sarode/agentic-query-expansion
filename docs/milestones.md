@@ -61,11 +61,18 @@ don't rediscover that failure mode from scratch.
   or calibration-methodology gap.
 - **Recovery headroom** — rollback/replan must measurably recover
   injected or naturally harmful trajectories; otherwise recovery should be
-  demoted from a headline contribution. Not yet tested with fault
-  injection (src/faults/injection.py exists but hasn't been run through
-  this checkpoint) — given the agency-headroom result above, this is now
-  a secondary priority pending a decision on whether/how to revise the
-  controller.
+  demoted from a headline contribution.
+  **MET, for content-level faults** (2026-08-27, `scripts/11_fault_injection_recovery_study.py`,
+  n=149-150/fault type, TripClick TAIL): entity injection (Detection
+  Recall=1.000, recovery gain +0.0238 NDCG@10) and grounding-passage
+  corruption (Recall=0.773, discriminating 46.5% false-alarm rate, largest
+  gain +0.0278) are both caught and recovered reliably — an order of
+  magnitude larger than any effect seen on natural queries. **NOT met for
+  system-level faults**: reranker-disabled degradation is caught only
+  18.5% of the time (the fitted verifier's weights are almost entirely
+  lexical/content features with near-zero reranker-specific weight).
+  This is now the paper's strongest result: promote recovery to a
+  headline contribution, scoped honestly to content-level faults.
 
 ## Metrics, SLOs, fault injection
 
