@@ -253,6 +253,33 @@ general-purpose qrel-free detector (r~0.13 on subtle natural variation)
 is still a genuinely effective safety net against large, obvious content
 corruption -- just not against failure modes outside its feature family.
 
+**Update (2026-08-28) -- a real bug was found and fixed, and the
+corrected result is more modest.** Investigating why `disable_reranker`
+showed almost no effect revealed that the reranker's judgment was
+computed but never actually applied to the accepted ranking (`R_t` was
+unconditionally raw BM25 order) -- telemetry-only, contradicting the
+documented control loop. Fixing that exposed a second bug: `verify()`
+was judging a different (pre-rerank) ranking than the one actually being
+accepted. Both fixed (see `src/agent/steps.py`, `src/observability/telemetry.py`
+git history), with regression tests locking in the correct behavior.
+
+Re-running the full verifier calibration (n=1168) on the corrected
+pipeline confirmed the deployed model and thresholds remain well-suited
+(r=0.146, a fresh refit doesn't beat it) -- no retraining needed. But
+re-running the fault injection study with the corrected pipeline gives a
+more modest result than originally reported: `inject_unsupported_entity`
+and `replace_grounding_passage` recovery gains are **no longer
+statistically significant** (95% CIs straddle zero: [-0.0196, +0.0331]
+and [-0.0204, +0.0166] respectively), though the point estimates stay
+positive. `disable_reranker`'s small effect (+0.0038, still significant)
+is unchanged, since that fault explicitly bypasses the fixed code path.
+The qualitative conclusion (content corruption more detectable than
+system-level faults) likely still holds directionally, but the earlier
+"order of magnitude larger and clearly significant" framing was
+partly an artifact of the bug, not the full story. Full history of both
+fixes and all three fault-injection runs (original buggy pipeline,
+reranker-fix-only, both fixes) is in git log for `src/agent/steps.py`.
+
 See `docs/milestones.md` for the execution plan and go/no-go checkpoints,
 and `docs/sources.md` for the source bibliography this project is built
 on.
