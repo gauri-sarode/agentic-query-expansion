@@ -18,3 +18,14 @@ Gitignored. Local indexes, caches, and downloaded corpora live here.
     training** package (neural-retriever training triples — irrelevant
     since the design uses off-the-shelf BM25 + a pretrained cross-encoder,
     no retriever fine-tuning).
+
+**The same restriction applies to `models/*.joblib`** (see
+`../models/`, also gitignored): those are statistical models fit on
+TripClick data, and TripClick's terms prohibit publicly sharing
+"statistical models or other resources created from the dataset"
+without permission. This was caught after `models/verifier_v1.joblib`
+had already been committed and pushed to the public repo (see git
+history around 2026-08-28) — the file was scrubbed from history via
+`git filter-repo` and force-push. Regenerate locally via
+`python scripts/10_train_verifier_model.py`; never `git add` a
+`.joblib` file.
