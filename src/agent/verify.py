@@ -6,8 +6,11 @@ time, when qrels aren't available.
 v1 implementation: loads a trained model artifact (models/verifier_v1.joblib,
 produced by scripts/10_train_verifier_model.py) rather than hardcoding
 copy-pasted coefficients -- retraining on new calibration data means
-re-running that script, not hand-editing this file. The committed
-artifact is a LinearRegression(fit_intercept=False) fit on 10
+re-running that script, not hand-editing this file. The artifact is
+gitignored, not committed -- it's fit on TripClick data, and TripClick's
+terms prohibit publicly sharing statistical models derived from the
+dataset without permission. Run scripts/10 locally to (re)produce it;
+this is a LinearRegression(fit_intercept=False) fit on 10
 telemetry-delta features against true NDCG@10 delta from 1,168 TripClick
 TAIL episodes (scripts/08_calibrate_verifier.py, 2026-08-26). Linear is
 not a default choice -- GBDT was tried on the same data and scored worse
