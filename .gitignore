@@ -11,3 +11,8 @@ results/
 *.sqlite3
 *.parquet
 *.duckdb
+
+# Trained artifacts are fit on TripClick data, which the dataset's terms
+# prohibit sharing publicly without permission -- keep local only.
+# Regenerate via `python scripts/10_train_verifier_model.py`.
+models/*.joblib
