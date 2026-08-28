@@ -32,11 +32,20 @@ comparison -- mean NDCG with vs. without observability-driven recovery
 (the brief's "strongest test": full observable agent > same agent
 without observability-driven recovery).
 
-Usage: python scripts/11_fault_injection_recovery_study.py [dataset] [n_queries]
+Usage: python scripts/11_fault_injection_recovery_study.py [dataset] [n_queries] [--resume]
+
+Checkpoints every 50 queries to
+results/{dataset}_fault_injection_checkpoint.json (raw per-episode NDCG
+triples per fault type, for both aggregate stats and later paired
+bootstrap significance testing) so a multi-hour run at large n survives
+an interruption via --resume.
 """
 from __future__ import annotations
 
+import json
 import sys
+import time
+from pathlib import Path
 
 import src.agent.steps as steps_module
 from src.agent.actions import EXPANSION_ACTIONS
@@ -58,6 +67,7 @@ _DB_PATHS = {
 
 _FAULT_TYPES = ["inject_unsupported_entity", "replace_grounding_passage", "disable_reranker"]
 _EPS = 1e-9
+_CHECKPOINT_EVERY = 50
 
 
 def _rank_to_scores(ranking: list[str]) -> dict[str, float]:
@@ -93,9 +103,46 @@ def _run_faulty_attempt(action, state, r0, db_path, evidence, seed, fault_type, 
         steps_module.generate_expansion = original_generate
 
 
+def _empty_results() -> dict:
+    return {
+        ft: {
+            "harmful": 0,
+            "healthy": 0,
+            "detected_and_harmful": 0,
+            "detected_and_healthy": 0,
+            "ndcg_original": [],
+            "ndcg_without_recovery": [],
+            "ndcg_with_recovery": [],
+        }
+        for ft in _FAULT_TYPES
+    }
+
+
+def _checkpoint_path(dataset: str) -> Path:
+    return Path(f"results/{dataset}_fault_injection_checkpoint.json")
+
+
+def _save_checkpoint(dataset: str, results: dict, last_index: int, skipped_no_expand: int, skipped_llm_error: int) -> None:
+    path = _checkpoint_path(dataset)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {
+                "dataset": dataset,
+                "results": results,
+                "last_index": last_index,
+                "skipped_no_expand": skipped_no_expand,
+                "skipped_llm_error": skipped_llm_error,
+            }
+        )
+    )
+
+
 def main() -> None:
-    dataset = sys.argv[1] if len(sys.argv) > 1 else "nfcorpus"
-    n = int(sys.argv[2]) if len(sys.argv) > 2 else 100
+    args = [a for a in sys.argv[1:] if a != "--resume"]
+    resume = "--resume" in sys.argv
+    dataset = args[0] if len(args) > 0 else "nfcorpus"
+    n = int(args[1]) if len(args) > 1 else 100
     db_path = _DB_PATHS[dataset]
 
     queries = load_queries(dataset)
@@ -105,13 +152,29 @@ def main() -> None:
     selector = ActionSelector()
     recovery_controller = RecoveryController()
 
-    # per fault type: counts and NDCG accumulators
-    results = {ft: {"harmful": 0, "healthy": 0, "detected_and_harmful": 0, "detected_and_healthy": 0,
-                     "ndcg_original": [], "ndcg_without_recovery": [], "ndcg_with_recovery": []} for ft in _FAULT_TYPES}
+    results = _empty_results()
     skipped_no_expand = 0
     skipped_llm_error = 0
+    start_index = 0
 
-    for i, qid in enumerate(query_ids, 1):
+    if resume:
+        checkpoint_path = _checkpoint_path(dataset)
+        if checkpoint_path.exists():
+            saved = json.loads(checkpoint_path.read_text())
+            if saved.get("dataset") == dataset:
+                results = saved["results"]
+                start_index = saved.get("last_index", 0)
+                skipped_no_expand = saved.get("skipped_no_expand", 0)
+                skipped_llm_error = saved.get("skipped_llm_error", 0)
+                print(f"Resuming from checkpoint: {start_index}/{len(query_ids)} query_ids already processed.", flush=True)
+            else:
+                print("WARNING: checkpoint dataset differs -- starting fresh.", flush=True)
+        else:
+            print("--resume requested but no checkpoint found -- starting fresh.", flush=True)
+
+    t_start = time.time()
+
+    for i, qid in enumerate(query_ids[start_index:], start_index + 1):
         text = queries[qid]
         init = steps_module.retrieve_and_observe_initial(text, db_path, k=100)
         action = selector.select(text, init.o0)
@@ -163,8 +226,21 @@ def main() -> None:
                 flush=True,
             )
 
-        if i % 25 == 0:
-            print(f"  [progress {i}/{len(query_ids)}]", flush=True)
+        if i % 25 == 0 or i == len(query_ids):
+            elapsed = time.time() - t_start
+            done_this_session = i - start_index
+            rate = elapsed / done_this_session
+            eta_min = rate * (len(query_ids) - i) / 60
+            print(
+                f"  [progress {i}/{len(query_ids)}  {rate:.1f}s/query  "
+                f"elapsed={elapsed / 60:.1f}min  eta={eta_min:.1f}min]",
+                flush=True,
+            )
+        if i % _CHECKPOINT_EVERY == 0:
+            _save_checkpoint(dataset, results, i, skipped_no_expand, skipped_llm_error)
+            print(f"  [checkpoint saved, last_index={i}]", flush=True)
+
+    _save_checkpoint(dataset, results, len(query_ids), skipped_no_expand, skipped_llm_error)
 
     print(f"\nn_queries={len(query_ids)}  (skipped: {skipped_no_expand} NO_EXPAND, {skipped_llm_error} LLM errors)")
     for fault_type in _FAULT_TYPES:
