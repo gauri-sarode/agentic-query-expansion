@@ -45,6 +45,7 @@ _DB_PATHS = {
     "tripclick-head": "data/tripclick_bm25.sqlite3",
     "tripclick-torso": "data/tripclick_bm25.sqlite3",
     "tripclick-tail": "data/tripclick_bm25.sqlite3",
+    "tripclick-tail-val": "data/tripclick_bm25.sqlite3",
 }
 
 _CONFIG_PATH = Path("configs/default.yaml")
