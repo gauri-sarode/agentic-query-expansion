@@ -16,7 +16,10 @@ DATASET_IDS = {
     "trec-dl-2020": "msmarco-passage/trec-dl-2020/judged",
 }
 
-# dataset name -> (tripclick slice, split)
+# dataset name -> (tripclick slice, split). "-test" is reserved for the
+# frozen, single-touch generalization evaluation (RQ1/RQ2/RQ3) -- all
+# config selection, verifier fitting, and threshold calibration must use
+# "-val" instead. See configs/experimental_protocol.yaml.
 TRIPCLICK_SLICES = {
     "tripclick-head": ("head", "test"),
     "tripclick-torso": ("torso", "test"),
@@ -24,6 +27,9 @@ TRIPCLICK_SLICES = {
     "tripclick-head-train": ("head", "train"),
     "tripclick-torso-train": ("torso", "train"),
     "tripclick-tail-train": ("tail", "train"),
+    "tripclick-head-val": ("head", "val"),
+    "tripclick-torso-val": ("torso", "val"),
+    "tripclick-tail-val": ("tail", "val"),
 }
 
 

@@ -1,0 +1,113 @@
+# Frozen train/val/test data-use protocol for the IEEE ICA 2026 submission.
+#
+# Committed as a standalone document (not just a comment somewhere) so the
+# allowed-data boundary is auditable, not just remembered. Written and
+# frozen 2026-08-29, before any TAIL-val-based tuning began, in response to
+# a review-quality critique that the original submission calibrated the
+# verifier and its recovery thresholds on the exact same TAIL episodes used
+# to report RQ1/RQ2/RQ3 -- an in-sample/CV characterization masquerading as
+# a generalization result.
+#
+# The rule: TAIL-val may be used for any config/model/threshold decision.
+# TAIL-test may be used only for a frozen, single-touch evaluation, after
+# every decision listed under `frozen_after` has been made and recorded.
+# No decision anywhere in this pipeline may be conditioned on a TAIL-test
+# outcome. Violating this after the freeze_commit below invalidates the
+# corresponding paper result and requires re-freezing.
+
+dataset: tripclick-tail
+val_split: tripclick-tail-val    # data/tripclick_raw/benchmark_tsv/{topics,qrels}.tail.val.tsv
+test_split: tripclick-tail       # data/tripclick_raw/benchmark_tsv/{topics,qrels}.tail.test.tsv -- frozen, single-touch
+
+pipeline:
+  - stage: retrieval_config_selection
+    qrels_allowed: [val]
+    decides: [bm25_stemming, bm25_title_weight, bm25_k1_b_if_tuned]
+    note: >
+      Selected by comparing candidate configs' retrieval metrics on
+      TAIL-val ONLY. TAIL-test is touched at most once afterward, with
+      the already-selected config, purely as a sanity check against the
+      published TripClick BM25 reference (nDCG@10=0.267, MRR@10=0.258,
+      raw click qrels) -- that comparison is diagnostic, not a selection
+      criterion, and must not trigger further config changes based on
+      how close it lands to 0.267.
+
+  - stage: verifier_feature_and_model_selection
+    qrels_allowed: [val]
+    decides: [feature_family, model_class]
+    note: >
+      5-fold CV Pearson correlation against true nDCG@10 delta, computed
+      entirely within TAIL-val episodes. This CV number justifies which
+      model was picked -- it must never be reported as the headline RQ1
+      detection result. See rq1_test_eval below for that.
+
+  - stage: verifier_fit_and_threshold_calibration
+    qrels_allowed: [val]
+    decides: [verifier_weights, recovery_thresholds]
+    produces:
+      - models/verifier_tripclick_tail_val_v1.joblib
+      - configs/controller_thresholds_tripclick_tail_val_v1.json
+    note: >
+      Fits the selected model's weights on all allowable TAIL-val
+      episodes, then calibrates RecoveryThresholds (harmful/accept
+      cutoffs) by checking which candidate cutoffs actually separate
+      true-harmed val episodes from the rest.
+
+  - stage: freeze
+    qrels_allowed: []
+    note: >
+      FREEZE POINT. Nothing below this line may change based on a
+      TAIL-test outcome. If a TAIL-test result looks wrong or
+      inconvenient, that motivates a documented re-freeze (new protocol
+      version, new artifact filenames) -- never a silent edit upstream.
+
+  - stage: rq1_test_eval
+    qrels_allowed: [test, eval-only]
+    decides: []
+    note: >
+      Evaluate the FROZEN verifier (verifier_tripclick_tail_val_v1) on
+      untouched TAIL-test episodes. This Pearson r / ROC-AUC / AP number,
+      not the val CV number, is the headline RQ1 result. Report both,
+      labeled distinctly (see paper Section V).
+
+  - stage: rq2_test_eval
+    qrels_allowed: [test, eval-only]
+    decides: []
+    note: >
+      Full n=1175 agent-vs-static comparison on TAIL-test with the frozen
+      verifier/thresholds and the frozen retrieval config. Persist full
+      per-query records (see fingerprint below), not just aggregates.
+
+  - stage: rq3_test_eval
+    qrels_allowed: [test, eval-only]
+    decides: []
+    note: >
+      Full fault-injection recovery study on TAIL-test, run after rq2
+      completes (shared-Ollama-backend resource contention). Persist
+      per-query x fault-type x recovery-state raw results, not just
+      aggregates.
+
+  - stage: oracle_ceiling_analysis
+    qrels_allowed: [test, retrospective-only]
+    decides: []
+    note: >
+      Post-hoc only, after all frozen runs complete. Uses TAIL-test qrels
+      retrospectively to compute an oracle accept/rollback ceiling -- an
+      upper bound on selective-control headroom, explicitly labeled as
+      not a deployable method. Distinguishes "no headroom exists" from
+      "headroom exists but the qrel-free verifier can't find it."
+
+result_fingerprint_required_fields:
+  # Every RQ1/RQ2/RQ3 result artifact must record these, so a retrieval
+  # or model change can never silently masquerade as an old result.
+  - retriever              # e.g. fts5_bm25
+  - stemming                # e.g. porter | none
+  - title_weight             # float, or null if untried/unused
+  - index_hash               # e.g. sha256 of data/tripclick_bm25.sqlite3, or build timestamp + doc count
+  - verifier_artifact         # e.g. verifier_tripclick_tail_val_v1.joblib
+  - thresholds_artifact
+  - generator                  # model id
+  - reranker                    # model id
+  - git_commit
+
+freeze_commit: null  # filled in once retrieval config + verifier + thresholds are actually frozen
