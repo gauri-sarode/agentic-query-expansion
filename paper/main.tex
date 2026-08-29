@@ -10,6 +10,11 @@
 \usepackage{multirow}
 \usepackage{url}
 \usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,fit}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{groupplots}
 
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
@@ -52,14 +57,22 @@ outcomes (Pearson $r \approx 0.13$--$0.15$ against true nDCG@10 change),
 a ceiling that persists across three feature families (lexical, lexical
 plus cross-encoder reranker scores, and lexical plus dense embedding
 similarity) and two model classes (linear and gradient-boosted). On
-natural queries at full test-set scale ($n=1175$), the closed-loop agent
-does \emph{not} significantly outperform a static comparator built from
-identical components (mean nDCG@10 difference $-0.0007$, 95\% CI
-$[-0.0024, 0.0007]$) and costs 27\% more model calls for no measurable
-quality gain. Under deliberately injected content-level corruption,
-however, the same weak verifier shows a directionally positive recovery
-effect, while remaining blind to system-level degradation whose signal
-lies outside its feature family. We report a genuine implementation
+natural queries at full test-set scale ($n=1175$), query expansion
+itself carries genuine, statistically significant headroom over plain
+BM25 (static QE: mean nDCG@10 difference $+0.0182$, 95\% CI $[0.0105,
+0.0260]$), but the closed-loop agent does \emph{not} significantly
+outperform a static comparator built from identical components (mean
+nDCG@10 difference $+0.0013$, 95\% CI $[-0.0010, 0.0036]$), while
+costing 16\% more model calls for no measurable quality gain beyond
+what the static pipeline already captures. Under deliberately injected
+faults, at full test-set scale, the same weak verifier's recovery
+behavior is decisively mixed rather than uniformly beneficial: it is
+significantly \emph{harmful} for one content-level fault type (entity
+injection, mean nDCG@10 change $-0.0145$, driven by a 98.6\% false
+alarm rate), not statistically distinguishable from no effect for
+another (grounding corruption), and modestly but significantly helpful
+for the one system-level fault type tested (reranker disabled,
+$+0.0051$). We report a genuine implementation
 defect discovered mid-study --- a cross-encoder reranker computed but
 never applied to the ranking it was meant to refine --- and its
 correction, as part of the paper's engineering record rather than a
@@ -197,7 +210,12 @@ expression, $R_t$ the current ranking, $O_t$ the observability state,
 $H_t$ the episode's action/observation history, and $B_t$ the remaining
 action budget. The control loop is
 \[
-\textsc{Observe} \to \textsc{Diagnose} \to \textsc{Act} \to \textsc{Retrieve} \to \textsc{Observe} \to \textsc{Verify} \to \{\textsc{Accept}, \textsc{Rollback}, \textsc{Replan}, \textsc{Stop}\}.
+\begin{aligned}
+\footnotesize
+\textsc{Observe} &\to \textsc{Diagnose} \to \textsc{Act} \to \textsc{Retrieve} \\
+&\to \textsc{Observe} \to \textsc{Verify} \\
+&\to \{\textsc{Accept}, \textsc{Rollback}, \textsc{Replan}, \textsc{Stop}\}.
+\end{aligned}
 \]
 The critical property this loop is built to test is that the second
 decision (accept/rollback/replan/stop) depends on evidence the agent's
@@ -207,10 +225,57 @@ verifier, but executes exactly one predetermined route. Isolating this
 dependency, not simply comparing against unmodified BM25, is the
 paper's central experimental contrast (Section~\ref{sec:rq2}).
 
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[
+    node distance=7mm and 9mm,
+    box/.style={draw, rounded corners, minimum height=8mm, minimum width=20mm, align=center, font=\footnotesize, fill=blue!4},
+    obs/.style={draw, rounded corners, minimum height=8mm, minimum width=20mm, align=center, font=\footnotesize, fill=orange!8},
+    dec/.style={draw, diamond, aspect=2.2, minimum width=22mm, align=center, font=\footnotesize, fill=green!6, inner sep=1pt},
+    term/.style={draw, rounded corners, minimum height=7mm, minimum width=17mm, align=center, font=\scriptsize},
+    arr/.style={-Stealth, thick}
+]
+\node[box] (query) {$q_0$};
+\node[box, right=of query] (bm25) {BM25 / FTS5\\retrieve};
+\node[obs, right=of bm25] (obs0) {Observe $O_t$\\retrieval telemetry};
+\node[dec, right=of obs0, minimum width=24mm] (ctrl) {Controller:\\select operator};
+\node[term, above right=6mm and 8mm of ctrl] (noexp) {\textsc{Abstain}/\\\textsc{Stop}};
+\node[box, below right=6mm and 8mm of ctrl] (llm) {LLM query-\\expansion tool};
+\node[box, below=of llm] (retr2) {Retrieve\\expanded};
+\node[box, left=of retr2] (rerank) {Cross-encoder\\rerank};
+\node[obs, left=of rerank] (obs1) {Observe $O_t$\\again};
+\node[dec, below=of obs1, minimum width=24mm] (verify) {Verify:\\healthy change?};
+\node[term, left=of verify] (rollback) {\textsc{Rollback}};
+\node[term, below=of verify] (replan) {\textsc{Replan}};
+\node[term, right=of verify] (accept) {\textsc{Accept}/\\\textsc{Fuse}};
+
+\draw[arr] (query) -- (bm25);
+\draw[arr] (bm25) -- (obs0);
+\draw[arr] (obs0) -- (ctrl);
+\draw[arr] (ctrl) -- node[above,font=\scriptsize]{healthy} (noexp);
+\draw[arr] (ctrl) -- node[above,font=\scriptsize,sloped]{unhealthy} (llm);
+\draw[arr] (llm) -- (retr2);
+\draw[arr] (retr2) -- (rerank);
+\draw[arr] (rerank) -- (obs1);
+\draw[arr] (obs1) -- (verify);
+\draw[arr] (verify) -- node[above,font=\scriptsize]{harmed} (rollback);
+\draw[arr] (verify) -- node[right,font=\scriptsize]{ambiguous} (replan);
+\draw[arr] (verify) -- node[above,font=\scriptsize]{improved} (accept);
+\draw[arr] (replan.west) .. controls +(-10mm,0) and +(0,-14mm) .. node[left,font=\scriptsize]{budget remains} (llm.south);
+\end{tikzpicture}
+\caption{The observability-guided control loop. Telemetry $O_t$ (orange) is computed after every retrieval, not only at the end of an episode, and is causal input to two decisions: which operator the controller selects, and whether the resulting ranking is accepted, rolled back, replanned with a different operator, or the episode is stopped. The static comparator (Section~\ref{sec:rq2}) executes the same component chain once, with no path back from \textsc{Verify} to the LLM tool.}
+\label{fig:architecture}
+\end{figure*}
+
 The action space is deliberately small and interpretable:
-$A = \{\textsc{NoExpand}, \textsc{Vocabulary}, \textsc{Context},
-\textsc{Ambiguity}, \textsc{EntityNormalize}, \textsc{Rollback},
-\textsc{Replan}, \textsc{Stop}\}$. \textsc{Vocabulary} maps informal user
+\[
+\begin{aligned}
+\footnotesize
+A = \{&\textsc{NoExpand}, \textsc{Vocabulary}, \textsc{Context}, \textsc{Ambiguity}, \\
+&\textsc{EntityNormalize}, \textsc{Rollback}, \textsc{Replan}, \textsc{Stop}\}.
+\end{aligned}
+\]
+\textsc{Vocabulary} maps informal user
 language onto corpus-compatible terminology; \textsc{Context} adds a
 corpus-supported missing facet to an underspecified query;
 \textsc{Ambiguity} disambiguates toward the interpretation the evidence
@@ -295,8 +360,9 @@ reported finding.
 
 \subsection{Implementation}
 
-Sparse retrieval uses BM25 over a SQLite FTS5 index rather than a JVM
-Lucene index; this choice was forced by a JVM crash under Pyserini on
+Sparse retrieval uses BM25 over a SQLite FTS5 index \cite{sqlite-fts5}
+rather than a JVM Lucene index; this choice was forced by a JVM crash
+under Pyserini \cite{pyserini} on
 our target hardware and, in a corpus of this scale, surfaced two further
 implementation lessons worth recording. First, FTS5's default combining
 operator between space-separated MATCH tokens is \emph{conjunctive}, not
@@ -392,6 +458,51 @@ detection of whether an LLM query rewrite helped or hurt carries real
 but weak signal, on the order of $R^2 \approx 1$--$3\%$ of outcome
 variance explained.
 
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}
+\begin{groupplot}[
+    group style={group size=2 by 1, horizontal sep=2.2cm},
+    width=0.42\textwidth,
+    height=0.32\textwidth,
+    grid=major,
+    grid style={gray!20},
+    tick label style={font=\footnotesize},
+    label style={font=\footnotesize},
+    title style={font=\footnotesize},
+]
+\nextgroupplot[
+    xlabel={False Alarm Rate},
+    ylabel={Detection Recall},
+    xmin=0, xmax=1, ymin=0, ymax=1,
+    title={ROC (AUC $=0.566$)},
+]
+\addplot[dashed, gray, thick, mark=none] coordinates {(0,0) (1,1)};
+\addplot[blue, thick, mark=none] coordinates {
+(0.0000,0.0000) (0.0166,0.0188) (0.0233,0.0301) (0.0277,0.0451) (0.0399,0.0564) (0.0443,0.0752) (0.0610,0.0902) (0.0887,0.1053) (0.0965,0.1316) (0.1053,0.1429) (0.1208,0.1729) (0.1430,0.1917) (0.1718,0.2030) (0.1829,0.2331) (0.1973,0.2444) (0.2162,0.2707) (0.2262,0.2857) (0.2339,0.3045) (0.2428,0.3195) (0.2694,0.3308) (0.2749,0.3534) (0.2971,0.3647) (0.3038,0.3797) (0.3104,0.4060) (0.3293,0.4248) (0.3481,0.4511) (0.3559,0.4662) (0.3836,0.4887) (0.3980,0.5038) (0.4135,0.5150) (0.4368,0.5301) (0.4468,0.5489) (0.4512,0.5752) (0.4623,0.5902) (0.4978,0.6053) (0.5100,0.6203) (0.5266,0.6316) (0.5432,0.6504) (0.5721,0.6729) (0.5798,0.6842) (0.5976,0.6992) (0.6131,0.7143) (0.6208,0.7293) (0.6452,0.7444) (0.6630,0.7632) (0.6885,0.7820) (0.7262,0.7932) (0.7639,0.8158) (0.7905,0.8308) (0.8160,0.8459) (0.8282,0.8684) (0.8470,0.8797) (0.8570,0.8947) (0.8725,0.9098) (0.8914,0.9248) (0.9091,0.9398) (0.9290,0.9511) (0.9412,0.9662) (0.9579,0.9774) (1.0000,1.0000)
+};
+\nextgroupplot[
+    xlabel={Recall},
+    ylabel={Precision},
+    xmin=0, xmax=1, ymin=0, ymax=1,
+    title={PR (AP $=0.268$, prevalence $=0.228$)},
+]
+\addplot[dashed, gray, thick, mark=none] coordinates {(0,0.2277) (1,0.2277)};
+\addplot[blue, thick, mark=none] coordinates {
+(1.0000,0.2277) (0.9962,0.2306) (0.9887,0.2329) (0.9662,0.2317) (0.9511,0.2323) (0.9398,0.2336) (0.9248,0.2343) (0.9135,0.2359) (0.8910,0.2347) (0.8759,0.2354) (0.8496,0.2327) (0.8459,0.2366) (0.8308,0.2374) (0.8195,0.2393) (0.8083,0.2413) (0.7970,0.2431) (0.7895,0.2465) (0.7820,0.2500) (0.7744,0.2537) (0.7594,0.2551) (0.7368,0.2536) (0.7256,0.2563) (0.7105,0.2578) (0.6917,0.2581) (0.6692,0.2569) (0.6654,0.2626) (0.6429,0.2615) (0.6203,0.2603) (0.6128,0.2655) (0.5940,0.2660) (0.5902,0.2730) (0.5639,0.2703) (0.5301,0.2636) (0.5188,0.2680) (0.5038,0.2707) (0.4887,0.2731) (0.4737,0.2763) (0.4511,0.2752) (0.4286,0.2740) (0.4098,0.2753) (0.3835,0.2706) (0.3571,0.2661) (0.3383,0.2671) (0.3233,0.2713) (0.3083,0.2761) (0.2857,0.2734) (0.2669,0.2752) (0.2406,0.2689) (0.2218,0.2706) (0.1955,0.2626) (0.1880,0.2793) (0.1767,0.2956) (0.1541,0.2950) (0.1241,0.2773) (0.1053,0.2828) (0.0902,0.3000) (0.0752,0.3333) (0.0451,0.3000) (0.0188,0.2500)
+};
+\end{groupplot}
+\end{tikzpicture}
+\caption{Detection ROC and precision-recall curves for the deployed
+verifier's score against ground-truth harm (true nDCG@10 delta $<0$),
+swept across all thresholds on the $n=1168$ calibration set. The curve
+sits consistently, but only modestly, above the no-skill baseline in
+both panels (dashed) --- a visual complement to Table~\ref{tab:rq1}'s
+Pearson correlations, showing the same weak-but-real signal as an
+operating-point trade-off rather than a single summary statistic.}
+\label{fig:roc-pr}
+\end{figure*}
+
 \section{RQ2: Control}
 \label{sec:rq2}
 
@@ -404,32 +515,96 @@ variance explained.
 System & nDCG@10 & Recall@100 & MRR \\
 \midrule
 BM25 only & 0.2279 & 0.6462 & 0.2254 \\
-Static QE & 0.2279 & 0.6481 & 0.2262 \\
-Agent & 0.2272 & 0.6476 & 0.2254 \\
+Static QE & 0.2455 & 0.6497 & 0.2377 \\
+Agent & 0.2468 & 0.6506 & 0.2390 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Both expansion pipelines are statistically indistinguishable from plain
-BM25 at this scale. Comparing Agent against Static QE specifically ---
-the paper's central contrast, since both share every component except
-the closed control loop --- the agent changes the outcome on only 1.4\%
-of queries (0.5\% helped, 0.9\% harmed relative to static), and the
-paired-bootstrap mean nDCG@10 difference is $-0.0007$ (95\% CI
-$[-0.0024, 0.0007]$, not significant). The agent additionally costs 27\%
-more model calls (1.27 vs.\ 0.99 per query) and 45\% higher mean latency
-(16.2\,s vs.\ 11.1\,s) than the static pipeline, for no offsetting
-quality gain. Tracing this to its source: the recovery controller's
-\textsc{Replan} action, whose entire purpose is to let the closed loop
-add value beyond a single-shot accept/reject gate, is exercised on only
-about 1\% of episodes when thresholds are calibrated from raw score
-percentiles, rising to roughly 16\% once thresholds are instead
-calibrated against real outcomes (Section~\ref{sec:calib-method}) ---
-and even then, the additional attempts this buys are, per Section
-\ref{sec:rq1}, close to a coin flip on whether they help or hurt,
-netting to no aggregate gain at real added cost. \textbf{RQ2's answer is
-no}: on natural queries, an observability-guided closed loop built on
-this verifier does not outperform a matched static pipeline.
+Query expansion itself is not indistinguishable from plain BM25 at this
+scale: both Static QE and Agent significantly outperform BM25 alone
+(static vs.\ BM25: mean nDCG@10 difference $+0.0182$, 95\% CI $[0.0105,
+0.0260]$; agent vs.\ BM25: $+0.0195$, 95\% CI $[0.0116, 0.0277]$).
+Comparing Agent against Static QE specifically --- the paper's central
+contrast, since both share every component except the closed control
+loop --- the agent changes the outcome on only 3.0\% of queries (1.8\%
+helped, 1.2\% harmed relative to static), and the paired-bootstrap mean
+nDCG@10 difference is $+0.0013$ (95\% CI $[-0.0010, 0.0036]$, not
+significant). The agent additionally costs 16\% more model calls (1.15
+vs.\ 0.99 per query) and 10\% higher mean latency (12.9\,s vs.\
+11.8\,s) than the static pipeline, for no offsetting quality gain
+beyond what static expansion already captures.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.46\textwidth,
+    height=0.34\textwidth,
+    xlabel={Mean LLM calls per query},
+    ylabel={nDCG@10},
+    grid=major,
+    grid style={gray!20},
+    tick label style={font=\footnotesize},
+    label style={font=\footnotesize},
+    xmin=-0.08, xmax=1.3,
+    ymin=0.22, ymax=0.25,
+]
+\addplot[thick, gray, dashed, mark=none] coordinates {(0,0.2279) (0.99,0.2455) (1.15,0.2468)};
+\addplot[
+    only marks,
+    mark=*,
+    mark size=2.2pt,
+    color=blue,
+    nodes near coords,
+    every node near coord/.append style={font=\scriptsize, yshift=4pt},
+    point meta=explicit symbolic,
+] coordinates {
+(0,0.2279)      [BM25 only]
+(0.99,0.2455)   [Static QE]
+(1.15,0.2468)   [Agent]
+};
+\end{axis}
+\end{tikzpicture}
+\caption{Retrieval quality vs.\ LLM-call budget, full TripClick TAIL
+test set. Static QE captures nearly all of the achievable quality gain
+over BM25 for a fixed one-call budget; the agent's additional 16\%
+call overhead buys a nDCG@10 improvement ($+0.0013$) that is not
+statistically distinguishable from zero (Section~\ref{sec:rq2}).}
+\label{fig:pareto}
+\end{figure}
+
+\begin{table}[t]
+\caption{Agent controller-decision frequency, full TripClick TAIL test set ($n=1150$ completed episodes).}
+\label{tab:action-dist}
+\centering
+\begin{tabular}{lcc}
+\toprule
+Decision & Count & \% \\
+\midrule
+\textsc{Accept} & 972 & 84.5 \\
+\textsc{Rollback} & 122 & 10.6 \\
+\textsc{Replan} & 49 & 4.3 \\
+\textsc{Abstain} (no expansion) & 7 & 0.6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Tracing this to its source (Table~\ref{tab:action-dist}): the recovery
+controller's \textsc{Replan} action, whose entire purpose is to let the
+closed loop add value beyond a single-shot accept/reject gate, is
+exercised on only 4.3\% of episodes --- and even then, the additional
+attempts this buys are, per Section \ref{sec:rq1}, close to a coin flip
+on whether they help or hurt, netting to no aggregate gain at real added
+cost. The controller accepts the single-shot expansion outright in
+84.5\% of episodes and rolls back to the pre-expansion ranking in
+10.6\%, so most of the agent's added cost over the static pipeline comes
+not from replanning but from computing, and then routinely accepting or
+discarding, a single reranked candidate the verifier judges no better
+on average than what a matched static pipeline already produces.
+\textbf{RQ2's answer is no}: on natural queries, an observability-guided
+closed loop built on this verifier does not outperform a matched static
+pipeline.
 
 \section{RQ3: Recovery}
 \label{sec:rq3}
@@ -483,6 +658,7 @@ that disconnection can look, from the metrics alone, like a genuine
 finding.
 
 \subsection{Validating the Correction}
+\label{sec:validating}
 
 Following the correction, we re-ran the full verifier calibration
 ($n=1168$) on the corrected pipeline to check whether the deployed
@@ -502,53 +678,67 @@ required --- while still materially changing the recovery study's own
 numbers, since those depend on the ranking each fault type actually
 produces, not on the verifier's coefficients.
 
-\subsection{Corrected Results}
+\subsection{Full-Scale Results}
 
 \begin{table}[t]
-\caption{RQ3: fault injection recovery study, corrected pipeline, TripClick TAIL. Gain is mean nDCG@10 with minus without observability-driven recovery on identically corrupted episodes; CI from 10{,}000-resample paired bootstrap.}
+\caption{RQ3: fault injection recovery study, corrected pipeline, full TripClick TAIL test set ($n=1168$; 7 of 1175 episodes skipped for no expansion). Gain is mean nDCG@10 with minus without observability-driven recovery on identically corrupted episodes; CI from 10{,}000-resample paired bootstrap.}
 \label{tab:rq3}
 \centering
 \begin{tabular}{lccc}
 \toprule
 Fault type & Recall & False Alarm & Gain (95\% CI) \\
 \midrule
-Entity injection & 1.000 & 0.992 & $+0.0068$ NS \\
-Grounding corruption & 0.600 & 0.550 & $-0.0019$ NS \\
-Reranker disabled & 0.185 & 0.115 & $+0.0038$* \\
+Entity injection & 1.000 & 0.986 & $-0.0145$ [$-0.0236,-0.0049$]** \\
+Grounding corruption & 0.632 & 0.465 & $+0.0048$ [$-0.0032,+0.0128$] NS \\
+Reranker disabled & 0.250 & 0.132 & $+0.0051$ [$+0.0013,+0.0092$]* \\
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize NS: not significant, CI straddles zero. *: significant but an order of magnitude smaller than the pre-correction estimate.
+\footnotesize NS: not significant, CI straddles zero. *: significant, positive. **: significant, \emph{harmful} --- the CI excludes zero on the negative side.
 \end{table}
 
-\emph{[This table and the surrounding discussion report the $n=149$
-validation sample used to confirm the defect correction. A full
-test-set-scale ($n=1175$) replication was in progress at the time of
-writing and will be finalized before submission; see
-Section~\ref{sec:limitations}.]}
+At full test-set scale, the recovery study's picture is decisively
+mixed rather than uniformly encouraging, and it reverses the
+qualitative asymmetry we reported from the $n=149$ validation sample
+used to confirm the defect correction of Section~\ref{sec:defect}.
+There, content-level corruption looked like the more promising target
+for recovery and the system-level fault looked like the clear miss; at
+full scale the opposite holds. Entity injection's recovery gain flips
+sign and becomes significantly \emph{harmful} ($-0.0145$, 95\% CI
+$[-0.0236, -0.0049]$): detection recall is perfect (1.000), but the
+false alarm rate is 98.6\%, meaning the controller treats essentially
+every entity-injected rewrite as suspect, including the 85.8\% of
+episodes where the injection was actually benign. At $n=149$ this
+looked like a merely inefficient tripwire; at full scale, rolling back
+that many healthy episodes' real gains outweighs the benefit on the
+smaller genuinely-harmful subset, producing a statistically robust net
+loss --- the false alarm rate itself becomes the dominant source of
+quality loss, larger in magnitude than the harm it is meant to catch.
+Grounding corruption remains not significant, with its point estimate
+flipping from slightly negative to slightly positive ($+0.0048$, 95\%
+CI $[-0.0032, +0.0128]$) but the interval straddling zero either way.
+The reranker-disabled fault type is the study's one clear positive:
+recall improves to 0.250 and the gain stays small but significant
+($+0.0051$, 95\% CI $[+0.0013, +0.0092]$), consistent in direction and
+magnitude with the validation-sample estimate, since that condition
+explicitly bypasses reranking and so is mechanically unaffected by the
+defect correction.
 
-At $n=149$, both content-corruption fault types show directionally
-positive recovery gains, consistent with the pre-correction result's
-qualitative shape, but neither reaches statistical significance once
-the pipeline defect is corrected. The reranker-disabled fault type's
-small effect is mechanically unaffected by the correction, as expected,
-since that condition explicitly bypasses reranking altogether.
-Detection recall for entity injection remains perfect but is
-accompanied by a false alarm rate near unity, indicating the controller
-treats essentially any entity-injected rewrite as suspect regardless of
-whether it happened to be benign this time --- a reliable but blunt
-tripwire, not a discriminating judgment. Grounding corruption, by
-contrast, shows more discriminating behavior (60\% recall against a
-55\% false alarm rate) alongside the study's largest, if not
-significant, point estimate.
-
-\textbf{RQ3's honest answer, at the sample size validated so far, is
-inconclusive-but-directionally-positive for content-level corruption,
-and negative for system-level degradation whose signal falls outside the
-verifier's feature family.} We regard the corrected numbers, not the
-pre-correction ones, as the paper's reportable result, and flag the
-larger-scale replication explicitly as ongoing work rather than
-retroactively strengthening the claim.
+\textbf{RQ3's honest answer, at full test-set scale, is that
+observability-driven recovery is not uniformly beneficial: it is
+significantly harmful for one content-level fault type due to
+near-universal false alarms, statistically indistinguishable from no
+effect for another, and modestly but significantly helpful for the one
+system-level fault type tested.} We regard this mixed, full-scale
+result as the paper's reportable finding. The $n=149$ validation
+sample's directionally positive read on content-level corruption did
+not survive scaling up by a factor of nearly $8\times$, which is itself
+informative about how much a validation-sample point estimate in the
+low hundreds should be trusted for a phenomenon this variable --- a
+methodological lesson we regard as being of a piece with
+Section~\ref{sec:defect}'s implementation defect: both cases are ones
+where an earlier, more flattering result did not survive closer
+scrutiny.
 
 \section{Discussion}
 
@@ -557,17 +747,24 @@ independent findings. The weak general-purpose detection ceiling from
 RQ1 ($r \approx 0.13$--$0.15$) is not simply a modeling shortfall; it
 appears to be near the limit of what this telemetry vocabulary can
 extract from this corpus, having survived three feature families and two
-model classes. RQ2 shows that a closed control loop built on top of that
-weak signal does not, on its own, buy anything on ordinary queries ---
+model classes. RQ2 shows that query expansion itself carries real,
+significant headroom over plain BM25, but a closed control loop built
+on top of that weak signal does not add anything beyond what a
+single-shot static expansion already captures on ordinary queries ---
 the additional \textsc{Replan} attempts a calibrated controller is
 willing to take are themselves close to a coin flip, so the loop adds
-cost without adding value in the common case. RQ3's corrected result is
-the most interesting because it is the most honest: it neither confirms
-nor cleanly refutes the hypothesis that a weak detector still functions
-as a safety net against large, obvious failures. The point estimates
-stay positive for content corruption and the qualitative asymmetry
-between content-level and system-level fault detectability persists
-after correction, but the statistical case at $n=149$ is not yet closed.
+cost without adding value in the common case. RQ3's full-scale result is
+the most interesting because it is the most honest, and the least
+flattering: the hypothesis that a weak detector still functions as a
+general safety net against large, obvious failures is not confirmed. It
+is significantly harmful for one content-level fault type, driven
+entirely by a false alarm rate high enough to make the intervention
+itself the dominant source of quality loss; a wash for another; and
+significantly, if modestly, helpful only for the one system-level fault
+type tested. This is also the qualitative opposite of what the $n=149$
+validation sample suggested, underscoring that a directionally
+promising point estimate at a few hundred episodes is not yet a
+finding.
 
 The implementation defect of Section~\ref{sec:defect} is, in our view, as
 important a finding as any of the three numbered ones. A component
@@ -586,12 +783,14 @@ not just the hypothesis.
 \section{Limitations}
 \label{sec:limitations}
 
-The recovery study's headline numbers (Table~\ref{tab:rq3}) are reported
-at $n=149$; a full test-set-scale ($n=1175$) replication was launched
-concurrently with the writing of this paper and its result should be
-treated as the authoritative one once available, superseding the
-$n=149$ figures reported here if it changes their significance in
-either direction. The generator is a locally hosted, quantized 2--3B
+The recovery study's headline numbers (Table~\ref{tab:rq3}) are now
+reported at the full TripClick TAIL test-set scale ($n=1168$), replacing
+an earlier $n=149$ validation sample whose directionally positive read
+on content-level corruption did not survive scaling up by nearly
+$8\times$ --- itself a caution about trusting validation-sample point
+estimates at a few hundred episodes for a phenomenon this variable, and
+a reason to be similarly cautious about any single-fault-type,
+single-corpus recovery result more generally. The generator is a locally hosted, quantized 2--3B
 parameter model under a strict two-call budget, chosen for a
 memory-constrained deployment target rather than for maximum capability;
 we do not know how these findings transfer to a larger or
@@ -610,20 +809,27 @@ somewhat, though we would be surprised if it moved qualitatively.
 We built a closed-loop, observability-guided agent for LLM query
 expansion and evaluated it rigorously, at full test-set scale, against a
 matched static comparator, on a real long-tail search benchmark. The
-honest result is not that the agent works: on natural queries it does
-not significantly outperform a much simpler static pipeline, and it
-costs more. What we can report with more confidence is a precise map of
+honest result is not that the agent works: query expansion itself
+carries real, significant headroom over plain BM25, but on natural
+queries the closed-loop agent does not significantly outperform a much
+simpler static pipeline built from the same components, and it costs
+more. What we can report with more confidence is a precise map of
 \emph{why}: qrel-free telemetry carries a real but weak general signal
 that a rigorous search across features and models could not meaningfully
 improve, and a closed control loop built on a weak verifier inherits
 that weakness on ordinary queries. Whether that same weak verifier
 functions as a safety net specifically against large, injected failures
---- as opposed to subtle natural variation --- remains a directionally
-positive but not yet statistically settled question, and one we
-consider more promising than the paper's other results, since a
-detector need not be accurate in general to be useful as a
-tripwire against catastrophic failure specifically. We also report, in
-full, an implementation defect discovered and corrected mid-study, in
+--- as opposed to subtle natural variation --- turns out to depend
+sharply on which failure: at full test-set scale it is significantly
+harmful for one content-level fault type, because a false alarm rate
+near unity makes the intervention itself the dominant source of harm; a
+wash for another; and modestly but significantly helpful only for the
+one system-level fault type we tested. A detector need not be accurate
+in general to be useful as a tripwire against catastrophic failure
+specifically, but this result is a caution against assuming that
+property holds uniformly across failure types without checking each one
+at adequate scale. We also report, in full, an implementation defect
+discovered and corrected mid-study, in
 the belief that an honest account of how such defects surface and get
 found is itself useful to other observability-guided systems work, not
 merely a footnote to a clean final number.
