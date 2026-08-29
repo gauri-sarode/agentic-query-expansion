@@ -12,6 +12,16 @@ telemetry computation calls both several times. A companion regular
 table (`meta`, doc_id PRIMARY KEY) plus a precomputed doc-count row give
 both a real index instead, while `docs` (FTS5) stays dedicated to what it
 does well: MATCH-based search and term document-frequency lookups.
+
+Tokenizer and title/body field weighting were selected entirely on
+TripClick TAIL-val (configs/experimental_protocol.yaml), never on the
+test split: 'porter unicode61' (stemming) took val nDCG@10 from 0.2353
+(unstemmed) to 0.2695; splitting title/body into separately-weighted
+columns and sweeping the title:body ratio on val found a plateau at
+title_weight=10 (val nDCG@10 0.2695 -> 0.3266, MRR peaks at 10 then
+declines at 20) -- see git history around 2026-08-29 for the sweep.
+TripClick documents ship as "title <eot> body" in a single field; we
+split on that delimiter at index time.
 """
 from __future__ import annotations
 
@@ -22,38 +32,55 @@ from pathlib import Path
 
 Hit = tuple[str, float]
 
+# Selected on TAIL-val only (see module docstring). bm25()'s weight args
+# map to ALL declared columns in table order including UNINDEXED ones --
+# doc_id consumes the first slot even though it carries no searchable
+# text, so the call is bm25(docs, 0, TITLE_WEIGHT, BODY_WEIGHT).
+TITLE_WEIGHT = 10.0
+BODY_WEIGHT = 1.0
+_DOC_SEP = "<eot>"
+
 
 def build_index(docs: Iterable[tuple[str, str]], db_path: str, batch_size: int = 50_000) -> None:
-    """docs: iterable of (doc_id, text) pairs."""
+    """docs: iterable of (doc_id, text) pairs, text = "title <eot> body"."""
     Path(db_path).parent.mkdir(parents=True, exist_ok=True)
     con = sqlite3.connect(db_path)
     con.execute("PRAGMA synchronous=OFF")
     con.execute("PRAGMA journal_mode=MEMORY")
     con.execute("DROP TABLE IF EXISTS docs")
-    con.execute("CREATE VIRTUAL TABLE docs USING fts5(doc_id UNINDEXED, text)")
+    con.execute(
+        "CREATE VIRTUAL TABLE docs USING fts5(doc_id UNINDEXED, title, body, tokenize='porter unicode61')"
+    )
     con.execute("DROP TABLE IF EXISTS meta")
     con.execute("CREATE TABLE meta (doc_id TEXT PRIMARY KEY, text TEXT)")
     con.execute("DROP TABLE IF EXISTS stats")
     con.execute("CREATE TABLE stats (key TEXT PRIMARY KEY, value INTEGER)")
 
-    batch: list[tuple[str, str]] = []
+    doc_batch: list[tuple[str, str, str]] = []
+    meta_batch: list[tuple[str, str]] = []
     n = 0
     t0 = time.time()
     for doc_id, text in docs:
-        batch.append((doc_id, text))
-        if len(batch) >= batch_size:
-            con.executemany("INSERT INTO docs(doc_id, text) VALUES (?, ?)", batch)
-            con.executemany("INSERT INTO meta(doc_id, text) VALUES (?, ?)", batch)
+        if _DOC_SEP in text:
+            title, body = text.split(_DOC_SEP, 1)
+            title, body = title.strip(), body.strip()
+        else:
+            title, body = "", text
+        doc_batch.append((doc_id, title, body))
+        meta_batch.append((doc_id, text))
+        if len(doc_batch) >= batch_size:
+            con.executemany("INSERT INTO docs(doc_id, title, body) VALUES (?, ?, ?)", doc_batch)
+            con.executemany("INSERT INTO meta(doc_id, text) VALUES (?, ?)", meta_batch)
             con.commit()
-            n += len(batch)
-            batch = []
+            n += len(doc_batch)
+            doc_batch, meta_batch = [], []
             elapsed = time.time() - t0
             print(f"[bm25_index] {n} docs indexed in {elapsed:.1f}s ({n / elapsed:.0f} docs/s)", flush=True)
-    if batch:
-        con.executemany("INSERT INTO docs(doc_id, text) VALUES (?, ?)", batch)
-        con.executemany("INSERT INTO meta(doc_id, text) VALUES (?, ?)", batch)
+    if doc_batch:
+        con.executemany("INSERT INTO docs(doc_id, title, body) VALUES (?, ?, ?)", doc_batch)
+        con.executemany("INSERT INTO meta(doc_id, text) VALUES (?, ?)", meta_batch)
         con.commit()
-        n += len(batch)
+        n += len(doc_batch)
     con.execute("INSERT OR REPLACE INTO stats(key, value) VALUES ('doc_count', ?)", (n,))
     con.commit()
     con.close()
@@ -89,9 +116,9 @@ def search(query: str, db_path: str, k: int = 100) -> list[Hit]:
     con = sqlite3.connect(db_path)
     try:
         rows = con.execute(
-            "SELECT doc_id, bm25(docs) AS score FROM docs WHERE docs MATCH ? "
+            "SELECT doc_id, bm25(docs, 0, ?, ?) AS score FROM docs WHERE docs MATCH ? "
             "ORDER BY score LIMIT ?",
-            (escaped, k),
+            (TITLE_WEIGHT, BODY_WEIGHT, escaped, k),
         ).fetchall()
     finally:
         con.close()

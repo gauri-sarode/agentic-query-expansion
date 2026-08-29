@@ -156,6 +156,13 @@ def act_once(
     # comparison correct if this ever passes a truncated ranking.
     bm25_score_by_id = dict(r1)
     telemetry_ranking = [(d, bm25_score_by_id[d]) for d in final_ids]
+    assert [d for d, _ in telemetry_ranking] == final_ids, (
+        "telemetry_ranking must be over the same doc-id order as final_ids "
+        "(the ranking R_t is about to be set to) -- this exact invariant broke "
+        "silently once already (see git history around the reranker-wiring "
+        "and telemetry-consistency defects); do not let a future refactor "
+        "reintroduce a second, independently-derived ranking here."
+    )
 
     r0_ids = [d for d, _ in r0]
     o1_retrieval = compute_retrieval_telemetry(
