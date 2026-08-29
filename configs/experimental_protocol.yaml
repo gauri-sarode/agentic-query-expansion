@@ -110,4 +110,13 @@ result_fingerprint_required_fields:
   - reranker                    # model id
   - git_commit
 
-freeze_commit: null  # filled in once retrieval config + verifier + thresholds are actually frozen
+retrieval_config_frozen:
+  commit: 06fb10a
+  retriever: fts5_bm25
+  stemming: porter
+  title_weight: 10.0
+  body_weight: 1.0
+  val_selection: "nDCG@10 plateaus at title_weight=10 (0.3266 at both 10x and 20x); MRR peaks at 10x (0.3122) then declines at 20x (0.3083)"
+  test_sanity_check: "nDCG@10=0.3152, MRR=0.3014 -- single touch, vs published reference nDCG@10=0.267, MRR@10=0.258"
+
+freeze_commit: null  # filled in once verifier + thresholds are also frozen (Steps 4-5)
