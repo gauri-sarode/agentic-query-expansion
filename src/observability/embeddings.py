@@ -17,8 +17,9 @@ import requests
 
 _EMBED_MODEL = "mxbai-embed-large"
 _EMBED_URL = "http://localhost:11434/api/embeddings"
-_MAX_CHARS = 2000  # defensive truncation -- long passages can exceed the model's context
-_MAX_ATTEMPTS = 3
+_MAX_CHARS = 2000  # defensive first truncation -- see embed()'s docstring for why this alone isn't enough
+_MIN_CHARS = 200  # below this, stop halving and just retry-with-backoff (likely a real server issue, not length)
+_MAX_ATTEMPTS = 5
 _RETRY_BACKOFF_SECONDS = 2.0
 
 
@@ -29,10 +30,22 @@ class EmbeddingUnavailableError(RuntimeError):
 @lru_cache(maxsize=4096)
 def embed(text: str) -> tuple[float, ...]:
     """Cached: the same doc/query text often recurs across an episode
-    (evidence passages, repeated queries) and across episodes. Retries a
-    couple of times on transient server errors (observed empirically:
-    Ollama's embedding endpoint occasionally 500s, seemingly independent
-    of text length) before giving up.
+    (evidence passages, repeated queries) and across episodes.
+
+    mxbai-embed-large is a BERT-architecture model with a hard 512-token
+    context limit (`ollama show mxbai-embed-large`), and the server 500s
+    rather than truncating server-side when a prompt exceeds it. The
+    fixed _MAX_CHARS cap is a poor proxy for token count on this corpus:
+    dense scientific/medical vocabulary (e.g. "nonsporulating",
+    "facultative anaerobic") produces more subword tokens per character
+    than typical English, so some texts well under _MAX_CHARS chars
+    still overflow 512 tokens while others near the cap don't -- e.g. a
+    1,831-char TripClick abstract 500'd while the same text truncated to
+    1,600 chars succeeded (empirically found investigating a ~20% skip
+    rate in scripts/09's calibration run, 2026-08-30). Retrying the same
+    truncated text on a 500 just repeats the same failure, so this
+    instead halves the length on each retry until it fits or a floor is
+    hit.
     """
     truncated = text[:_MAX_CHARS]
     last_error: Exception | None = None
@@ -44,7 +57,10 @@ def embed(text: str) -> tuple[float, ...]:
         except requests.RequestException as e:
             last_error = e
             if attempt < _MAX_ATTEMPTS - 1:
-                time.sleep(_RETRY_BACKOFF_SECONDS * (attempt + 1))
+                if len(truncated) > _MIN_CHARS:
+                    truncated = truncated[: len(truncated) // 2]
+                else:
+                    time.sleep(_RETRY_BACKOFF_SECONDS * (attempt + 1))
     raise EmbeddingUnavailableError(str(last_error)) from last_error
 
 
