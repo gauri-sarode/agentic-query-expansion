@@ -3,26 +3,31 @@ the new retrieval state is healthier than the previous one using
 telemetry only -- this is what makes the verifier usable at inference
 time, when qrels aren't available.
 
-v1 implementation: loads a trained model artifact (models/verifier_v1.joblib,
-produced by scripts/10_train_verifier_model.py) rather than hardcoding
-copy-pasted coefficients -- retraining on new calibration data means
-re-running that script, not hand-editing this file. The artifact is
-gitignored, not committed -- it's fit on TripClick data, and TripClick's
-terms prohibit publicly sharing statistical models derived from the
-dataset without permission. Run scripts/10 locally to (re)produce it;
-this is a LinearRegression(fit_intercept=False) fit on 10
-telemetry-delta features against true NDCG@10 delta from 1,168 TripClick
-TAIL episodes (scripts/08_calibrate_verifier.py, 2026-08-26). Linear is
-not a default choice -- GBDT was tried on the same data and scored worse
-under 5-fold CV (r=0.045 vs 0.134). This replaces a v0 hand-picked-weight
-baseline that was tuned by intuition and turned out actively
-uninformative on TripClick (r=-0.064).
+v1 implementation: loads a trained model artifact
+(models/verifier_tripclick_tail_val_v1.joblib, produced by
+scripts/10_train_verifier_model.py) rather than hardcoding copy-pasted
+coefficients -- retraining on new calibration data means re-running that
+script, not hand-editing this file. The artifact is gitignored, not
+committed -- it's fit on TripClick data, and TripClick's terms prohibit
+publicly sharing statistical models derived from the dataset without
+permission. Run scripts/10 locally to (re)produce it.
 
-The fitted model's r=+0.134 is a real, statistically meaningful
-improvement over v0, but still a WEAK signal in absolute terms (R^2 ~
-1.8% of variance explained) -- treat the verifier as weakly-but-genuinely
-informative, not authoritative. See docs/milestones.md and
-results/tripclick-tail_verifier_calibration.json for the full history.
+Selected per configs/experimental_protocol.yaml: entirely on TripClick
+TAIL-**val** (n=1147), never on test. Fit as a LinearRegression
+(fit_intercept=False) on the 10 telemetry-delta features, chosen because
+nothing beat it on val -- neither a fitted GBDT (r=+0.001), nor adding 3
+dense-embedding features (r=-0.015), nor reverting to the project's
+original v0 hand-picked-weight baseline (r=+0.020, not significant,
+p=0.498; see git history around commit e668e0e for those literal
+weights). This model's own 5-fold CV estimate on val is r=-0.014 --
+weaker than chance-adjacent -- and we deploy it anyway because it is the
+methodologically honest choice: the only artifact actually fit on the
+correct (post retrieval-fix) val distribution, versus alternatives that
+were either untested on this pipeline or fit on stale pre-fix data. Do
+not read this as "the verifier works" -- it is the least-bad option
+among several that don't, and that is itself part of RQ1's reportable
+finding (see paper's RQ1 section for the frozen TAIL-test evaluation,
+the actual headline number).
 """
 from __future__ import annotations
 
@@ -35,7 +40,7 @@ import numpy as np
 from src.agent.state import AgentState
 from src.observability.telemetry import ObservabilityState
 
-_MODEL_PATH = Path(__file__).resolve().parent.parent.parent / "models" / "verifier_v1.joblib"
+_MODEL_PATH = Path(__file__).resolve().parent.parent.parent / "models" / "verifier_tripclick_tail_val_v1.joblib"
 
 
 @lru_cache(maxsize=1)

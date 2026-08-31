@@ -35,25 +35,24 @@ class SelectorThresholds:
 
 @dataclass(frozen=True)
 class RecoveryThresholds:
-    # Recalibrated 2026-08-26 against verify()'s v1 fitted-weight score
-    # (src/agent/verify.py), which has a much smaller scale (~-0.1 to
-    # +0.03) than the v0 hand-picked weights these were previously tuned
-    # against (~-5 to +30) -- the old 0.05/-1.0 values are meaningless on
-    # the new scale and would have effectively disabled ACCEPT/ROLLBACK
-    # entirely. Chosen from the same 1,168-sample TripClick TAIL
-    # calibration verify() itself was fit on
-    # (results/tripclick-tail_verifier_calibration.json), by checking
-    # which candidate cutoffs actually separated true-harmed episodes
-    # from the rest in that data (not just score percentiles blind to
-    # outcome, unlike the v0 calibration). accept=-0.036 is the sample
-    # median; harmful=-0.06 was the best precision/recall trade-off found
-    # in that grid (catches 34% of true-harmed episodes at an 18% false
-    # -rollback rate on true-helped ones) -- still a weak, not strong,
-    # signal (verify()'s docstring has the full caveat). Gives a roughly
-    # even three-way split on that data: ~50% ACCEPT, ~22% ROLLBACK,
-    # ~28% REPLAN.
-    accept: float = -0.036  # verifier_score >= this -> accept
-    harmful: float = -0.06  # verifier_score <= this -> ROLLBACK
+    # Recalibrated 2026-08-30 against the TAIL-val-fit verifier
+    # (models/verifier_tripclick_tail_val_v1.joblib, see verify()'s
+    # docstring) per configs/experimental_protocol.yaml -- entirely on
+    # TAIL-val (n=1147), never touching test. A precision/recall grid
+    # search over candidate cutoffs found no real discriminating point
+    # (best recall=0.56 came with false_rollback_rate=0.505, i.e.
+    # coin-flip-level separation), consistent with this verifier's own
+    # weak 5-fold CV estimate (r=-0.014). Rather than chase a spurious
+    # "best" cutoff out of grid noise, these follow the same simple,
+    # outcome-blind-to-noise convention as the prior calibration:
+    # accept=sample median, harmful=25th percentile of the val score
+    # distribution (min=-0.179, p10=-0.114, p25=-0.102, median=-0.081,
+    # p75=-0.058, max=0.093). Treat this as a placeholder decision
+    # boundary on a verifier that RQ1's frozen TAIL-test evaluation may
+    # well show doesn't generalize at all -- not a tuned, trustworthy
+    # cutoff.
+    accept: float = -0.081  # verifier_score >= this -> accept
+    harmful: float = -0.102  # verifier_score <= this -> ROLLBACK
 
 
 class ActionSelector:
