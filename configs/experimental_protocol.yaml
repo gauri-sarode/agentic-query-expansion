@@ -119,4 +119,25 @@ retrieval_config_frozen:
   val_selection: "nDCG@10 plateaus at title_weight=10 (0.3266 at both 10x and 20x); MRR peaks at 10x (0.3122) then declines at 20x (0.3083)"
   test_sanity_check: "nDCG@10=0.3152, MRR=0.3014 -- single touch, vs published reference nDCG@10=0.267, MRR@10=0.258"
 
-freeze_commit: null  # filled in once verifier + thresholds are also frozen (Steps 4-5)
+verifier_frozen:
+  artifact: models/verifier_tripclick_tail_val_v1.joblib
+  thresholds: {accept: -0.081, harmful: -0.102}
+  selection: >
+    Feature-family x model-class sweep on TAIL-val (n=1147-1175): fixed-weight
+    (stale pre-freeze placeholder, illegitimate baseline) r=0.061; fitted
+    linear (10-feat) r=-0.014; fitted GBDT (10-feat) r=0.001; fitted linear
+    (13-feat, +embedding) r=-0.015; reverted v0 hand-picked weights (commit
+    e668e0e) r=+0.020, p=0.498 (not significant). Nothing beat noise. Selected
+    the freshly TAIL-val-fit 10-feature linear model anyway, as the only
+    artifact honestly fit on the correct (post retrieval-fix) distribution --
+    deploying the stale placeholder or an untested hand-picked baseline would
+    have reintroduced the same "wrong data" problem this protocol exists to
+    prevent. Its own CV estimate (r=-0.014) is the honest expectation, not a
+    reason for optimism.
+  thresholds_selection: >
+    Grid search over TAIL-val found no real discriminating cutoff (best
+    recall=0.56 at false_rollback_rate=0.505, i.e. coin-flip separation) --
+    consistent with r=-0.014. Used the same median/25th-percentile convention
+    as the prior calibration rather than chase spurious grid-search noise.
+
+freeze_commit: 0458927  # retrieval config (06fb10a) + verifier + thresholds (this commit) all frozen; only RQ1/RQ2/RQ3 TAIL-test evaluation remains
