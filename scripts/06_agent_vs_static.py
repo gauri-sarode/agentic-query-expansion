@@ -167,6 +167,7 @@ def main() -> None:
         if i % _CHECKPOINT_EVERY == 0:
             _save_checkpoint(dataset, baseline_run, static_run, static_traces, True, agent_run, agent_traces)
             print(f"  [checkpoint saved, agent {i}/{len(query_ids)}]", flush=True)
+    _save_checkpoint(dataset, baseline_run, static_run, static_traces, True, agent_run, agent_traces)
 
     q = {qid: qrels[qid] for qid in query_ids}
     baseline_eval = evaluate(q, baseline_run)

@@ -22,17 +22,24 @@ generation:
 agent:
   action_budget: 3
 
-# Frozen per docs/milestones.md's go/no-go calibration step, from two
-# NFCorpus dev runs (scripts/06_agent_vs_static.py --freeze-slo, n=100,
-# for harm_rate/llm_calls; scripts/07_latency_benchmark.py, n=50 paired
-# samples per pipeline, for p95_latency after an isolated,
-# order-alternated benchmark -- the naive wall-clock comparison in an
-# early scripts/06 run was confounded by KV-cache reuse and long-run
-# drift, see git history on this file and on scripts/07).
+# Frozen from the full n=1175 TAIL-test RQ2 run (2026-09-02,
+# scripts/06_agent_vs_static.py --freeze-slo, frozen retrieval config +
+# verifier per configs/experimental_protocol.yaml). harm_rate and
+# llm_calls come directly from that run's --freeze-slo output.
+# max_p95_latency_ms does NOT: that run spanned multiple real-world
+# machine-sleep gaps (this was a long-running background job monitored
+# across several sessions), and 78/1175 episode_latency_ms values were
+# inflated to minutes (max ~17min) by wall-clock time elapsing while the
+# process was suspended, not real per-episode compute time. Rather than
+# freeze a contaminated p95, this value is the p95 of the remaining
+# 1097 episodes with a plausible single-episode latency (<60s, generous
+# given up to 2 LLM calls plus reranking) -- clean p50=13.5s,
+# p95=30.8s, max=55.2s, consistent with the same run's static-pass mean
+# (~19s/query) and this project's earlier latency-benchmark numbers.
 slo:
-  max_harm_rate: 0.1072
-  max_expected_llm_calls: 1.1549
-  max_p95_latency_ms: 22963.8
+  max_harm_rate: 0.1234
+  max_expected_llm_calls: 1.2153
+  max_p95_latency_ms: 30780.4
 
 k_values: [10, 100]
 seed: 42
