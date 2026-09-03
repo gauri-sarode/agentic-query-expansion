@@ -21,8 +21,7 @@
 
 \begin{document}
 
-\title{Observe, Expand, Recover: An Observability-Guided Agent for Safe Query Expansion\\
-{\large \textit{An Honest Account of What Runtime Telemetry Can and Cannot Buy a Query Expansion Agent}}}
+\title{Observe, Expand, Recover: An Observability-Guided Agent for Safe Query Expansion}
 
 \author{
 \IEEEauthorblockN{Author One\IEEEauthorrefmark{1}, Author Two\IEEEauthorrefmark{2}}
@@ -38,11 +37,11 @@ Large language model (LLM) query expansion is typically applied either
 unconditionally or not at all, despite well-documented evidence that
 unconditional expansion is net-harmful on a non-trivial fraction of
 queries. We formulate query expansion instead as a bounded, observable
-agentic decision, and evaluate it under a train/validation/test
-discipline strict enough to survive review: every retrieval-config
-choice, verifier-model selection, and recovery threshold is fixed on a
-held-out TripClick TAIL \emph{validation} split before a single frozen
-touch of the \emph{test} split, per research question. We study three
+agentic decision, and evaluate it under a strictly separated
+validation/test protocol: every retrieval-config choice, verifier-model
+selection, and recovery threshold is fixed on a held-out TripClick TAIL
+\emph{validation} split before a single frozen touch of the
+\emph{test} split, per research question. We study three
 questions: (RQ1) can qrel-free telemetry predict whether an expansion
 will help or hurt; (RQ2) does a closed-loop agent conditioned on that
 telemetry outperform an otherwise identical static, failure-conditioned
@@ -351,8 +350,8 @@ documents, 323 queries) was used only for engineering iteration.
 
 A first pass at this study calibrated the verifier and thresholds on
 the same episodes later used to report RQ1--RQ3 --- an in-sample
-characterization a reviewer could correctly read as overstating
-generalization. We froze a stricter protocol instead, in a committed
+characterization which does not support an out-of-sample
+generalization claim. We froze a stricter protocol instead, in a committed
 config rather than left implicit: TAIL \emph{validation} may be used
 for any retrieval-config, verifier, or threshold decision; TAIL
 \emph{test} may be touched at most once per research question, purely
@@ -848,10 +847,10 @@ subsets.
 \section{Conclusion}
 
 We evaluated a closed-loop, observability-guided query-expansion agent
-under a train/validation/test discipline strict enough to survive the
-scrutiny that sank an earlier, leakier pass at this same study ---
-which itself surfaced the paper's first finding: an honestly-selected
-BM25 baseline fix inverted every downstream conclusion. On the
+under a corrected experimental protocol that separates model selection
+from final evaluation --- which itself surfaced the paper's first
+finding: an honestly-selected BM25 baseline fix inverted every
+downstream conclusion. On the
 corrected baseline, the agent does not outperform static expansion,
 and neither outperforms BM25; but the oracle analysis shows this is a
 detection failure, not an absent opportunity, and the recovery study
