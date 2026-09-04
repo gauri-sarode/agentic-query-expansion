@@ -42,56 +42,45 @@
 
 \begin{abstract}
 Large language model (LLM) query expansion is typically applied either
-unconditionally or not at all, despite well-documented evidence that
-unconditional expansion is net-harmful on a non-trivial fraction of
-queries. We formulate query expansion instead as a bounded, observable
-agentic decision, evaluated under a strictly separated
-validation/test protocol: every retrieval-config, verifier-model, and
-threshold decision is fixed on a held-out TripClick TAIL
-\emph{validation} split before a single frozen touch of \emph{test},
-per research question. A first pass used an under-tuned BM25 baseline
-(nDCG@10 $0.228$, below the $0.267$ literature reference); correcting
-it --- stemming plus title-field weighting, chosen entirely on
-validation --- raises BM25 to $0.315$, above the reference, and
-changes every downstream conclusion. Telemetry available before any
-action predicts whether unexpanded retrieval is already poor with
-ROC-AUC $0.649$ on frozen test, but the same telemetry vocabulary is
-markedly worse at the harder, actionable question --- will a
-\emph{specific} expansion help this query --- at ROC-AUC only $0.552$
-($r=0.114$, $p<0.001$). Detection is not actionability, and that gap
-is this paper's central finding. Consistent with it, neither static
-expansion nor a closed-loop agent significantly outperforms corrected
-BM25 (static: $+0.0007$, agent: $+0.0009$ nDCG@10, CIs crossing zero),
-nor does the agent beat static ($+0.0002$); reranking alone, with no
-expansion, significantly \emph{hurts} ($-0.0302$, $p<0.001$), so
-expansion's role here is largely offsetting harm the reranker
-introduces. This is not for lack of headroom: an oracle with perfect
-per-query knowledge gains $+0.0246$ nDCG@10 over BM25 ($p<0.001$), of
-which the verifier captures only $2$--$13\%$ across intervention
-budgets. Fault-injection recovery is fault-specific and, via a causal
-feature-perturbation analysis, mechanistically explained: a
-grounding-corruption fault is significantly recovered ($+0.0099$), an
-entity-injection fault is detected almost every time but flagged
-almost indiscriminately (net effect not significant), and a
-reranker-disabling fault is never recovered (recall $0.000$) because
-the fault \emph{increases} the verifier's healthy-state score rather
-than merely evading weak features. This causal signature is
-predictive, not just descriptive: a diagnostic rule fit to these three
-faults correctly anticipated, \emph{before it was run}, that a fourth,
-held-out fault type would be detectable with an entity-injection-like
-profile (predicted and confirmed: recall $0.800$) --- telemetry can
-indicate in advance whether a new failure class will support recovery.
-Generalization is worse still
-outside the calibration split: action-utility AUC falls to $0.148$
-(HEAD) and $0.214$ (TORSO), both below chance. We report a real
-implementation defect found mid-study and its correction. Runtime
-observability reliably detects retrieval failure, and, for large
-structured faults specifically, can tell in advance which failure
-classes it will be able to recover; but the stronger property general
-autonomous recovery needs --- predicting whether a specific
-intervention on an ordinary query will help --- is not delivered by
-the same telemetry, under a protocol designed so both findings are
-trustworthy.
+unconditionally or not at all, despite evidence that unconditional
+expansion is net-harmful on a non-trivial fraction of queries. We
+formulate query expansion as a bounded, observable agentic decision,
+evaluated under a strictly separated validation/test protocol: every
+retrieval-config, verifier-model, and threshold decision is fixed on
+TripClick TAIL \emph{validation} before a single frozen touch of
+\emph{test}. An under-tuned BM25 baseline (nDCG@10 $0.228$), corrected
+via validation-only stemming and title weighting, reaches $0.315$,
+above the published reference, changing every downstream conclusion.
+Pre-action telemetry predicts whether retrieval is already poor with
+ROC-AUC $0.649$, but the same telemetry is markedly worse at the
+harder, actionable question --- will a \emph{specific} expansion help
+--- at ROC-AUC only $0.552$ ($r=0.114$, $p<0.001$). Detection is not
+actionability, and that gap is this paper's central finding.
+Consistent with it, neither static expansion nor a closed-loop agent
+significantly outperforms corrected BM25 (static: $+0.0007$, agent:
+$+0.0009$ nDCG@10), nor does the agent beat static; decomposing the
+pipeline shows reranking and expansion are each significantly
+\emph{harmful} alone but interact positively together, not one
+canceling a fixed cost from the other. This is not for lack of
+headroom: an oracle gains $+0.0246$ nDCG@10 over BM25 ($p<0.001$), of
+which the verifier captures only $0.5$--$12\%$ across intervention
+budgets. Fault-injection recovery is fault-specific, causally
+explained by which telemetry features each fault perturbs --- one
+fault even \emph{increases} the verifier's healthy-state score rather
+than merely evading detection. A diagnostic rule built from three
+faults correctly anticipated a fourth, held-out fault's
+detection/false-alarm regime before it was run, though whether
+detection converts to a significant recovery gain remains fault-specific
+(confirmed for only one of four). Generalization is worse outside the
+calibration split: action-utility AUC falls to $0.148$ (HEAD) and
+$0.214$ (TORSO), below chance. We report a real implementation defect
+found mid-study and its correction. Runtime observability reliably
+detects retrieval failure and, for large structured faults, indicates
+in advance how the verifier will behave toward a new failure class; but
+the stronger property general autonomous recovery needs --- predicting
+whether a specific intervention on an ordinary query will help --- is
+not delivered by the same telemetry, under a protocol designed so
+these findings are trustworthy.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -169,8 +158,9 @@ selectivity-frontier analysis quantifying captured headroom; (5) a
 fault-injection study with a causal feature-perturbation analysis and a
 diagnostic rule, confirmed \emph{prospectively} on a held-out fault
 never used to derive it --- telemetry can indicate whether a new
-failure class supports recovery before it is ever observed, not just
-explain failures already seen; (6) a cross-split check showing that
+failure class will be over-flagged, under-flagged, or genuinely
+discriminable before it is ever observed, not just explain failures
+already seen; (6) a cross-split check showing that
 ranking degrades below chance outside its calibration split; and (7)
 an honest account of a real implementation defect, corrected mid-study.
 
@@ -228,7 +218,7 @@ paper's central experimental contrast (Section~\ref{sec:rq2}).
 
 \begin{figure*}[t]
 \centering
-\resizebox{0.52\textwidth}{!}{
+\resizebox{0.43\textwidth}{!}{
 \begin{tikzpicture}[
     node distance=4.5mm and 6mm,
     box/.style={draw, rounded corners, minimum height=6mm, minimum width=17mm, align=center, font=\footnotesize, fill=blue!4},
@@ -431,7 +421,7 @@ via paired bootstrap (10{,}000 resamples) throughout.
 \label{sec:rq1}
 
 \begin{table}[t]
-\caption{Model search on TAIL \emph{validation} ($n=1147$--$1168$): Pearson $r$ vs.\ true nDCG@10 change. Selects a model, not the generalization result (Table~\ref{tab:rq1-test}).}
+\caption{Validation characterization of candidate verifier families on TAIL \emph{validation} ($n=1147$--$1168$): Pearson $r$ vs.\ true nDCG@10 change. Not the generalization result (Table~\ref{tab:rq1-test}).}
 \label{tab:rq1}
 \centering
 \begin{tabular}{lc}
@@ -449,11 +439,17 @@ Linear, 13 features (+dense embedding) & $-0.015$ \\
 Nothing clears noise on validation: every candidate --- a hand-picked
 baseline, linear and gradient-boosted fits on the deployed 10-feature
 set, and a fit augmenting it with dense-embedding features --- lands
-at or below $|r|=0.02$. We select the 10-feature linear model anyway,
-the only candidate fit on the corrected pipeline's feature
-distribution, and deploy it \emph{despite} its weak validation
-estimate, per Section~\ref{sec:protocol}: no decision here is
-conditioned on test performance.
+at or below $|r|=0.02$. We select the 10-feature linear model, the
+only candidate fit on the corrected pipeline's feature distribution
+rather than a stale or untested one (configs/experimental\_protocol.yaml)
+--- though that criterion alone does not distinguish it from GBDT-10,
+fit on the identical distribution and statistically indistinguishable
+from it ($r{=}{+}0.001$ vs.\ $-0.014$); linear is also the only class
+compatible with Section~\ref{sec:rq3}'s closed-form attribution, though
+that was not the stated selection criterion at freeze time. We deploy
+it \emph{despite} its weak validation estimate, per
+Section~\ref{sec:protocol}: no decision here is conditioned on test
+performance.
 
 \begin{table}[t]
 \caption{RQ1's frozen results: both models evaluated \emph{once} on withheld TAIL test ($n=1157$), never touched during selection.}
@@ -559,12 +555,13 @@ System & nDCG@10 & Recall@100 & MRR \\
 \midrule
 BM25 only & 0.3152 & 0.7750 & 0.3014 \\
 BM25 + rerank, no QE & 0.2850$^\dagger$ & --- & --- \\
-Static QE & 0.3159 & 0.7759 & 0.2993 \\
+BM25 + QE, no rerank & 0.2992$^\ddagger$ & 0.7716 & 0.2856 \\
+Static QE (QE + rerank) & 0.3159 & 0.7759 & 0.2993 \\
 Agent & 0.3161 & 0.7770 & 0.3015 \\
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize $\dagger$: significantly below BM25 only, $-0.0302$ [$-0.0447,-0.0154$], $p<0.001$.
+\footnotesize $\dagger$: significantly below BM25 only, $-0.0302$ [$-0.0447,-0.0154$], $p<0.001$. $\ddagger$: significantly below BM25 only, $-0.0160$ [$-0.0237,-0.0086$], $p<0.001$ (\texttt{scripts/13}).
 \end{table}
 
 Once BM25 is corrected (Section~\ref{sec:bm25-fix}), the picture
@@ -575,15 +572,19 @@ does not significantly outperform Static QE ($+0.0002$, 95\% CI
 $[-0.0027, 0.0032]$; changes 3.9\% of outcomes, 2.1\% helped, 1.7\%
 harmed). The agent still costs 24\% more model calls (1.22 vs.\ 0.98
 per query) and 36\% higher mean latency (15.1\,s vs.\ 11.1\,s,
-excluding sleep-inflated episodes) for no offsetting gain. Isolating
-the reranker alone --- corrected BM25 candidates, cross-encoder
-reranking, no expansion --- shows reranking by itself is significantly
-\emph{harmful} here ($-0.0302$, $p<0.001$): the cross-encoder, trained
-on general web relevance, misorders health-domain results. Static QE
-and Agent both rerank \emph{after} expanding, yet land statistically
-even with unreranked BM25, so expansion's practical role here is
-largely canceling harm the reranker introduces, not adding quality on
-top of a neutral reranking step. \textbf{On natural queries, neither
+excluding sleep-inflated episodes) for no offsetting gain. Decomposing
+the two components (Table~\ref{tab:rq2}) shows an interaction, not one
+offsetting a fixed cost from the other: reranking alone is
+significantly \emph{harmful} ($-0.0302$, $p<0.001$) and expansion alone
+is \emph{also} significantly harmful ($-0.0160$, 95\% CI $[-0.0237,
+-0.0086]$) --- neither component helps in isolation. Yet adding the
+reranker back once expansion is already applied significantly
+\emph{helps} ($+0.0167$, 95\% CI $[0.0076, 0.0257]$), the opposite sign
+from adding it to raw BM25: the cross-encoder, trained on general web
+relevance, misorders raw BM25's candidate pool but behaves better once
+expansion has already reshaped it. Static QE's near-parity with BM25
+is this interaction landing close to neutral, not one component
+compensating for the other. \textbf{On natural queries, neither
 expansion flavor moves the needle once the retriever is
 competitive} --- materially different from what a weak baseline would
 have supported.
@@ -598,7 +599,7 @@ treatment ranking true click labels say is better --- not deployable,
 but useful to bound the second explanation.
 
 \begin{table}[t]
-\caption{Oracle selectivity ceiling, same episodes as Table~\ref{tab:rq2}. Oracle picks $\max(\text{BM25}, \text{treatment})$ per query, true click labels.}
+\caption{Unconstrained oracle ceiling, same episodes as Table~\ref{tab:rq2}. Oracle picks $\max(\text{BM25}, \text{treatment})$ per query, true click labels, no budget cap.}
 \label{tab:oracle}
 \centering
 \footnotesize
@@ -627,18 +628,18 @@ from ``maybe there's nothing here'' into ``there is something here,
 and our qrel-free detector cannot see it.''
 
 \begin{table}[t]
-\caption{Selectivity frontier, TAIL test: mean nDCG@10 gain over always-BM25 when the top $X\%$ of queries by policy rank get treatment, rest at BM25. \% Oracle: verifier gain as a fraction of oracle gain.}
+\caption{Selectivity frontier, TAIL test ($n=1175$, \texttt{scripts/14}): mean nDCG@10 gain over always-BM25 when the top $X\%$ of queries by policy rank get treatment, rest at BM25. Budget-oracle is the \emph{same} oracle as Table~\ref{tab:oracle}, capped to the top $X\%$; it necessarily plateaus at Table~\ref{tab:oracle}'s unconstrained $+0.0246$ once the budget covers every query the oracle would treat. \% column: verifier gain as a fraction of budget-oracle gain at that budget.}
 \label{tab:frontier}
 \centering
 \footnotesize
 \begin{tabular}{l@{\hspace{5pt}}c@{\hspace{5pt}}c@{\hspace{5pt}}c}
 \toprule
-Budget & Verifier gain & Oracle gain & \% Oracle \\
+Budget & Verifier gain & Budget-oracle & \% \\
 \midrule
-5\% & 0.0005 & 0.0186 & 2.4\% \\
-10\% & 0.0007 & 0.0245 & 2.7\% \\
-20\% & 0.0023 & 0.0250 & 9.1\% \\
-40\% & 0.0033 & 0.0250 & 13.1\% \\
+5\% & 0.0001 & 0.0184 & 0.5\% \\
+10\% & 0.0006 & 0.0242 & 2.5\% \\
+20\% & 0.0025 & 0.0246 & 10.2\% \\
+40\% & 0.0029 & 0.0246 & 11.8\% \\
 100\% & 0.0007 & 0.0007 & 100\%$^*$ \\
 \bottomrule
 \end{tabular}
@@ -647,9 +648,9 @@ Budget & Verifier gain & Oracle gain & \% Oracle \\
 \end{table}
 
 At every budget below universal treatment, the verifier captures only
-a small fraction of available headroom --- $2.4\%$ at 5\%, rising to
-$13.1\%$ at 40\%, never close to the oracle: far short of what perfect
-knowledge extracts.
+a small fraction of available headroom --- $0.5\%$ at 5\%, rising to
+$11.8\%$ at 40\%, never close to the budget-oracle: far short of what
+perfect knowledge extracts.
 
 \begin{table}[t]
 \caption{Agent controller-decision frequency, full TripClick TAIL test set ($n=1175$).}
@@ -809,9 +810,11 @@ dominant feature was not (\texttt{topk\_overlap}, not the predicted
 \texttt{coverage\_gain}; \texttt{scripts/12}). \textbf{The verifier's
 fixed weights are diagnostic for how a genuinely new failure class
 will behave, not merely descriptive of the three faults they were fit
-against}: recovery is not just explainable after the fact but
-predictable in advance, even though the per-feature mechanism does not
-always transfer.
+against}: whether the verifier will over-flag it, under-flag it, or
+discriminate it is predictable in advance, even though whether that
+discrimination converts into a significant recovery gain (as it did
+only for grounding corruption) still requires running it, and the
+per-feature mechanism does not always transfer.
 
 \section{Does the Verifier Generalize Beyond TAIL?}
 \label{sec:robustness}
@@ -859,17 +862,16 @@ shows the consequence --- a closed loop built on the weaker signal
 adds nothing over a matched static pipeline --- and the oracle and
 selectivity-frontier analyses rule out ``no opportunity exists'': real
 headroom is available ($+0.0246$ nDCG@10) and the verifier reaches at
-most $13\%$ of it. RQ3's causal attribution shows this is a per-fault
+most $12\%$ of it. RQ3's causal attribution shows this is a per-fault
 property, sharp enough in one case that the verifier actively reads
 the fault as an improvement. The diagnostic rule
 (Section~\ref{sec:diagnostic}) is the paper's sharpest positive result
 precisely because it operates in this narrower regime: for
-\emph{large, structured} faults, the same weights that cannot rank
-ordinary queries' action utility still predict, before a new fault is
-run, which recall/false-alarm regime it falls into.
+\emph{large, structured} faults, the same weights predict, before a
+new fault is run, which recall/false-alarm regime it falls into.
 Section~\ref{sec:robustness} bounds this differently: holding the
 fault fixed and changing query frequency, the same ranking goes from
-weakly informative on TAIL to below-chance on HEAD/TORSO. Two distinct
+weakly informative on TAIL to below-chance on HEAD/TORSO. Two
 generalization questions, opposite answers: new failure types within
 the calibration split, yes; the same behavior outside it, no.
 
@@ -916,8 +918,10 @@ is a per-fault, mechanistically explicable property --- in one case
 the verifier is actively misled, not merely blind --- and, tested
 prospectively on a held-out fault, this mechanism supports genuine
 diagnosis in advance: predicting, before a new large structured
-failure is run, whether telemetry will support recovering from it.
-That capability does not extend across query-frequency regimes, where
+failure is run, whether the verifier will over-flag it, under-flag it,
+or discriminate it well, though whether that translates into a
+significant recovery gain still requires running it. That capability
+does not extend across query-frequency regimes, where
 the same ranking inverts outside its calibration split. We report both
 implementation defects found by refusing a convenient result, in the
 belief that the discipline to catch them is worth more than a
