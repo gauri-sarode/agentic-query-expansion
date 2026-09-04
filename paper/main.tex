@@ -222,7 +222,7 @@ paper's central experimental contrast (Section~\ref{sec:rq2}).
 
 \begin{figure*}[t]
 \centering
-\resizebox{0.60\textwidth}{!}{
+\resizebox{0.55\textwidth}{!}{
 \begin{tikzpicture}[
     node distance=4.5mm and 6mm,
     box/.style={draw, rounded corners, minimum height=6mm, minimum width=17mm, align=center, font=\footnotesize, fill=blue!4},
@@ -872,8 +872,12 @@ title-weight ratio ($10\times$ body) came from a genuine
 validation-set plateau, not cherry-picking, but may not transfer
 beyond TripClick's title-informative abstracts. The causal attribution
 in Section~\ref{sec:rq3} uses the frozen verifier's linear weights as a
-local description of its own behavior, verified only against the three
-tested faults. The failure-detection model
+local description of its own behavior. A prospective check on one
+held-out fault (query-term removal, predicted before running from the
+weights alone; \texttt{scripts/12}) got the qualitative direction right
+--- detectable, entity-injection-like profile --- but not the specific
+dominant feature: the mechanism generalizes qualitatively, not as a
+precise single-feature account. The failure-detection model
 (Section~\ref{sec:detect-vs-act}) uses one binary definition of ``poor
 retrieval''; a graded definition could shift its measured AUC.
 
