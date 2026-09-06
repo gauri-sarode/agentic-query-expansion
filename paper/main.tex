@@ -16,13 +16,13 @@
 \pgfplotsset{compat=1.18}
 \usepgfplotslibrary{groupplots}
 
-\setlength{\textfloatsep}{5pt plus 1pt minus 2pt}
-\setlength{\floatsep}{4pt plus 1pt minus 1pt}
-\setlength{\intextsep}{5pt plus 1pt minus 1pt}
-\setlength{\abovecaptionskip}{3pt}
+\setlength{\textfloatsep}{4pt plus 1pt minus 2pt}
+\setlength{\floatsep}{3pt plus 1pt minus 1pt}
+\setlength{\intextsep}{4pt plus 1pt minus 1pt}
+\setlength{\abovecaptionskip}{2pt}
 \setlength{\belowcaptionskip}{0pt}
-\setlength{\abovedisplayskip}{3pt plus 1pt minus 1pt}
-\setlength{\belowdisplayskip}{3pt plus 1pt minus 1pt}
+\setlength{\abovedisplayskip}{2pt plus 1pt minus 1pt}
+\setlength{\belowdisplayskip}{2pt plus 1pt minus 1pt}
 
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
@@ -43,44 +43,59 @@
 \begin{abstract}
 Large language model (LLM) query expansion is typically applied either
 unconditionally or not at all, despite evidence that unconditional
-expansion is net-harmful on a non-trivial fraction of queries. We
-formulate query expansion as a bounded, observable agentic decision,
-evaluated under a strictly separated validation/test protocol: every
-retrieval-config, verifier-model, and threshold decision is fixed on
-TripClick TAIL \emph{validation} before a single frozen touch of
-\emph{test}. An under-tuned BM25 baseline (nDCG@10 $0.228$), corrected
-via validation-only stemming and title weighting, reaches $0.315$,
-above the published reference, changing every downstream conclusion.
-Pre-action telemetry predicts whether retrieval is already poor with
-ROC-AUC $0.649$, but the same telemetry is markedly worse at the
-harder, actionable question --- will a \emph{specific} expansion help
---- at ROC-AUC only $0.552$ ($r=0.114$, $p<0.001$). Detection is not
-actionability, and that gap is this paper's central finding.
-Consistent with it, neither static expansion nor a closed-loop agent
-significantly outperforms corrected BM25 (static: $+0.0007$, agent:
-$+0.0009$ nDCG@10), nor does the agent beat static; decomposing the
-pipeline shows reranking and expansion are each significantly
-\emph{harmful} alone but interact positively together, not one
-canceling a fixed cost from the other. This is not for lack of
-headroom: an oracle gains $+0.0246$ nDCG@10 over BM25 ($p<0.001$), of
-which the verifier captures only $0.5$--$12\%$ across intervention
-budgets. Fault-injection recovery is fault-specific, causally
-explained by which telemetry features each fault perturbs --- one
-fault even \emph{increases} the verifier's healthy-state score rather
-than merely evading detection. A diagnostic rule built from three
-faults correctly anticipated a fourth, held-out fault's
-detection/false-alarm regime before it was run, though whether
-detection converts to a significant recovery gain remains fault-specific
-(confirmed for only one of four). Generalization is worse outside the
-calibration split: action-utility AUC falls to $0.148$ (HEAD) and
-$0.214$ (TORSO), below chance. We report a real implementation defect
-found mid-study and its correction. Runtime observability reliably
-detects retrieval failure and, for large structured faults, indicates
-in advance how the verifier will behave toward a new failure class; but
-the stronger property general autonomous recovery needs --- predicting
-whether a specific intervention on an ordinary query will help --- is
-not delivered by the same telemetry, under a protocol designed so
-these findings are trustworthy.
+expansion is net-harmful on a non-trivial fraction of queries. Rather
+than treat expansion as a one-shot generation problem, we formulate it
+as a bounded, observable agentic decision: an agent that observes
+retrieval telemetry, acts, and verifies its own action's consequences
+before committing to it, borrowing the observe-diagnose-act-recover
+discipline of site reliability engineering. The question is not
+whether an LLM can produce a useful expansion --- that is established
+--- but whether runtime observability alone can make that decision
+safe: selective, recoverable, and cost-aware. We answer this under a
+validation/test protocol strict enough to be trusted, a discipline
+that itself surfaced our first finding: an under-tuned retrieval
+baseline quietly inflating every comparison until corrected.
+
+The central result is a distinction the existing literature has not
+isolated: the same telemetry vocabulary that is reasonably good at
+flagging that retrieval has already gone wrong (AUC $0.649$) is
+markedly worse at the harder question an agent actually needs answered
+--- whether a specific candidate fix will help (AUC $0.552$). Detection
+is not actionability, and that gap explains why neither a static,
+failure-conditioned expansion pipeline nor a full closed-loop recovery
+agent improves on a properly-tuned retriever on ordinary queries. This
+is not for lack of opportunity: a retrospective oracle shows real,
+mostly-uncaptured headroom ($+0.0246$ nDCG@10, against $+0.0007$
+actually captured), so the limitation is in what the telemetry can
+discriminate, not in the absence of anything worth discriminating.
+Decomposing the pipeline further complicates the obvious story about
+why expansion appears to break even: reranking and expansion are each
+harmful alone, yet help each other combined, a genuine interaction
+rather than one component quietly absorbing the other's cost.
+
+Where the same telemetry does earn its keep is a narrower, more
+structural setting: given a handful of deliberately injected, large
+failure modes, a simple rule built from how each fault shifts the
+verifier's observed features held up against three new, held-out
+failure types tested afterward --- not because our own upfront
+guesses about which one would resemble which were reliable, they
+mostly were not, but because the underlying computed statistic tracked
+the right regime regardless. Whether that translates into an actual
+quality gain, not just correct detection, turns out to depend on the
+specific failure. That capability is narrow in another way too: the
+same verifier, left
+untouched, is actively misleading outside the query population it was
+tuned on (AUC falling to $0.14$--$0.23$, below chance), not just
+unhelpful. We also report a real implementation
+defect found and corrected mid-study, and an honest account of a
+model-selection step that, on reflection, could not distinguish its
+deployed choice from a statistically equivalent alternative. Taken
+together, these results argue that runtime telemetry is a genuinely
+useful alarm that something is wrong, but the harder property
+autonomous recovery actually requires --- knowing what to do about it
+--- is a different capability, one this telemetry delivers only for
+large, previously-characterized failure classes, not for ordinary
+queries in general.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -95,30 +110,21 @@ phrasings, and disambiguating context for a search query
 the rewrite on retrieved evidence rather than the query text alone ---
 improves on naive query-only rewriting. Existing work establishes that
 LLM query expansion \emph{can} help, not when an operational system
-should trust an expansion enough to use it. In practice, expansion is
-applied unconditionally or not at all; neither is safe, since
+should trust an expansion enough to use it, and in practice it is
+applied unconditionally or not at all --- neither safe, since
 unconditional rewriting is reliably net-harmful on a measurable
-fraction of queries, particularly underspecified or already-well-served
-ones.
-
-We treat this as a control problem rather than a generation problem.
-Borrowing the observe-diagnose-act-recover discipline of site
-reliability engineering \cite{sre-slo} and the trace/metric vocabulary
-of OpenTelemetry \cite{opentelemetry}, we build an agent
-whose action space is a small set of interpretable, corpus-grounded
-expansion operators, whose control loop alternates actions with
-structured observations as in ReAct \cite{react}, and whose accept,
-roll-back, replan, and abstain decisions are driven by runtime
-telemetry rather than the language model's own self-assessment. The
-central question is not whether an LLM can produce a useful
-expansion --- that is established --- but whether \emph{runtime
-observability} can make expansion selective, recoverable, and
-cost-aware. Answering it surfaces a distinction the selective query
+fraction of queries, particularly underspecified or
+already-well-served ones. Our agent's action space is a small set of
+interpretable, corpus-grounded expansion operators (Section~\ref{sec:controller}),
+its control loop alternates actions with structured observations as in
+ReAct \cite{react}, and its accept, roll-back, replan, and abstain
+decisions are driven by runtime telemetry rather than the language
+model's own self-assessment. Answering whether that telemetry can
+carry the decision surfaces a distinction the selective query
 expansion and query performance prediction literature has not, to our
 knowledge, isolated: predicting that retrieval is failing and
 predicting that a specific intervention will fix it are different
 tasks, and telemetry good at the first can be useless at the second.
-This paper reports what we found, including where the answer was no.
 
 \subsection{Research Questions}
 
@@ -152,17 +158,17 @@ TAIL retriever above the published reference and changing every
 downstream conclusion; (3) a direct comparison, from one telemetry
 vocabulary, of failure-\emph{detection} against
 intervention-\emph{utility} prediction, showing these differ and only
-the first is reliable; (4) a frozen-test evaluation of the closed-loop
+the first is moderately predictive; (4) a frozen-test evaluation of the closed-loop
 agent against a matched static comparator, with an oracle and
 selectivity-frontier analysis quantifying captured headroom; (5) a
-fault-injection study with a causal feature-perturbation analysis and a
-diagnostic rule, confirmed \emph{prospectively} on a held-out fault
-never used to derive it --- telemetry can indicate whether a new
-failure class will be over-flagged, under-flagged, or genuinely
-discriminable before it is ever observed, not just explain failures
-already seen; (6) a cross-split check showing that
-ranking degrades below chance outside its calibration split; and (7)
-an honest account of a real implementation defect, corrected mid-study.
+fault-injection study with a fault-induced telemetry perturbation
+analysis and a diagnostic rule, tested \emph{prospectively} on three
+held-out faults --- the computed statistic tracks whether a new
+failure class will be over-flagged, under-flagged, or discriminable
+before it is observed, holding across all six fault types even where
+our own guesses did not; (6) a cross-split check showing ranking
+degrades below chance outside its calibration split; and (7) an honest
+account of a real implementation defect, corrected mid-study.
 
 \section{Related Work}
 
@@ -175,22 +181,20 @@ neither retrieval-state telemetry nor a harmful rewrite's recovery.
 \textbf{Agentic control and observability.} ReAct \cite{react}
 interleaves reasoning with actions and observations, the template for
 our observe-act-observe structure, but with a much smaller action
-space: typed retrieval operators, keeping the policy interpretable
-under a non-LLM controller. OpenTelemetry's trace/metric/log
-separation and GenAI semantic conventions \cite{opentelemetry} supply
-a naming discipline for our telemetry; Google's SRE framing of an SLO
-as a target range, not a metric to optimize \cite{sre-slo}, motivates
-our Agent Search SLO: quality subject to harm, cost, and latency
-frozen \emph{before} evaluation.
+space: typed retrieval operators under a non-LLM controller.
+OpenTelemetry's trace/metric/log separation and GenAI semantic
+conventions \cite{opentelemetry} supply a naming discipline for our
+telemetry; Google's SRE framing of an SLO as a target range
+\cite{sre-slo} motivates our Agent Search SLO: quality subject to
+harm, cost, and latency frozen \emph{before} evaluation.
 
 \textbf{Query performance prediction and selective expansion.} Classic
 query performance prediction \cite{qpp-clarity} and selective query
 expansion \cite{selective-qe} already ask whether a query is hard, or
 likely to benefit from expansion, from retrieval signal alone. We
-split that into two predictive targets sharing one telemetry
-vocabulary --- is retrieval failing, versus will \emph{this} action
-fix it --- and show qrel-free telemetry answers the first far better
-(Section~\ref{sec:rq1}).
+split that into two targets sharing one telemetry vocabulary --- is
+retrieval failing, versus will \emph{this} action fix it --- and show
+qrel-free telemetry answers the first far better (Section~\ref{sec:rq1}).
 
 \textbf{Benchmarks.} TripClick \cite{tripclick} has genuine
 head/torso/tail query-frequency structure, unlike benchmarks that treat
@@ -218,7 +222,7 @@ paper's central experimental contrast (Section~\ref{sec:rq2}).
 
 \begin{figure*}[t]
 \centering
-\resizebox{0.43\textwidth}{!}{
+\resizebox{0.40\textwidth}{!}{
 \begin{tikzpicture}[
     node distance=4.5mm and 6mm,
     box/.style={draw, rounded corners, minimum height=6mm, minimum width=17mm, align=center, font=\footnotesize, fill=blue!4},
@@ -374,12 +378,11 @@ rest of the study rather than an implementation footnote.
 Sparse retrieval uses BM25 over a SQLite FTS5 index \cite{sqlite-fts5}
 rather than a JVM Lucene index, forced by a JVM crash under Pyserini
 \cite{pyserini} on our hardware; two further silent-corruption risks
-surfaced at this corpus's scale, the same category as
-Section~\ref{sec:bm25-fix}'s baseline gap and Section~\ref{sec:defect}'s
-telemetry defect: FTS5's default MATCH operator is \emph{conjunctive}
-(collapsing recall without an error), and FTS5 indexes only the
-\texttt{MATCH} column (an unindexed companion lookup degrades to a
-full table scan, $18\times$ slower at $1.5$M rows). Cross-encoder
+surfaced at scale, the same category as Section~\ref{sec:bm25-fix}'s
+baseline gap and Section~\ref{sec:defect}'s telemetry defect: a
+conjunctive default MATCH operator (collapsing recall without an
+error) and an unindexed companion lookup that degrades to a full table
+scan ($18\times$ slower at $1.5$M rows). Cross-encoder
 reranking (\texttt{cross-encoder/ms-marco-MiniLM-L6-v2}
 \cite{minilm-cross-encoder}) applies to the top 100 BM25 candidates,
 reranking the top 50. Generation uses a locally hosted, 4-bit quantized
@@ -440,19 +443,19 @@ Nothing clears noise on validation: every candidate --- a hand-picked
 baseline, linear and gradient-boosted fits on the deployed 10-feature
 set, and a fit augmenting it with dense-embedding features --- lands
 at or below $|r|=0.02$. We select the 10-feature linear model, the
-only candidate fit on the corrected pipeline's feature distribution
-rather than a stale or untested one (configs/experimental\_protocol.yaml)
---- though that criterion alone does not distinguish it from GBDT-10,
-fit on the identical distribution and statistically indistinguishable
-from it ($r{=}{+}0.001$ vs.\ $-0.014$); linear is also the only class
-compatible with Section~\ref{sec:rq3}'s closed-form attribution, though
-that was not the stated selection criterion at freeze time. We deploy
-it \emph{despite} its weak validation estimate, per
-Section~\ref{sec:protocol}: no decision here is conditioned on test
+only candidate fit on the corrected pipeline's distribution rather
+than a stale or untested one (configs/experimental\_protocol.yaml) ---
+though that criterion alone does not distinguish it from GBDT-10, fit
+on the identical distribution and statistically indistinguishable
+($r{=}{+}0.001$ vs.\ $-0.014$); linear is also the only class
+compatible with Section~\ref{sec:rq3}'s closed-form attribution, not
+the stated criterion at freeze time. We deploy it \emph{despite} its
+weak validation estimate, per Section~\ref{sec:protocol}: no decision
+is conditioned on test
 performance.
 
 \begin{table}[t]
-\caption{RQ1's frozen results: both models evaluated \emph{once} on withheld TAIL test ($n=1157$), never touched during selection.}
+\caption{RQ1's frozen results: both models evaluated \emph{once} on withheld TAIL test ($n=1157$), never touched during selection. Bracketed values are bootstrap 95\% CIs (\texttt{scripts/17}).}
 \label{tab:rq1-test}
 \centering
 \begin{tabular}{lc}
@@ -460,9 +463,9 @@ performance.
 Metric & Test value \\
 \midrule
 Action utility: Pearson $r$ vs.\ true $\Delta$nDCG@10 & $0.114$ ($p<0.001$) \\
-Action utility: ROC-AUC (detecting harm) & $0.552$ \\
+Action utility: ROC-AUC (detecting harm) & $0.552$ [$0.518,0.586$] \\
 Action utility: average precision (prev.\ $0.330$) & $0.364$ \\
-Failure detection: ROC-AUC (val CV $0.618$) & $\mathbf{0.649}$ \\
+Failure detection: ROC-AUC (val CV $0.618$) & $\mathbf{0.649}$ [$0.618,0.680$] \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -489,23 +492,24 @@ frozen test, identically to Section~\ref{sec:calib-method}'s protocol
 --- Table~\ref{tab:rq1-test}'s last row.
 
 The gap is large and consistent across val and test: telemetry
-genuinely informative about \emph{whether} retrieval is failing
-($\text{AUC}=0.649$) is markedly weaker at predicting whether a
-\emph{specific candidate action fixes it} ($\text{AUC}=0.552$) ---
-both frozen single-touch test numbers from the same features and
-protocol, not the same result at different noise levels.
-\textbf{RQ1's answer}: qrel-free telemetry reliably detects that
-something is wrong, but is only weakly informative about whether a
-proposed fix will work --- the gap RQ2's control result and RQ3's
-fault-specific pattern trace back to.
+moderately predictive of \emph{whether} retrieval is failing
+($\text{AUC}=0.649$, 95\% CI $[0.618,0.680]$) is markedly weaker at
+predicting whether a \emph{specific candidate action fixes it}
+($\text{AUC}=0.552$, 95\% CI $[0.518,0.586]$) --- both frozen
+single-touch test numbers from the same features and protocol, not the
+same result at different noise levels. \textbf{RQ1's answer}: qrel-free
+telemetry is moderately predictive of whether something is wrong, but
+only weakly informative about whether a proposed fix will work --- the
+gap RQ2's control result and RQ3's fault-specific pattern trace back
+to.
 
 \begin{figure*}[t]
 \centering
 \begin{tikzpicture}
 \begin{groupplot}[
-    group style={group size=2 by 1, horizontal sep=1.6cm},
-    width=0.34\textwidth,
-    height=0.17\textwidth,
+    group style={group size=2 by 1, horizontal sep=1.2cm},
+    width=0.29\textwidth,
+    height=0.13\textwidth,
     grid=major,
     grid style={gray!20},
     tick label style={font=\footnotesize},
@@ -554,7 +558,7 @@ in both panels.}
 System & nDCG@10 & Recall@100 & MRR \\
 \midrule
 BM25 only & 0.3152 & 0.7750 & 0.3014 \\
-BM25 + rerank, no QE & 0.2850$^\dagger$ & --- & --- \\
+BM25 + rerank, no QE & 0.2850$^\dagger$ & 0.7750 & 0.2701 \\
 BM25 + QE, no rerank & 0.2992$^\ddagger$ & 0.7716 & 0.2856 \\
 Static QE (QE + rerank) & 0.3159 & 0.7759 & 0.2993 \\
 Agent & 0.3161 & 0.7770 & 0.3015 \\
@@ -617,9 +621,10 @@ Oracle-agent vs.\ Agent & $+0.0276$ & $[0.0226, 0.0332]$* \\
 \end{table}
 
 The answer is unambiguous: substantial headroom exists. A perfect
-selective controller would gain $+0.0246$ nDCG@10 over BM25 ---
-roughly $35\times$ what Static QE actually captures ($+0.0007$) ---
-significant at $p<0.001$. Static expansion helps $11.6\%$ of queries
+selective controller gains $+0.0246$ nDCG@10 over BM25 ($p<0.001$),
+whereas unconditional Static QE gains $+0.0007$ and is not
+significantly different from BM25. Static expansion helps $11.6\%$ of
+queries
 and harms $10.6\%$ relative to BM25, a real, roughly-balanced mix a
 perfect selector could exploit. The failure is squarely in
 \emph{detection}: RQ1's verifier, $r=0.114$ on frozen test, is far too
@@ -628,13 +633,13 @@ from ``maybe there's nothing here'' into ``there is something here,
 and our qrel-free detector cannot see it.''
 
 \begin{table}[t]
-\caption{Selectivity frontier, TAIL test ($n=1175$, \texttt{scripts/14}): mean nDCG@10 gain over always-BM25 when the top $X\%$ of queries by policy rank get treatment, rest at BM25. Budget-oracle is the \emph{same} oracle as Table~\ref{tab:oracle}, capped to the top $X\%$; it necessarily plateaus at Table~\ref{tab:oracle}'s unconstrained $+0.0246$ once the budget covers every query the oracle would treat. \% column: verifier gain as a fraction of budget-oracle gain at that budget.}
+\caption{Selectivity frontier, TAIL test ($n=1175$, \texttt{scripts/14}). Each policy treats \emph{exactly} $X\%$ of queries with Static QE (an intervention quota, not a cap), ranked by true benefit (oracle) or verifier score (verifier), rest at BM25; mean nDCG@10 gain over always-BM25. Oracle gain need not be monotone in $X$: past the fraction treatment truly helps, it is forced onto harmful queries too. \% column: verifier gain as a fraction of oracle gain.}
 \label{tab:frontier}
 \centering
 \footnotesize
 \begin{tabular}{l@{\hspace{5pt}}c@{\hspace{5pt}}c@{\hspace{5pt}}c}
 \toprule
-Budget & Verifier gain & Budget-oracle & \% \\
+Quota & Verifier gain & Oracle gain & \% \\
 \midrule
 5\% & 0.0001 & 0.0184 & 0.5\% \\
 10\% & 0.0006 & 0.0242 & 2.5\% \\
@@ -644,13 +649,16 @@ Budget & Verifier gain & Budget-oracle & \% \\
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize $^*$At 100\% budget every policy treats every query, so ranking cannot matter; verifier and oracle necessarily coincide with Table~\ref{tab:rq2}'s unconditional Static QE result.
+\footnotesize $^*$At 100\% quota every policy treats every query, so ranking cannot matter; verifier and oracle necessarily coincide with Table~\ref{tab:rq2}'s unconditional Static QE result.
 \end{table}
 
-At every budget below universal treatment, the verifier captures only
-a small fraction of available headroom --- $0.5\%$ at 5\%, rising to
-$11.8\%$ at 40\%, never close to the budget-oracle: far short of what
-perfect knowledge extracts.
+Oracle gain is flat at $0.0246$ from 20\% to 40\% (both quotas still
+fall within the $11.6\%$ helped plus $77.8\%$ unchanged, contributing
+zero either way) before collapsing to $+0.0007$ at 100\%, once forced
+to also treat the remaining $10.6\%$ genuinely harmful queries ---
+exactly what a true quota predicts. At every quota below universal
+treatment, the verifier captures only a small fraction of available
+headroom, $0.5$--$11.8\%$, never close to the oracle.
 
 \begin{table}[t]
 \caption{Agent controller-decision frequency, full TripClick TAIL test set ($n=1175$).}
@@ -698,21 +706,20 @@ An early pass found the reranker-disabled fault essentially
 undetectable (recall $0.185$) while the other two looked strong.
 Tracing this revealed a real defect: the reranked ranking was
 computed, at real latency cost, but never actually applied to the
-ranking the agent accepted --- disabling the reranker was mechanically
-a no-op regardless of verifier quality. Fixing it exposed a second,
-entangled defect: the verifier's telemetry was still computed from the
-pre-rerank ranking. We corrected both and re-ran calibration to
-confirm the deployed verifier did not need retraining (corrected
-Pearson $r=0.146$ vs.\ the original $0.134$). We report this because a
-component computed purely for observability is architecturally easy to
-leave disconnected from the outcome it explains, and the resulting
-error looked coherent --- unrealistically strong --- until an
-implausible near-zero effect prompted investigation.
+accepted ranking --- disabling the reranker was mechanically a no-op.
+Fixing it exposed a second, entangled defect: the verifier's telemetry
+was still computed from the pre-rerank ranking. We corrected both and
+re-ran calibration to confirm the deployed verifier did not need
+retraining (corrected Pearson $r=0.146$ vs.\ $0.134$). We report this
+because a component computed purely for observability is
+architecturally easy to leave disconnected from the outcome it
+explains, and the error looked coherent --- unrealistically strong ---
+until an implausible near-zero effect prompted investigation.
 
 \subsection{Frozen Results}
 
 \begin{table}[t]
-\caption{RQ3, frozen result: fault injection, corrected pipeline, TAIL test ($n=1157$; 18/1175 skipped, no expansion). Gain is mean nDCG@10 with minus without recovery on identically corrupted episodes; CI from 10{,}000-resample bootstrap. Dominant contributor: feature $j$ with largest $|w_j\Delta x_j|$ (below).}
+\caption{RQ3, frozen result: fault injection, TAIL test ($n=1157$). Gain is mean nDCG@10 with minus without recovery on identical episodes; CI from 10{,}000-resample bootstrap. Dominant contributor: feature $j$ with largest $|w_j\Delta x_j|$.}
 \label{tab:rq3}
 \centering
 \tiny
@@ -729,59 +736,52 @@ Reranker disabled & 0.000 & 0.002 & $+0.0000$ & \texttt{disagreement} $+0.126$ \
 \footnotesize CIs straddle zero except *: significant, positive. FA: false alarm.
 \end{table}
 
-The three fault types split into three distinct outcomes: no single
-answer to ``is recovery useful,'' only a per-failure-type one.
-\textbf{Entity injection} is detected almost every time (recall
-$0.974$) but flagged almost indiscriminately (false alarm $0.939$),
-netting out non-significant. \textbf{Grounding corruption} is the one
-clean recovery success ($+0.0099$, $p<0.05$). \textbf{Reranker
-disabled} is never detected at all (recall $0.000$): the controller
+The three fault types (Table~\ref{tab:rq3}) split into three distinct
+outcomes: no single answer to ``is recovery useful,'' only a
+per-failure-type one. \textbf{Entity injection} is detected almost
+every time but flagged almost as often, netting out non-significant.
+\textbf{Grounding corruption} is the one clean recovery success.
+\textbf{Reranker disabled} is never detected: the controller
 essentially always accepts.
 
-\textbf{Why, causally.} Fitted weights alone show which features the
-verifier ignores, not what a fault \emph{does} to its score:
-$\Delta x_j = \mathbb{E}[x_j^{\text{fault}} - x_j^{\text{clean}}]$,
-$\text{Contribution}_j = w_j \cdot \Delta x_j$ ($n{=}79$/fault;
-Table~\ref{tab:rq3}, last column). The clearest case is reranker
-disabled: its dominant contribution is large and \emph{positive}, from
-\texttt{disagreement} moving in the direction the verifier reads as
-improvement --- the fault does not merely evade weak reranker-derived
-features, it makes the corrupted state score higher, so the controller
-is actively misled, not
-merely blind. Section~\ref{sec:diagnostic} generalizes this causal
-signature into a rule and tests it prospectively.
+\textbf{How, mechanistically.} Fitted weights alone show which
+features the verifier ignores, not what a fault \emph{does} to its
+score: $\Delta x_j = \mathbb{E}[x_j^{\text{fault}} - x_j^{\text{clean}}]$,
+$\text{Contribution}_j = w_j \cdot \Delta x_j$ ($n{=}79$/fault) --- a
+decomposition against the verifier's fitted (co-varying) features, not
+an independent causal effect of feature $j$ alone. The clearest case
+is reranker disabled: its dominant contribution is large and
+\emph{positive}, from \texttt{disagreement} moving in the direction
+the verifier reads as improvement --- it does not merely evade weak
+reranker-derived features, it makes the corrupted state score higher,
+so the controller is actively misled, not merely blind.
+Section~\ref{sec:diagnostic} generalizes this signature into a rule
+and tests it prospectively.
 
-\textbf{RQ3's answer is that recoverability is fault-specific}, and
-the attribution shows why: content-level corruption produces a real
-net gain only when its effect on the verifier's score is small enough
-to leave room for genuine per-episode discrimination (grounding), is a
-wash when the effect is large and uniform enough to flag almost
-everything (entity injection), and a system-level fault is disguised
-as an improvement when it moves a strongly-weighted feature the
-\emph{wrong} way (reranker) --- a verifier is not uniformly weak or
-strong across failure types, it can be actively adversarial to a fault
-it was never calibrated against. This pattern is not just
-post-hoc description, either: Section~\ref{sec:diagnostic} tests it
+\textbf{RQ3's answer is that recoverability is fault-specific}: a real
+net gain needs a score shift small enough for per-episode
+discrimination (grounding), is a wash when the shift is large and
+uniform (entity injection), and a fault is disguised as an improvement
+when it moves a strongly-weighted feature the \emph{wrong} way
+(reranker) --- a verifier can be actively adversarial to a fault it
+was never calibrated against. Section~\ref{sec:diagnostic} tests this
 prospectively.
 
-\subsection{A Diagnostic Rule, Confirmed on a Held-Out Fault}
+\subsection{A Diagnostic Rule, Tested on Three Held-Out Faults}
 \label{sec:diagnostic}
 
-The three faults' net contributions ($\sum_j w_j\Delta x_j$) and their
-recall/false-alarm pairs move together: strongly negative (entity
-injection, $-0.0529$) pushes the score down almost regardless of true
-harm, giving high recall but comparably high false alarms; strongly
-positive (reranker disabled, $+0.1296$) does the opposite (recall/FA
-near zero); only near-zero (grounding, $+0.0002$) leaves room for
-per-episode variation to separate harmful from healthy cases --- the
-one fault with a significant net gain. This is usable \emph{before} a
-new fault is ever run: reason about which features a candidate
-corruption should perturb, weight by the frozen verifier's
-coefficients, and read off whether it will be over-flagged,
-under-flagged, or genuinely discriminable.
+The three faults' net contributions ($\sum_j w_j\Delta x_j$,
+Table~\ref{tab:diagnostic}) and recall/false-alarm pairs move
+together: strongly negative pushes the score down regardless of true
+harm, giving high recall but comparably high false alarms (entity
+injection); strongly positive does the opposite (reranker disabled);
+only near-zero leaves room for per-episode variation to separate
+harmful from healthy cases --- the one fault with a significant net
+gain (grounding). This needs only paired telemetry, no labels, so it
+is usable \emph{before} a new fault is run.
 
 \begin{table}[t]
-\caption{Net contribution predicts recall/false-alarm regime, not gain: near-zero is where real discrimination happens.}
+\caption{Net contribution vs.\ recall, sorted. Gain: frozen significance for the original three ($n{=}1157$); held-out rows ($n{=}79$--$80$) are point estimates.}
 \label{tab:diagnostic}
 \centering
 \scriptsize
@@ -790,95 +790,95 @@ under-flagged, or genuinely discriminable.
 Fault & Net contrib. & Recall & FA & Gain \\
 \midrule
 Entity injection & $-0.0529$ & 0.974 & 0.939 & NS \\
-Query-term removal$^\dagger$ & $-0.0236$ & 0.800 & 0.694 & NS \\
+Query-term removal$^\dagger$ & $-0.0236$ & 0.800 & 0.694 & $+0.0012$ \\
 Grounding corruption & $+0.0002$ & 0.528 & 0.469 & * \\
+Append irrelevant term$^\dagger$ & $+0.0157$ & 0.235 & 0.258 & $-0.0185$ \\
+Truncated pool$^\dagger$ & $+0.1225$ & 0.000 & 0.000 & $+0.0000$ \\
 Reranker disabled & $+0.1296$ & 0.000 & 0.002 & NS \\
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize $\dagger$: held out, predicted before running (below). *: significant, $p<0.05$. NS: not significant.
+\footnotesize $\dagger$: held out, predicted before running. *: significant, $p<0.05$. NS: not significant.
 \end{table}
 
-We tested this prospectively on a held-out fourth fault never used to
-derive the rule: \texttt{remove\_high\_idf\_term}, dropping the
-query's single most discriminative term before retrieval ---
-mechanistically distinct from all three. Predicted in writing before
-running: negative net contribution, an over-flagged profile like
-entity injection. Result: net contribution $-0.0236$, recall $0.800$,
-false alarm $0.694$ --- the predicted regime, confirmed, though the
-dominant feature was not (\texttt{topk\_overlap}, not the predicted
-\texttt{coverage\_gain}; \texttt{scripts/12}). \textbf{The verifier's
-fixed weights are diagnostic for how a genuinely new failure class
-will behave, not merely descriptive of the three faults they were fit
-against}: whether the verifier will over-flag it, under-flag it, or
-discriminate it is predictable in advance, even though whether that
-discrimination converts into a significant recovery gain (as it did
-only for grounding corruption) still requires running it, and the
-per-feature mechanism does not always transfer.
+We tested this prospectively on three held-out faults never used to
+derive the rule (\texttt{scripts/12}, \texttt{18}, \texttt{19}):
+removing the query's most discriminative term, appending an irrelevant
+term, and truncating the retrieval pool. Written predictions went
+1-for-3 --- correct for query-term removal, but wrong for
+append-irrelevant-term (guessed it would pattern-match; it came out
+weakly positive, low recall) and wrong for truncated pool (guessed
+grounding-like; it came out strongly positive, recall $0.000$, same
+dominant feature as reranker disabled). \textbf{Yet the underlying
+statistic did not miss}: sorting all six fault types by net
+contribution reproduces the same monotone recall ordering with no
+exceptions (Table~\ref{tab:diagnostic}). Intuition about a new fault
+was not reliable; the qrel-free statistic, needing no guessing,
+tracked recoverability regime across content, evidence,
+system-component, and query-level corruption alike. Whether that
+regime converts into a significant gain remains harder: only grounding
+produced one.
 
 \section{Does the Verifier Generalize Beyond TAIL?}
 \label{sec:robustness}
 
-Every calibration decision so far used TAIL validation only
-(Section~\ref{sec:protocol}); we did not test whether the frozen
-verifier's action-utility ranking holds on HEAD and TORSO, which it
-never saw during selection. Using the identical frozen config, no
+Every calibration decision so far used TAIL validation only; we did not
+test whether the frozen verifier's ranking holds on HEAD/TORSO, which
+it never saw during selection. Using the identical config, no
 recalibration, we run BM25 and Static QE on each bucket's test split.
 
 \begin{table}[t]
-\caption{Cross-split robustness, full test splits ($n=1175$ each), frozen verifier unchanged.}
+\caption{Cross-split robustness. BM25/Static QE/oracle gain: full test splits ($n=1175$). HEAD/TORSO AUC: bootstrap 95\% CI, $n=400$ (\texttt{scripts/16}, superseding an earlier unsaved $n=1175$ computation that gave point estimates $0.148$/$0.214$, consistent with these).}
 \label{tab:robustness}
 \centering
 \scriptsize
-\begin{tabular}{l@{\hspace{4pt}}c@{\hspace{4pt}}c@{\hspace{4pt}}c@{\hspace{4pt}}c}
+\begin{tabular}{l@{\hspace{3pt}}c@{\hspace{3pt}}c@{\hspace{3pt}}c@{\hspace{3pt}}c}
 \toprule
-Split & BM25 & Static QE & Oracle gain & AUC \\
+Split & BM25 & Static QE & Oracle gain & AUC [95\% CI] \\
 \midrule
-HEAD & 0.2282 & 0.2293 (NS) & $+0.0153$* & $0.148$ \\
-TORSO & 0.2485 & 0.2506 (NS) & $+0.0187$* & $0.214$ \\
-TAIL & 0.3152 & 0.3159 (NS) & $+0.0246$* & $0.552$ \\
+HEAD & 0.2282 & 0.2293 (NS) & $+0.0153$* & $0.143$ [$0.107,0.180$] \\
+TORSO & 0.2485 & 0.2506 (NS) & $+0.0187$* & $0.234$ [$0.189,0.281$] \\
+TAIL & 0.3152 & 0.3159 (NS) & $+0.0246$* & $0.552$ [$0.518,0.586$] \\
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize NS: CI crosses zero. *: significant, $p<0.001$. AUC: frozen verifier's action-utility AUC on that split.
+\footnotesize NS: CI crosses zero. *: significant, $p<0.001$.
 \end{table}
 
 Static QE stays statistically indistinguishable from BM25 on every
 bucket, matching TAIL; oracle headroom exists on every bucket too.
 What does not transfer is the verifier: action-utility AUC falls from
-$0.552$ on TAIL to $0.214$ on TORSO and $0.148$ on HEAD --- both
-\emph{below} chance, anti-correlated with true utility, not merely
-uninformative. A verifier calibrated on one frequency regime does not
-just fail to add value in another; its ranking inverts.
+$0.552$ on TAIL (95\% CI $[0.518,0.586]$) to $0.234$ on TORSO
+($[0.189,0.281]$) and $0.143$ on HEAD ($[0.107,0.180]$) --- both CIs
+entirely \emph{below} chance, anti-correlated with true utility, not
+merely uninformative. A verifier calibrated on one frequency regime
+does not just fail to add value in another; its ranking inverts.
 
 \section{Discussion}
 
 Read together, RQ1--RQ3, the oracle analysis, the diagnostic rule, and
 the cross-split check sketch one finding. Section~\ref{sec:detect-vs-act}
-is load-bearing: the same telemetry detects that retrieval is failing
-reasonably well (AUC $0.649$) but is weakly informative about whether
-a specific action on an ordinary query will fix it (AUC $0.552$). RQ2
-shows the consequence --- a closed loop built on the weaker signal
-adds nothing over a matched static pipeline --- and the oracle and
-selectivity-frontier analyses rule out ``no opportunity exists'': real
-headroom is available ($+0.0246$ nDCG@10) and the verifier reaches at
-most $12\%$ of it. RQ3's causal attribution shows this is a per-fault
+is load-bearing: the telemetry is moderately predictive of
+whether retrieval is failing (AUC $0.649$) but weakly informative
+about whether a specific action on an ordinary query will fix it (AUC
+$0.552$). RQ2 shows the consequence --- a closed loop built on the
+weaker signal adds nothing over a matched static pipeline --- and the
+oracle and selectivity-frontier analyses rule out ``no opportunity
+exists'': real headroom is available and the verifier reaches at most
+$12\%$ of it. RQ3's perturbation attribution shows this is a per-fault
 property, sharp enough in one case that the verifier actively reads
 the fault as an improvement. The diagnostic rule
-(Section~\ref{sec:diagnostic}) is the paper's sharpest positive result
-precisely because it operates in this narrower regime: for
-\emph{large, structured} faults, the same weights predict, before a
-new fault is run, which recall/false-alarm regime it falls into.
-Section~\ref{sec:robustness} bounds this differently: holding the
-fault fixed and changing query frequency, the same ranking goes from
-weakly informative on TAIL to below-chance on HEAD/TORSO. Two
-generalization questions, opposite answers: new failure types within
-the calibration split, yes; the same behavior outside it, no.
+(Section~\ref{sec:diagnostic}) is the paper's sharpest positive
+result: for \emph{large, structured} faults, the same weights predict
+which regime a new fault falls into. Section~\ref{sec:robustness}
+bounds this differently: holding the fault fixed and changing query
+frequency instead, the same ranking goes from weakly informative on
+TAIL to below-chance on HEAD/TORSO --- new failure types within the
+calibration split generalize, the same behavior outside it does not.
 
-The BM25 baseline and reranker-wiring defects
-(Sections~\ref{sec:bm25-fix}, \ref{sec:defect}) were both found only
-by refusing a convenient result: an error that looks coherent rather
-than broken. A frozen protocol with a mandatory sanity check defends
+The BM25 baseline and reranker-wiring defects were both found only by
+refusing a convenient result: an error that looks coherent rather than
+broken. A frozen protocol with a mandatory sanity check defends
 against the first kind; the second we only found by distrusting a
 result that seemed too good.
 
@@ -886,20 +886,18 @@ result that seemed too good.
 \label{sec:limitations}
 
 The oracle ceiling (Section~\ref{sec:oracle}) is retrospective, using
-test-set click labels directly --- a valid upper bound, never a
-deployable method. The generator is a locally hosted, quantized 2--3B
+test-set click labels directly --- a valid upper bound, never
+deployable. The generator is a locally hosted, quantized 2--3B
 parameter model under a two-call budget; a larger generator might
 change RQ1's ceiling or RQ2's null result. Cross-split robustness
-(Section~\ref{sec:robustness}) covers TripClick's three buckets only;
-other benchmarks remain untested, so the AUC collapse could be
-frequency-specific or reflect broader corpus-shift sensitivity.
-Click-derived qrels are an imperfect relevance proxy inherited from
-the benchmark. The diagnostic rule (Section~\ref{sec:diagnostic})
-predicted the held-out fault's recall/false-alarm regime correctly but
-not its dominant feature, and rests on one held-out fault, not a
-systematic sweep. The failure-detection model uses one binary
-definition of ``poor retrieval''; a graded definition could shift its
-measured AUC.
+covers TripClick's three buckets only; other benchmarks remain
+untested. Click-derived qrels are an imperfect relevance proxy
+inherited from the benchmark. The diagnostic rule tracked all three
+held-out faults' regimes correctly even though our own guesses about
+which regime a given fault would land in were often wrong; six fault
+types is still a small, hand-designed set, not a systematic sweep. The
+failure-detection model uses one binary definition of ``poor
+retrieval''; a graded definition could shift its measured AUC.
 
 \section{Conclusion}
 
@@ -907,24 +905,22 @@ We evaluated a closed-loop, observability-guided query-expansion agent
 under a corrected protocol separating model selection from final
 evaluation --- surfacing the paper's first finding: an
 honestly-selected BM25 fix inverted every downstream conclusion.
-Runtime observability reveals retrieval failures reliably (detection
-AUC $0.649$), but autonomous recovery needs a stronger property the
-same telemetry does not deliver: predicting whether a specific
-intervention will help (action-utility AUC $0.552$, below chance
-outside its calibration split). That gap is why the closed-loop agent
-does not outperform static expansion and neither outperforms BM25,
-despite real headroom going uncaptured. The recovery study shows this
-is a per-fault, mechanistically explicable property --- in one case
-the verifier is actively misled, not merely blind --- and, tested
-prospectively on a held-out fault, this mechanism supports genuine
-diagnosis in advance: predicting, before a new large structured
-failure is run, whether the verifier will over-flag it, under-flag it,
-or discriminate it well, though whether that translates into a
-significant recovery gain still requires running it. That capability
-does not extend across query-frequency regimes, where
-the same ranking inverts outside its calibration split. We report both
-implementation defects found by refusing a convenient result, in the
-belief that the discipline to catch them is worth more than a
+Runtime observability is moderately predictive of retrieval failure
+(detection AUC $0.649$), but autonomous recovery needs a stronger
+property the same telemetry does not deliver: predicting whether a
+specific intervention will help (action-utility AUC $0.552$, below
+chance outside its calibration split). That gap is why the closed-loop
+agent does not outperform static expansion and neither outperforms
+BM25, despite real headroom going uncaptured. The recovery study shows
+this is a per-fault, mechanistically explicable property --- in one
+case the verifier is actively misled, not merely blind --- and, tested
+prospectively on three held-out faults, supports genuine diagnosis in
+advance of which regime a new failure will fall into, even when our
+own guesses did not, though whether that converts to a significant
+gain still requires running it. This does not extend across
+query-frequency regimes, where the same ranking inverts. We report
+both implementation defects found by refusing a convenient result, in
+the belief that the discipline to catch them is worth more than a
 flattering number.
 
 \section*{Acknowledgment}
