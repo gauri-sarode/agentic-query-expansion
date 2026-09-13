@@ -1,0 +1,57 @@
+{
+  "seed": 42,
+  "split_path": "configs/nq_split.json",
+  "n_val": 800,
+  "n_test": 600,
+  "stemming": "porter",
+  "db_path": "data/nq_bm25.sqlite3",
+  "title_weight": 50.0,
+  "body_weight": 1.0,
+  "title_weight_selection_note": "nDCG@10 climbs monotonically through the full swept grid (1/5/10/20/30/50) but with sharply diminishing marginal gain per unit weight (~0.002/unit at low weights, down to ~0.00015/unit between 30 and 50) -- consistent with approaching a plateau. Not swept further given diminishing returns and the scoped-down, confirmatory nature of this replication (cf. TripClick's title_weight sweep, which plateaued and declined by 20; NQ's does not decline within the tested range, just flattens).",
+  "val_selection": {
+    "stemming_sweep": {
+      "porter": {
+        "ndcg10": 0.28847711063216025,
+        "mrr": 0.2640053400905413,
+        "recall100": 0.7341666666666667
+      },
+      "none": {
+        "ndcg10": 0.27925609912175003,
+        "mrr": 0.25343169865384163,
+        "recall100": 0.7139583333333333
+      }
+    },
+    "title_weight_sweep": {
+      "1.0": {
+        "ndcg10": 0.28847711063216025,
+        "mrr": 0.2640053400905413,
+        "recall100": 0.7341666666666667
+      },
+      "5.0": {
+        "ndcg10": 0.2965108033860741,
+        "mrr": 0.2630774343417814,
+        "recall100": 0.7608333333333333
+      },
+      "10.0": {
+        "ndcg10": 0.2979218835281501,
+        "mrr": 0.26220832146913886,
+        "recall100": 0.7616666666666667
+      },
+      "20.0": {
+        "ndcg10": 0.30186724120458946,
+        "mrr": 0.26701918490515053,
+        "recall100": 0.75875
+      },
+      "30.0": {
+        "ndcg10": 0.3036,
+        "mrr": 0.2692,
+        "recall100": 0.7579
+      },
+      "50.0": {
+        "ndcg10": 0.3065,
+        "mrr": 0.2702,
+        "recall100": 0.7567
+      }
+    }
+  }
+}

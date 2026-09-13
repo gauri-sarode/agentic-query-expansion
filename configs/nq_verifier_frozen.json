@@ -1,0 +1,68 @@
+{
+  "verifier": {
+    "artifact": "models/nq_verifier_val_v1.joblib",
+    "model_class": "LinearRegression(fit_intercept=False)",
+    "model_class_selection_note": "Model class reused from TripClick's own feature-family/model-class sweep (configs/experimental_protocol.yaml: linear beat GBDT and hand-picked weights on TAIL-val) rather than independently re-swept for NQ, given this replication's confirmatory scope.",
+    "feature_names": [
+      "score_margin_gain",
+      "coverage_gain",
+      "coherence_gain",
+      "stability",
+      "drift",
+      "disagreement",
+      "topk_overlap",
+      "reranker_top_score",
+      "reranker_score_margin",
+      "query_length_ratio"
+    ],
+    "weights": {
+      "score_margin_gain": 0.007728433933944712,
+      "coverage_gain": 0.10479053335318854,
+      "coherence_gain": -0.18916315312056112,
+      "stability": 0.052339196927076115,
+      "drift": -0.032726772843927415,
+      "disagreement": -1.3010426069826053e-18,
+      "topk_overlap": -0.03109502221144469,
+      "reranker_top_score": 0.0,
+      "reranker_score_margin": 0.0,
+      "query_length_ratio": -0.02228528407884364
+    },
+    "n_val": 787,
+    "val_5fold_cv_pearson_r": 0.21802148229824808,
+    "class_balance": {
+      "harmful": 123,
+      "not_harmful": 664
+    }
+  },
+  "failure_detector": {
+    "artifact": "models/nq_failure_detector_val_v1.joblib",
+    "model_class": "LogisticRegression(max_iter=1000)",
+    "feature_names": [
+      "top_score",
+      "score_margin",
+      "score_entropy",
+      "query_term_coverage",
+      "mean_rare_term_idf",
+      "entity_overlap",
+      "result_coherence",
+      "ranking_stability"
+    ],
+    "weights": {
+      "top_score": -0.040911927338428446,
+      "score_margin": -0.16446708404046428,
+      "score_entropy": 1.3031220542167146,
+      "query_term_coverage": 0.907024112174592,
+      "mean_rare_term_idf": -0.02390544234124717,
+      "entity_overlap": -0.00031860677691489627,
+      "result_coherence": 0.7615769534630146,
+      "ranking_stability": 0.19970230019047258
+    },
+    "n_val": 800,
+    "val_5fold_cv_auc": 0.6514667968261121,
+    "class_balance": {
+      "poor": 386,
+      "not_poor": 414
+    }
+  },
+  "freeze_note": "FREEZE POINT: both models fit entirely on NQ val (n=800, seed=42, configs/nq_split.json). Nothing after this may be tuned based on NQ test-set outcomes, mirroring configs/experimental_protocol.yaml's freeze discipline."
+}

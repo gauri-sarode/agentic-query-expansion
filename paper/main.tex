@@ -195,7 +195,7 @@ paper's central experimental contrast (Section~\ref{sec:rq2}).
 
 \begin{figure*}[t]
 \centering
-\resizebox{0.60\textwidth}{!}{
+\resizebox{0.42\textwidth}{!}{
 \begin{tikzpicture}[
     node distance=4.5mm and 6mm,
     box/.style={draw, rounded corners, minimum height=6mm, minimum width=17mm, align=center, font=\footnotesize, fill=blue!4},
@@ -833,27 +833,63 @@ entirely \emph{below} chance, anti-correlated with true utility, not
 merely uninformative. A verifier calibrated on one frequency regime
 does not just fail to add value in another; its ranking inverts.
 
+\section{Does the Finding Replicate on a Second Corpus?}
+\label{sec:nq}
+
+To check whether Section~\ref{sec:detect-vs-act}'s finding is specific
+to TripClick, we replicate the detection-vs-actionability comparison on
+BEIR Natural Questions~\cite{beir,natural-questions}, an open-domain
+corpus unrelated to TripClick's clinical queries. NQ ships as one
+3{,}452-query split with no train/val/test partition, so we carve a
+disjoint, fixed-seed ($42$) val/test split (800/600), freeze a fresh
+BM25 config and fresh failure/action-utility detectors on val only (same
+features and model classes as TripClick's, refit since weights are
+corpus-specific), then touch test once. Table~\ref{tab:nq} reports the
+result: as on TripClick, Static QE does not significantly beat BM25
+despite real oracle-capturable headroom ($p<0.001$), and pre-action
+telemetry is far more informative about failure (AUC $0.638$) than
+post-action telemetry is about a given intervention's utility (AUC
+$0.522$, CI includes chance --- even more clearly than TripClick's own
+$0.552$). Telemetry is substantially more informative about retrieval
+failure than about corrective-action utility across two unrelated
+domains and corpora, despite real per-query intervention headroom.
+
+\begin{table}[t]
+\centering
+\caption{TripClick TAIL (existing) vs.\ BEIR NQ~\cite{beir,natural-questions} (new, frozen, $n{=}600$; val/test 800/600, seed 42, constructed ourselves --- NQ ships with no partition). CIs are bootstrap 95\%. NS: crosses zero. *: $p<0.001$.}
+\label{tab:nq}
+\scriptsize
+\renewcommand{\arraystretch}{0.85}
+\begin{tabular}{l@{\hspace{3pt}}c@{\hspace{3pt}}c@{\hspace{3pt}}c@{\hspace{3pt}}c}
+\toprule
+Corpus & Static QE gain & Oracle gain & Failure AUC & Action-util.\ AUC \\
+\midrule
+TripClick & $+0.0007$ (NS) & $+0.0246$* & $0.649$ [$.618,.680$] & $0.552$ [$.518,.586$] \\
+BEIR NQ & $+0.0058$ (NS) & $+0.0388$* & $0.638$ [$.593,.681$] & $0.522$ [$.442,.602$] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Discussion}
 
-Read together, RQ1--RQ3, the oracle analysis, the diagnostic rule, and
-the cross-split check sketch one finding. Section~\ref{sec:detect-vs-act}
-is load-bearing: the telemetry is moderately predictive of
-whether retrieval is failing (AUC $0.649$) but weakly informative
-about whether a specific action on an ordinary query will fix it (AUC
-$0.552$). RQ2 shows the consequence --- a closed loop built on the
-weaker signal adds nothing over a matched static pipeline --- and the
-oracle and selectivity-frontier analyses rule out ``no opportunity
-exists'': real headroom is available and the verifier reaches at most
-$12\%$ of it. RQ3's perturbation attribution shows this is a per-fault
-property, sharp enough in one case that the verifier actively reads
-the fault as an improvement. The diagnostic rule
-(Section~\ref{sec:diagnostic}) is the paper's sharpest positive
-result: for \emph{large, structured} faults, the same weights predict
-which regime a new fault falls into. Section~\ref{sec:robustness}
-bounds this differently: holding the fault fixed and changing query
-frequency instead, the same ranking goes from weakly informative on
-TAIL to below-chance on HEAD/TORSO --- new failure types within the
-calibration split generalize, the same behavior outside it does not.
+RQ1--RQ3, the oracle analysis, the diagnostic rule, and the cross-split
+check sketch one finding. Section~\ref{sec:detect-vs-act} is
+load-bearing: telemetry is moderately predictive of whether retrieval
+is failing (AUC $0.649$) but weakly informative about whether a
+specific action on an ordinary query will fix it (AUC $0.552$). RQ2
+shows the consequence: a closed loop built on the weaker signal adds
+nothing over a matched static pipeline, and the oracle/selectivity-frontier
+analyses show real headroom exists that the verifier reaches at
+most $12\%$ of. RQ3's attribution shows this is a per-fault property,
+sharp enough in one case that the verifier reads the fault as an
+improvement. The diagnostic rule (Section~\ref{sec:diagnostic}) is the
+paper's sharpest positive result: for \emph{large, structured} faults,
+the same weights predict which regime a new fault falls into.
+Section~\ref{sec:robustness} bounds this differently: holding the
+fault fixed and varying query frequency instead, the same ranking goes
+from weakly informative on TAIL to below-chance on HEAD/TORSO --- new
+failure types within the calibration split generalize, the same
+behavior outside it does not.
 
 The BM25 baseline and reranker-wiring defects were both found only by
 refusing a convenient result: an error that looks coherent rather than
@@ -869,14 +905,15 @@ test-set click labels directly --- a valid upper bound, never
 deployable. The generator is a locally hosted, quantized 2--3B
 parameter model under a two-call budget; a larger generator might
 change RQ1's ceiling or RQ2's null result. Cross-split robustness
-covers TripClick's three buckets only; other benchmarks remain
-untested. Click-derived qrels are an imperfect relevance proxy
-inherited from the benchmark. The diagnostic rule tracked all three
-held-out faults' regimes correctly even though our own guesses about
-which regime a given fault would land in were often wrong; six fault
-types is still a small, hand-designed set, not a systematic sweep. The
-failure-detection model uses one binary definition of ``poor
-retrieval''; a graded definition could shift its measured AUC.
+covers TripClick's three buckets, and the core detection-vs-actionability
+finding replicates on one further corpus (Section~\ref{sec:nq}); broader
+coverage remains untested. Click-derived qrels are an imperfect
+relevance proxy inherited from TripClick. The diagnostic rule tracked
+all three held-out faults' regimes correctly even though our own
+guesses about which regime a fault would land in were often wrong; six
+fault types is still a small, hand-designed set. The failure-detection
+model uses one binary definition of ``poor retrieval''; a graded
+definition could shift its measured AUC.
 
 \section{Conclusion}
 
@@ -894,23 +931,25 @@ BM25, despite real headroom going uncaptured. The recovery study shows
 this is a per-fault, mechanistically explicable property --- in one
 case the verifier is actively misled, not merely blind --- and, tested
 on three held-out faults, supports label-free diagnosis of a new
-failure's detection regime from its telemetry signature, even when
-our own guesses about that regime did not, though whether that
-converts to a significant gain still requires a full evaluation. This
-does not extend across
-query-frequency regimes, where the same ranking inverts. We report
-both implementation defects found by refusing a convenient result, in
-the belief that the discipline to catch them is worth more than a
-flattering number.
+failure's detection regime from its telemetry signature, even when our
+own guesses did not; converting that into a significant gain still
+needs a full evaluation. The same ranking inverts across
+query-frequency regimes, yet the core detection-vs-actionability gap
+itself replicates on a second, unrelated corpus (BEIR NQ,
+Section~\ref{sec:nq}). We report both implementation defects found by
+refusing a convenient result, in the belief that the discipline to
+catch them is worth more than a flattering number.
 
 \section*{Acknowledgment}
 The authors thank the TripClick maintainers for access to the dataset
 under its non-commercial research license.
 
 \begingroup
-\footnotesize
+\let\oldfootnotesize\footnotesize
+\renewcommand{\footnotesize}{\scriptsize}
 \bibliographystyle{IEEEtran}
 \bibliography{references}
+\let\footnotesize\oldfootnotesize
 \endgroup
 
 \end{document}
