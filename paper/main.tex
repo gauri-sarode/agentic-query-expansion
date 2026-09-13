@@ -34,9 +34,8 @@
 \title{Observe, Expand, Recover: Observability-Guided Control for Query Expansion}
 
 \author{
-\IEEEauthorblockN{Author One\IEEEauthorrefmark{1}, Author Two\IEEEauthorrefmark{2}}
-\IEEEauthorblockA{\IEEEauthorrefmark{1}Affiliation One, email@example.com}
-\IEEEauthorblockA{\IEEEauthorrefmark{2}Affiliation Two (AI Observability), email2@example.com}
+\IEEEauthorblockN{Anonymous Author(s)}
+\IEEEauthorblockA{Affiliation(s) withheld for double-blind review}
 }
 
 \maketitle
@@ -352,7 +351,9 @@ reranking (\texttt{cross-encoder/ms-marco-MiniLM-L6-v2}
 reranking the top 50. Generation uses a locally hosted, 4-bit quantized
 2--3B-parameter model, capped at two calls per query episode with a
 32--64 token structured output, so the language model is never the
-entire decision surface, only one typed tool within it.
+entire decision surface, only one typed tool within it. Code, configs,
+and analysis scripts are available at an anonymized repository for
+review: \url{https://anonymous.4open.science/r/agentic-query-expansion-63A4/}.
 
 \subsection{Verifier Calibration Methodology}
 \label{sec:calib-method}
