@@ -185,7 +185,7 @@ paper's central experimental contrast (Section~\ref{sec:rq2}).
 
 \begin{figure*}[t]
 \centering
-\resizebox{0.54\textwidth}{!}{
+\resizebox{0.42\textwidth}{!}{
 \begin{tikzpicture}[
     node distance=4.5mm and 6mm,
     box/.style={draw, rounded corners, minimum height=6mm, minimum width=17mm, align=center, font=\footnotesize, fill=blue!4},
@@ -460,7 +460,12 @@ moderately predictive of \emph{whether} retrieval is failing
 predicting whether a \emph{specific candidate action fixes it}
 ($\text{AUC}=0.552$, 95\% CI $[0.518,0.586]$) --- both frozen
 single-touch test numbers from the same features and protocol, not the
-same result at different noise levels. \textbf{RQ1's answer}: qrel-free
+same result at different noise levels. Non-overlapping CIs alone don't
+formally test the difference; a paired bootstrap on the $n{=}1157$
+acted-upon queries (failure AUC on this subset: $0.643$) gives
+$+0.0905$, 95\% CI $[+0.0446,+0.1361]$, excluding zero
+(\texttt{scripts/28}) --- the gap itself is statistically established,
+not just the two point estimates. \textbf{RQ1's answer}: qrel-free
 telemetry is moderately predictive of whether something is wrong, but
 even after observing the retrieval consequences of its own action, it
 is only weakly informative about whether that action actually helped
@@ -848,9 +853,12 @@ despite real oracle-capturable headroom ($p<0.001$), and the same
 ordering replicates, now decisively --- pre-action telemetry is more
 predictive of retrieval failure (AUC $0.670$) than post-action
 telemetry is of intervention utility (AUC $0.550$, 95\% CI
-$[0.515,0.585]$, clearly above chance). A paired bootstrap of the AUC
-difference on the $n{=}2{,}599$ acted-upon queries excludes zero
-($+0.115$, 95\% CI $[+0.075,+0.154]$, \texttt{scripts/26}). This is an
+$[0.515,0.585]$, clearly above chance). Failure-detection AUC uses all
+$2{,}652$ queries; action-utility AUC and its paired comparison use only
+the $2{,}599$ on which an expansion action was actually executed (the
+rest were NO\_EXPAND). That paired bootstrap of the AUC difference
+excludes zero ($+0.115$, 95\% CI $[+0.075,+0.154]$,
+\texttt{scripts/26}). This is an
 independent second-corpus replication of
 Section~\ref{sec:detect-vs-act}'s ordering, not evidence the finding
 generalizes broadly across domains --- one further corpus, $2{,}652$
@@ -886,7 +894,8 @@ most $12\%$ of. RQ3's attribution shows this is a per-fault property,
 sharp enough in one case that the verifier reads the fault as an
 improvement. The diagnostic rule (Section~\ref{sec:diagnostic}) is the
 paper's sharpest positive result: for \emph{large, structured} faults,
-the same weights predict which regime a new fault falls into.
+the same weights characterize which regime a new fault falls into after
+a telemetry-only probe.
 Section~\ref{sec:robustness} bounds this differently: holding the
 fault fixed and varying query frequency instead, the same ranking goes
 from weakly informative on TAIL to below-chance on HEAD/TORSO --- new
