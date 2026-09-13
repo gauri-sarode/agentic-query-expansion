@@ -1,0 +1,14 @@
+{
+  "decision_date": "2026-09-13",
+  "reason": "Review feedback asked for a statistically stronger NQ replication -- the original n=600 frozen test left action-utility AUC's CI straddling chance ([0.442,0.602]), too imprecise to say whether the ordering-vs-chance distinction is real or just underpowered.",
+  "decision": "Use ALL remaining, never-touched NQ queries (query IDs = full 3452-query pool minus configs/nq_split.json's val[800] and test[600], i.e. 2052 queries) as a second, disjoint frozen-test touch. Pre-committed BEFORE running any of them: no early stopping, no partial peek-then-decide. The pooled result (original 600 + this extension) will be reported in full regardless of outcome.",
+  "frozen_inputs_unchanged": [
+    "configs/nq_protocol_frozen.json (porter stemming, title_weight=50, data/nq_bm25.sqlite3)",
+    "models/nq_verifier_val_v1.joblib",
+    "models/nq_failure_detector_val_v1.joblib",
+    "accept threshold: predicted delta_ndcg >= 0.0"
+  ],
+  "extension_size": 2052,
+  "pooled_size_if_complete": 2652,
+  "script": "scripts/25_nq_test_extension.py"
+}
