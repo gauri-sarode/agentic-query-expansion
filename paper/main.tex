@@ -24,6 +24,7 @@
 \setlength{\belowcaptionskip}{0pt}
 \setlength{\abovedisplayskip}{2pt plus 1pt minus 1pt}
 \setlength{\belowdisplayskip}{2pt plus 1pt minus 1pt}
+\renewcommand{\arraystretch}{0.88}
 
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
@@ -44,29 +45,25 @@
 \begin{abstract}
 LLM query expansion is typically applied unconditionally, despite
 evidence it is net-harmful on a non-trivial fraction of queries. We
-formulate expansion as a bounded, observable agentic decision: observe
-retrieval telemetry, act, and verify the action's consequences before
-committing to it. Our central finding: qrel-free telemetry recorded
-\emph{before} any action is reasonably predictive of whether retrieval
-has already failed (AUC $0.649$), but the same vocabulary, recorded
-\emph{after} observing a specific action's consequences, is markedly
-weaker at telling whether that action helped (AUC $0.552$). Detection
-is not actionability. Neither a static expansion pipeline nor a
-closed-loop recovery agent improves on a properly-tuned retriever on
-ordinary queries, despite a retrospective oracle showing
-mostly-uncaptured control headroom ($+0.0246$ nDCG@10). The same
+formulate expansion as a bounded, observable agentic decision that
+observes retrieval telemetry, acts, and verifies the action's
+consequences before committing to it. Our central finding: qrel-free
+telemetry recorded \emph{before} an action is reasonably predictive of
+retrieval failure (AUC $0.649$), but recorded \emph{after} the action,
+it is markedly weaker at telling whether that action helped (AUC
+$0.552$). Detection is not actionability. Neither a static expansion
+pipeline nor a closed-loop recovery agent beats a properly-tuned
+retriever on ordinary queries, despite a retrospective oracle showing
+uncaptured headroom ($+0.0246$ nDCG@10). The same
 telemetry earns its keep in a narrower, structural setting: a
-statistic computed from how a fault shifts the verifier's features,
-available after a label-free telemetry probe, correctly characterizes
-the detection regime across six fault types (three held out) with no
-exceptions, though converting that into an actual recovery gain
-remains fault-specific. This does not travel across query populations
-either: the same verifier's ranking, left untouched, becomes
-anti-correlated with true action utility outside its calibration
-split. Runtime telemetry is a useful alarm that something is wrong,
-but knowing whether a specific fix will help is a different capability
---- one delivered here only for large, characterized failure classes,
-not ordinary queries.
+statistic computed from how a fault shifts the verifier's features
+orders six fault types by observed detection recall, though converting
+that into an actual recovery gain remains fault-specific. Nor does this
+travel across query populations: the same, untouched verifier ranking
+becomes anti-correlated with true action utility outside its
+calibration split. Runtime telemetry is a useful alarm that something
+is wrong, but knowing whether a specific fix will help is a different,
+narrower capability.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -170,9 +167,8 @@ retrieval failing, versus will \emph{this} action fix it --- and show
 qrel-free telemetry answers the first far better (Section~\ref{sec:rq1}).
 
 \textbf{Benchmarks.} TripClick \cite{tripclick} has genuine
-head/torso/tail query-frequency structure, unlike benchmarks that treat
-``hard'' as a synonym for low-BM25-score, which is why it is our sole
-evaluation corpus.
+head/torso/tail frequency structure, unlike benchmarks that treat
+``hard'' as low-BM25-score --- our reason for it as primary corpus.
 
 \section{System Design}
 
@@ -195,7 +191,7 @@ paper's central experimental contrast (Section~\ref{sec:rq2}).
 
 \begin{figure*}[t]
 \centering
-\resizebox{0.42\textwidth}{!}{
+\resizebox{0.41\textwidth}{!}{
 \begin{tikzpicture}[
     node distance=4.5mm and 6mm,
     box/.style={draw, rounded corners, minimum height=6mm, minimum width=17mm, align=center, font=\footnotesize, fill=blue!4},
@@ -482,8 +478,8 @@ trace back to.
 \begin{tikzpicture}
 \begin{groupplot}[
     group style={group size=2 by 1, horizontal sep=1.2cm},
-    width=0.29\textwidth,
-    height=0.13\textwidth,
+    width=0.27\textwidth,
+    height=0.12\textwidth,
     grid=major,
     grid style={gray!20},
     tick label style={font=\footnotesize},
@@ -788,15 +784,16 @@ term, and truncating the retrieval pool. Written predictions went
 append-irrelevant-term (guessed it would pattern-match; it came out
 weakly positive, low recall) and wrong for truncated pool (guessed
 grounding-like; it came out strongly positive, recall $0.000$, same
-dominant feature as reranker disabled). \textbf{Yet the underlying
-statistic did not miss}: sorting all six fault types by net
-contribution reproduces the same monotone recall ordering with no
-exceptions (Table~\ref{tab:diagnostic}). Intuition about a new fault
-was not reliable; the qrel-free statistic, needing no guessing,
-tracked recoverability regime across content, evidence,
-system-component, and query-level corruption alike. Whether that
-regime converts into a significant gain remains harder: only grounding
-produced one.
+dominant feature as reranker disabled). Human intuition about a new
+fault went \textbf{1-for-3}. \textbf{Yet the underlying statistic did
+not miss}: sorting all six fault types by net contribution reproduces
+the same monotone recall ordering with no exceptions
+(Table~\ref{tab:diagnostic}). The qrel-free statistic, needing no
+guessing, tracked recoverability regime across content, evidence,
+system-component, and query-level corruption alike where our own
+guesses often did not --- a post-probe capability, not a zero-shot one
+(Section~\ref{sec:limitations}). Whether that regime converts into a
+significant gain remains harder: only grounding produced one.
 
 \section{Does the Verifier Generalize Beyond TAIL?}
 \label{sec:robustness}
@@ -842,21 +839,25 @@ BEIR Natural Questions~\cite{beir,natural-questions}, an open-domain
 corpus unrelated to TripClick's clinical queries. NQ ships as one
 3{,}452-query split with no train/val/test partition, so we carve a
 disjoint, fixed-seed ($42$) val/test split (800/600), freeze a fresh
-BM25 config and fresh failure/action-utility detectors on val only (same
-features and model classes as TripClick's, refit since weights are
-corpus-specific), then touch test once. Table~\ref{tab:nq} reports the
+BM25 config and detectors on val only (same features/model classes as
+TripClick's, refit since corpus-specific), then touch test once.
+Table~\ref{tab:nq} reports the
 result: as on TripClick, Static QE does not significantly beat BM25
-despite real oracle-capturable headroom ($p<0.001$), and pre-action
-telemetry is far more informative about failure (AUC $0.638$) than
-post-action telemetry is about a given intervention's utility (AUC
-$0.522$, CI includes chance --- even more clearly than TripClick's own
-$0.552$). Telemetry is substantially more informative about retrieval
-failure than about corrective-action utility across two unrelated
-domains and corpora, despite real per-query intervention headroom.
+despite real oracle-capturable headroom ($p<0.001$), and the same
+ordering replicates --- pre-action telemetry is more predictive of
+retrieval failure (AUC $0.638$) than post-action telemetry is of
+intervention utility (AUC $0.522$, CI includes chance, unlike
+TripClick's own $0.552$). The gap itself is real, not just suggestive:
+a paired bootstrap of the AUC difference on the $n{=}586$ acted-upon
+queries excludes zero ($+0.114$, 95\% CI $[+0.026,+0.202]$,
+\texttt{scripts/24}). This is an independent second-corpus replication
+of Section~\ref{sec:detect-vs-act}'s ordering, not evidence the finding
+generalizes broadly across domains --- one further corpus, $600$
+held-out queries.
 
 \begin{table}[t]
 \centering
-\caption{TripClick TAIL (existing) vs.\ BEIR NQ~\cite{beir,natural-questions} (new, frozen, $n{=}600$; val/test 800/600, seed 42, constructed ourselves --- NQ ships with no partition). CIs are bootstrap 95\%. NS: crosses zero. *: $p<0.001$.}
+\caption{TripClick TAIL vs.\ BEIR NQ~\cite{beir,natural-questions} (frozen, $n{=}600$; val/test 800/600, seed 42, ours --- NQ has no partition). Bootstrap 95\% CIs. NS: crosses zero. *: $p<0.001$.}
 \label{tab:nq}
 \scriptsize
 \renewcommand{\arraystretch}{0.85}
@@ -908,12 +909,16 @@ change RQ1's ceiling or RQ2's null result. Cross-split robustness
 covers TripClick's three buckets, and the core detection-vs-actionability
 finding replicates on one further corpus (Section~\ref{sec:nq}); broader
 coverage remains untested. Click-derived qrels are an imperfect
-relevance proxy inherited from TripClick. The diagnostic rule tracked
-all three held-out faults' regimes correctly even though our own
-guesses about which regime a fault would land in were often wrong; six
-fault types is still a small, hand-designed set. The failure-detection
-model uses one binary definition of ``poor retrieval''; a graded
-definition could shift its measured AUC.
+relevance proxy inherited from TripClick. The diagnostic rule
+(Section~\ref{sec:diagnostic}) orders all six fault types' detection
+recall correctly, including three held out, even though our own
+guesses about each fault's regime were often wrong; six fault types is
+still a small, hand-designed set. It is also post-probe, not zero-shot:
+it needs a fault's own telemetry shift to compute, so it characterizes
+a fault only after that fault has run at least once. The
+failure-detection model uses one binary
+definition of ``poor retrieval''; a graded definition could shift its
+measured AUC.
 
 \section{Conclusion}
 
