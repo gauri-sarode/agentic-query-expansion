@@ -1,36 +1,51 @@
 # Observe, Expand, Recover
 
-An observability-guided agent for safe query expansion. Target venue: **IEEE ICA 2026**.
+Observability-guided control for LLM query expansion.
 
 LLM query expansion is usually applied unconditionally or not at all. This
-project treats it instead as a **bounded agentic decision**: an agent
-observes retrieval health, selectively invokes a corpus-grounded LLM
-expansion operator, observes the consequences of that action through
+project treats it instead as a **bounded, observable agentic decision**: an
+agent observes retrieval telemetry, selectively invokes a corpus-grounded
+LLM expansion operator, observes the consequences of that action through
 runtime telemetry, and decides to accept, roll back, replan, or abstain —
-under an explicit quality/harm/cost budget.
+under an explicit budget, with no relevance judgments (qrels) available at
+inference time.
 
 Three ideas stay fused rather than separate: LLM query expansion is the
 **task mechanism**, an agentic control loop is the **decision process**,
-and AI observability is the **feedback/control layer** — the telemetry is
+and AI observability is the **feedback/control layer** — telemetry is
 causal input to the agent's policy and verifier, not just logging.
+
+## Central finding
+
+Qrel-free telemetry recorded *before* any action is reasonably predictive
+of whether retrieval has already failed (AUC 0.649), but the same
+vocabulary, recorded *after* observing a specific action's consequences,
+is markedly weaker at telling whether that action helped (AUC 0.552).
+**Detection is not actionability.** Neither a static expansion pipeline
+nor a closed-loop recovery agent improves on a properly-tuned retriever on
+ordinary queries, despite a retrospective oracle showing substantial,
+mostly-uncaptured control headroom. The same ordering — pre-action
+telemetry beats post-action telemetry at predicting intervention utility —
+replicates on an independent second corpus (BEIR Natural Questions),
+ruling out a TripClick-specific artifact.
 
 ## Research questions
 
-- **RQ-Detection** — Can qrel-free retrieval telemetry and agent-runtime
-  telemetry identify unhealthy retrieval states and predict whether
-  expansion will help or harm?
-- **RQ-Control** — Does an agent that conditions expansion actions on
-  those observations outperform an otherwise identical *static*
-  retrieval-aware QE pipeline, on quality, harmful-intervention rate, or
-  inference cost?
-- **RQ-Recovery** — After a harmful rewrite or an injected system/retrieval
+- **RQ1 (Detection vs. Actionability)** — Can qrel-free retrieval and
+  agent-runtime telemetry (a) identify that unexpanded retrieval is
+  already unhealthy, and (b) predict whether a *specific* expansion action
+  is likely to help or harm — and, if both are possible, is the second any
+  easier than the first once the first is solved?
+- **RQ2 (Control)** — Does an agent that conditions expansion actions on
+  that telemetry outperform an otherwise identical *static*,
+  failure-conditioned pipeline — same retriever, grounding, generator, and
+  fusion, differing only in whether a closed loop can observe an action's
+  consequences and recover from a bad one?
+- **RQ3 (Recovery)** — After a harmful rewrite or a simulated system-level
   fault, can observability-driven verification detect the degradation and
-  choose `ROLLBACK` / `REPLAN` / `STOP` accurately enough to restore
-  retrieval quality under a bounded action budget?
-
-The target result is not top raw NDCG — it's moving the
-**quality–safety–cost Pareto frontier** relative to a static QE pipeline
-built from the same retriever, grounding, generator, and fusion mechanism.
+  select a recovery action to restore retrieval quality, under a bounded
+  budget — even for a verifier whose general-purpose detection power (RQ1)
+  is only weakly informative?
 
 ## System design
 
@@ -42,7 +57,7 @@ s_t = (q0, q_t, R_t, O_t, H_t, B_t)
 
 `q0` immutable original query, `q_t` active search expression, `R_t`
 current ranking, `O_t` observability state, `H_t` action/observation
-history, `B_t` remaining compute/action budget.
+history, `B_t` remaining action budget.
 
 Control loop:
 
@@ -52,15 +67,16 @@ OBSERVE -> DIAGNOSE -> ACT -> RETRIEVE -> OBSERVE -> VERIFY
 ```
 
 The critical experimental contrast: a **static** comparator gets the same
-query, ranking, evidence, LLM, and verifier, but executes exactly one
-predetermined route. The agent's second decision depends on evidence its
-own first action created. That dependency is the thing being tested.
+query, initial ranking, evidence, generator, and verifier, but executes
+exactly one predetermined route. The agent's second decision depends on
+evidence its own first action created. Isolating that dependency — not
+simply comparing against unmodified BM25 — is the paper's central
+experimental contrast.
 
 Actions: `NO_EXPAND, VOCABULARY, CONTEXT, AMBIGUITY, ENTITY_NORMALIZE,
-ROLLBACK, REPLAN, STOP`. The LLM is one typed tool inside the agent
-(`generate_expansion`), not the planner, retriever, judge, and memory
-manager simultaneously — action selection and recovery are handled by a
-small learned/rule-based controller, not free-form LLM reasoning.
+ROLLBACK, REPLAN, STOP`. The LLM is invoked through exactly one typed tool
+(`generate_expansion`); it is never the sole arbiter of its own output's
+use — that judgment is a separate, non-generative controller.
 
 Observability model: one end-to-end trace per query episode
 (`retrieve_original -> build_evidence -> plan_action -> generate_expansion
@@ -69,45 +85,38 @@ with three telemetry families — retrieval (score margins, entropy, term
 coverage, entity overlap, top-k overlap, reranker disagreement, ranking
 stability under perturbation), agent (selected operator, trajectory
 length, drift from original, budget remaining), and system (latency,
-token counts, tool errors/timeouts). See `docs/observability_model.md`.
+token counts, tool errors/timeouts). Every feature is computable without
+relevance judgments. See `docs/observability_model.md`.
 
-Failure taxonomy (what each observed signature should trigger — see
-`docs/failure_taxonomy.md`): vocabulary mismatch, underspecification,
-ambiguity, entity mismatch, intent drift, confirmation bias, retriever
-disagreement, tool degradation, budget exhaustion, healthy retrieval.
+Failure taxonomy (see `docs/failure_taxonomy.md`): vocabulary mismatch,
+underspecification, ambiguity, entity mismatch, intent drift, confirmation
+bias, retriever disagreement, tool degradation, budget exhaustion, healthy
+retrieval.
 
 ## Datasets
 
 | Dataset | Role | Status |
 |---|---|---|
-| **TripClick** | Primary long-tail benchmark (HEAD/TORSO/TAIL) — ~1.52M docs, ~686K train queries, 3,525-query test set | **Access granted** — non-commercial research use, dataset itself may not be redistributed |
-| MS MARCO Chameleons | Hard-query stress test (queries that resist conventional reformulation) | Public |
-| TREC DL 2019/2020 | Deep NIST graded judgments — intent-drift/recovery safety check | Public |
-| NFCorpus (BEIR) | Fast dev loop — ~3.6K docs / 323 queries | Public, start immediately |
-
-Only TripClick supports the frequency-tail claim; Chameleons supports the
-retrieval-difficulty claim; TREC DL supports the deeply-judged
-safety/recovery claim; NFCorpus is the engineering/early-feasibility
-benchmark. Development does not wait on any single dataset — NFCorpus
-builds the whole agent+telemetry stack first.
+| **TripClick** | Primary benchmark — 1,523,878 docs, head/torso/tail frequency buckets, 1,175 queries/split/bucket | Access granted — non-commercial research use, dataset itself may not be redistributed |
+| **BEIR Natural Questions** | Independent second-corpus replication of the RQ1 core finding | Public — no native train/val/test split; we construct a fixed-seed (42) disjoint split ourselves |
+| NFCorpus (BEIR) | Fast dev loop / engineering iteration | Public |
 
 TripClick terms prohibit redistributing the corpus. This repo publishes
-**code and aggregated results only**; raw TripClick data stays out of
-version control (see `data/README.md`).
+**code, configs, and aggregated results only**; raw TripClick data stays
+out of version control (see `data/README.md`).
 
-## Experiment matrix
+## Frozen experimental protocol
 
-| System | Query expansion | Closed-loop action | Runtime observability controls policy | Recovery | Purpose |
-|---|---|---|---|---|---|
-| BM25 | — | — | — | — | Retrieval floor |
-| RM3/PRF | yes | — | — | — | Classical feedback baseline |
-| Query2doc-style | yes | — | — | — | Strong LLM-QE baseline |
-| MuGI-style | yes | — | — | — | Multi-generation/fusion baseline |
-| Grounded static QE | yes | — | retrieval evidence only | — | Isolate grounding |
-| Failure-conditioned static QE | yes | — | initial retrieval state | verifier only | Strong non-agentic comparator |
-| Retrieval agent | yes | yes | retrieval state only | yes | Isolate agency |
-| **Observable retrieval agent** | yes | yes | retrieval + agent + system telemetry | yes | **Proposed method** |
-| Strategy oracle | yes | offline only | qrels | — | Upper bound, never deployed |
+Every reported test-set number follows a committed protocol
+(`configs/experimental_protocol.yaml`, and its NQ analogue
+`configs/nq_protocol_frozen.json` / `configs/nq_verifier_frozen.json`):
+validation data may be used for any retrieval-config, verifier, or
+threshold decision; test data may be touched only after every upstream
+decision is frozen, with no decision afterward conditioned on a test-set
+outcome. The NQ replication's statistical-power extension
+(`configs/nq_test_extension_precommit.json`) follows the same discipline:
+pre-committed to a fixed additional query pool *before* touching any of
+it, no early stopping, no retuning.
 
 ## Repo layout
 
@@ -119,12 +128,13 @@ src/
   agent/                    -- state, actions, controller/policy, control loop, verify, fuse
   observability/            -- trace schema, telemetry feature extraction, trace store
   faults/                   -- seeded fault injection for the recovery study
-  eval/                     -- metrics, Agent Search SLO, Pareto/bootstrap analysis
-configs/                     -- pinned model/budget/threshold configs per experiment
-scripts/                     -- dataset setup, index builds, experiment runners
+  eval/                     -- metrics, SLO thresholds, bootstrap/CI analysis
+configs/                     -- pinned model/budget/threshold configs, frozen protocols
+scripts/                     -- dataset setup, index builds, experiment runners (numbered, chronological)
 docs/                        -- observability model, failure taxonomy, milestones, sources
 data/                        -- gitignored; local indexes/caches/downloaded corpora
 tests/
+paper/                       -- LaTeX source and compiled PDF
 ```
 
 ## Setup
@@ -135,150 +145,113 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-## Status
+## Results
 
-The full closed-loop agent runs end to end (rule-based v0
-controller/verifier -- see `src/agent/controller.py` for why v0 is
-rule-based rather than learned). TripClick's IR Benchmark package is
-downloaded, parsed, and indexed (1,523,878 docs; 1,175 queries each for
-HEAD/TORSO/TAIL test).
+### A corrected retrieval baseline
 
-BM25-only retrieval floor (no expansion, no agent):
+BM25 over an unstemmed FTS5 index scored nDCG@10 0.228 on TAIL test — 15%
+below the 0.267 published reference for this exact split and label type.
+Selecting entirely on validation, porter stemming and a 10:1 title:body
+field weight close the gap (val nDCG@10 0.235 → 0.327); a single,
+one-time sanity check against withheld test gives nDCG@10 0.315, above
+the published reference. Every downstream conclusion in this paper
+changed once this fix was in place — it is a precondition for the rest of
+the study, not an implementation footnote.
 
-| Split | MRR | Recall@100 | NDCG@10 |
+### RQ1: Detection is not actionability
+
+Frozen TAIL test (n=1157), both models touched once:
+
+| Metric | Test value |
+|---|---|
+| Failure-detection AUC (is retrieval already unhealthy?) | **0.649** [0.618, 0.680] |
+| Action-utility AUC (will this specific action help?) | 0.552 [0.518, 0.586] |
+| Action-utility Pearson r vs. true ΔnDCG@10 | 0.114 (p < 0.001) |
+
+Pre-action telemetry is moderately predictive of *whether* retrieval is
+failing; the same vocabulary, recorded *after* observing a specific
+action's consequences, is markedly weaker at predicting *whether that
+action helped*.
+
+### RQ2: Control
+
+Full TripClick TAIL test (n=1175), corrected baseline:
+
+| System | nDCG@10 | Recall@100 | MRR |
 |---|---|---|---|
-| NFCorpus | 0.514 | 0.232 | 0.303 |
-| TripClick HEAD | 0.324 | 0.411 | 0.179 |
-| TripClick TORSO | 0.261 | 0.582 | 0.182 |
-| TripClick TAIL | 0.225 | 0.646 | 0.228 |
+| BM25 only | 0.3152 | 0.7750 | 0.3014 |
+| BM25 + rerank, no QE | 0.2850 | 0.7750 | 0.2701 |
+| BM25 + QE, no rerank | 0.2992 | 0.7716 | 0.2856 |
+| Static QE (QE + rerank) | 0.3159 | 0.7759 | 0.2993 |
+| Agent | 0.3161 | 0.7770 | 0.3015 |
 
-## Core result: closed-loop agent vs. static QE, full TripClick TAIL test set
+Neither Static QE nor Agent significantly outperforms BM25 alone, and
+Agent does not significantly outperform Static QE. The QE × reranking
+interaction is real and significant (paired bootstrap, `scripts/13`):
++0.0468 [+0.0303, +0.0630], excluding zero — reranking alone and
+expansion alone are each independently harmful, but combined they roughly
+cancel out, a genuine interaction rather than one component offsetting a
+fixed cost from the other.
 
-The critical comparison from the experiment matrix -- **observable agent
-vs. the strong static failure-conditioned QE comparator**
-(`scripts/06_agent_vs_static.py`), same operator-selection policy,
-generator, verifier, and fusion mechanism for both (`src/agent/steps.py`)
--- run on the **complete TripClick TAIL test set (n=1175)**, with
-`verify()`'s weights fitted against real ground-truth NDCG@10 on this
-exact corpus (`scripts/08_calibrate_verifier.py`, n=1168, Pearson
-r=0.134) and `RecoveryThresholds` recalibrated to match against real
-outcomes, not blind score percentiles:
+A retrospective oracle shows the null result is not "no opportunity
+exists": oracle-static beats BM25 by +0.0246 nDCG@10 (p < 0.001), while
+the qrel-free verifier captures only 0.5–11.8% of that headroom across
+selective-intervention quotas (`scripts/14`).
 
-| System | NDCG@10 | Recall@100 | MRR |
-|---|---|---|---|
-| BM25 only | 0.2279 | 0.6462 | 0.2254 |
-| Static QE | 0.2279 | 0.6481 | 0.2262 |
-| Agent | 0.2272 | 0.6476 | 0.2254 |
+### RQ3: Which failures are recoverable
 
-Agent vs. static: helped 0.5%, unchanged 98.6%, harmed 0.9%. Paired
-bootstrap mean_diff=**-0.0007**, 95% CI [-0.0024, 0.0007] -- **not
-significant, point estimate slightly negative**. Cost: agent uses 27%
-more LLM calls (1.27 vs 0.99/query) and 45% higher latency (16.2s vs
-11.1s/query mean) than static, for no measurable quality gain.
+Six fault types tested (three used to derive a diagnostic rule, three
+held out and never used to derive it): sorting all six by a closed-form
+net-contribution statistic (`Σ_j w_j·Δx_j`, computed from paired
+clean-vs-faulty telemetry, no relevance labels needed) reproduces the
+observed detection-recall ordering with no exceptions. Human intuition
+about the three held-out faults, tested prospectively, went 1-for-3 — the
+statistic is a post-probe characterization tool, not a zero-shot
+predictor: it needs a fault's own telemetry shift to compute.
 
-**This is a definitive, methodologically rigorous negative result, not a
-placeholder to re-run.** The verifier was fit against real ground truth
-on the target corpus and validated at full test-set scale; the thresholds
-were chosen from outcome-validated cutoffs; every measurement confound
-found along the way (prompt-adjacency KV-cache reuse, run-order drift,
-FTS5 performance) was diagnosed and fixed before trusting a number. The
-closed loop does not beat static QE here, and the reason traces cleanly
-to the verifier's own weak predictive power (r=0.134, ~1.8% of variance
-explained) -- REPLAN's retry attempts are close to a coin flip on
-whether they help or hurt, netting to ~0 aggregate gain at real added
-cost. SLO frozen in `configs/default.yaml` from this run:
-`max_harm_rate=0.0477`, `max_expected_llm_calls=1.2681`,
-`max_p95_latency_ms=28370`.
+### Distribution shift: does the verifier generalize beyond TAIL?
 
-Earlier, smaller-scale results (NFCorpus n=100, an intermediate
-verifier) are preserved in git history but superseded by the above.
+The action-utility verifier, calibrated on TAIL validation only, is
+tested unmodified on HEAD and TORSO test splits: AUC falls from 0.552 on
+TAIL to 0.234 on TORSO and 0.143 on HEAD — both CIs entirely below
+chance, i.e. anti-correlated with true utility, not merely uninformative.
+A verifier calibrated on one query-frequency regime does not just fail to
+add value in another; its ranking inverts.
 
-### Why the verifier is stuck at r=0.13: three converged attempts to raise it
+### Independent second-corpus replication: BEIR Natural Questions
 
-After the result above, two follow-up investigations tried to raise the
-verifier's r=0.134 ceiling rather than accept it as final:
+To check whether the RQ1 finding is specific to TripClick, the core
+detection-vs-actionability comparison is replicated on BEIR Natural
+Questions — an open-domain corpus unrelated to TripClick's clinical
+queries, with its own fresh, fixed-seed val/test split, fresh BM25
+config, and fresh failure/action-utility detectors (never reusing
+TripClick's fitted weights). Frozen test, pooled to n=2,652 after a
+pre-committed statistical-power extension:
 
-- **Learned model, not hand-tuning**: `verify()` now loads a trained
-  artifact (`models/verifier_v1.joblib`, `scripts/10_train_verifier_model.py`)
-  instead of hardcoded coefficients -- proper train-script/artifact
-  separation, confirmed behaviorally identical to the prior hardcoded
-  version. Still linear: a GBDT (non-linear) fit was tried on the same
-  data and scored worse (r=0.045).
-- **Richer features**: added embedding-based signals (`src/observability/embeddings.py`,
-  local `mxbai-embed-large`, previously unused) -- embedding drift,
-  cross-document embedding coherence, expansion-to-evidence
-  groundedness, a qualitatively different (dense semantic) family vs.
-  everything lexical/BM25/reranker-scalar tried before. Tested at a
-  properly powered n=368 (`scripts/09_calibrate_embedding_features.py`):
-  lexical-only 5-fold CV r=0.070, lexical+embedding r=0.094 -- a +0.024
-  gain, under the 0.05 adoption bar, and still below the real n=1168
-  lexical-only baseline (0.134). **Not adopted.**
+| Corpus | Static QE gain | Oracle gain | Failure AUC | Action-utility AUC |
+|---|---|---|---|---|
+| TripClick | +0.0007 (NS) | +0.0246* | 0.649 [0.618, 0.680] | 0.552 [0.518, 0.586] |
+| BEIR NQ | +0.0033 (NS) | +0.0409* | 0.670 [0.649, 0.690] | 0.550 [0.515, 0.585] |
 
-Three feature families (6, 10, and 13 features) and two model classes
-(linear, GBDT) now converge on the same ~r=0.13 ceiling. This looks like
-a genuine detection-difficulty limit on this corpus with this telemetry,
-not a fixable feature-richness or modeling-choice gap.
+The same ordering replicates, decisively: a paired bootstrap of the AUC
+difference on the acted-upon subset (n=2,599) excludes zero (+0.115, 95%
+CI [+0.075, +0.154]). This is an independent second-corpus replication,
+not evidence of broad cross-domain generalization — one further corpus,
+one further query population.
 
-## RQ-Recovery: the weak verifier as a safety net against injected faults
+## Two real defects, found by distrusting convenient results
 
-Given the above, the paper's core question was reframed: not "does the
-closed-loop agent improve retrieval" (no), but "is observability-driven
-recovery still useful as a safety net against large, obvious failures,
-even with a verifier too weak to help on subtle natural variation?"
-`scripts/11_fault_injection_recovery_study.py` reuses the live agent's
-exact pipeline with three fault types injected at their natural point,
-comparing an always-accept ablation against the real calibrated
-`RecoveryController` on the identical corrupted state (paired, no LLM
-call re-run). Full run, TripClick TAIL, n=149-150/fault type:
+Both surfaced only from refusing to accept a result that looked coherent
+rather than broken:
 
-| Fault | Detection Recall | False Alarm Rate | Recovery gain (NDCG@10) |
-|---|---|---|---|
-| inject_unsupported_entity | 1.000 | 0.992 | +0.0238 |
-| replace_grounding_passage | 0.773 | 0.465 | +0.0278 |
-| disable_reranker | 0.185 | 0.115 | +0.0038 |
-
-**Content-level corruption is caught reliably** -- entity injection with
-perfect (if blunt/near-blanket) recall, and grounding-passage corruption
-with genuinely discriminating detection (77% recall, a moderate 46.5%
-false-alarm rate, not blanket rejection) and the largest recovery gain of
-the three. Both recovery gains are an order of magnitude larger than
-anything seen on natural queries (-0.0007, not significant). **System-level
-degradation is mostly missed** -- disabling the reranker is caught only
-18.5% of the time, because the fitted verifier's weights are almost
-entirely lexical/content features with near-zero reranker-specific
-weight; it wasn't built to notice that failure mode.
-
-This is the paper's strongest, most defensible result: a weak
-general-purpose qrel-free detector (r~0.13 on subtle natural variation)
-is still a genuinely effective safety net against large, obvious content
-corruption -- just not against failure modes outside its feature family.
-
-**Update (2026-08-28) -- a real bug was found and fixed, and the
-corrected result is more modest.** Investigating why `disable_reranker`
-showed almost no effect revealed that the reranker's judgment was
-computed but never actually applied to the accepted ranking (`R_t` was
-unconditionally raw BM25 order) -- telemetry-only, contradicting the
-documented control loop. Fixing that exposed a second bug: `verify()`
-was judging a different (pre-rerank) ranking than the one actually being
-accepted. Both fixed (see `src/agent/steps.py`, `src/observability/telemetry.py`
-git history), with regression tests locking in the correct behavior.
-
-Re-running the full verifier calibration (n=1168) on the corrected
-pipeline confirmed the deployed model and thresholds remain well-suited
-(r=0.146, a fresh refit doesn't beat it) -- no retraining needed. But
-re-running the fault injection study with the corrected pipeline gives a
-more modest result than originally reported: `inject_unsupported_entity`
-and `replace_grounding_passage` recovery gains are **no longer
-statistically significant** (95% CIs straddle zero: [-0.0196, +0.0331]
-and [-0.0204, +0.0166] respectively), though the point estimates stay
-positive. `disable_reranker`'s small effect (+0.0038, still significant)
-is unchanged, since that fault explicitly bypasses the fixed code path.
-The qualitative conclusion (content corruption more detectable than
-system-level faults) likely still holds directionally, but the earlier
-"order of magnitude larger and clearly significant" framing was
-partly an artifact of the bug, not the full story. Full history of both
-fixes and all three fault-injection runs (original buggy pipeline,
-reranker-fix-only, both fixes) is in git log for `src/agent/steps.py`.
+- **Under-tuned BM25 baseline** — every downstream comparison was
+  inflated until corrected on validation alone (see above).
+- **Reranker-wiring defect** — the reranker's judgment was computed but
+  never actually applied to the accepted ranking (`R_t` stayed
+  unconditionally raw BM25 order); fixing it exposed a second bug where
+  `verify()` was judging a different (pre-rerank) ranking than the one
+  actually accepted. Both fixed, with regression tests locking in correct
+  behavior — see `src/agent/steps.py` git history.
 
 See `docs/milestones.md` for the execution plan and go/no-go checkpoints,
 and `docs/sources.md` for the source bibliography this project is built
