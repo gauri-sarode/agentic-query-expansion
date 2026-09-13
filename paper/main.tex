@@ -31,7 +31,7 @@
 
 \begin{document}
 
-\title{Observe, Expand, Recover: An Observability-Guided Agent for Safe Query Expansion}
+\title{Observe, Expand, Recover: Observability-Guided Control for Query Expansion}
 
 \author{
 \IEEEauthorblockN{Author One\IEEEauthorrefmark{1}, Author Two\IEEEauthorrefmark{2}}
@@ -53,19 +53,18 @@ it is markedly weaker at telling whether that action helped (AUC
 $0.552$). Detection is not actionability. Neither a static expansion
 pipeline nor a closed-loop recovery agent beats a properly-tuned
 retriever on ordinary queries, despite a retrospective oracle showing
-uncaptured headroom ($+0.0246$ nDCG@10). The same
-telemetry earns its keep in a narrower, structural setting: a
-statistic computed from how a fault shifts the verifier's features
-orders six fault types by observed detection recall, though converting
-that into an actual recovery gain remains fault-specific. Nor does this
-travel across query populations: the same untouched ranking becomes
-anti-correlated with true utility outside its calibration split. Runtime telemetry is a useful alarm that something
-is wrong, but knowing whether a specific fix will help is a different,
-narrower capability.
+uncaptured headroom ($+0.0246$ nDCG@10) our qrel-free verifier largely
+cannot exploit. A six-fault perturbation analysis shows this gap is
+per-fault and mechanistically explicable, not just noise. The same
+ordering replicates on an independent second corpus, BEIR Natural
+Questions (failure AUC $0.670$ vs.\ action-utility AUC $0.550$, paired
+difference $95\%$ CI excluding zero): knowing that retrieval has
+failed is substantially easier than knowing which intervention will
+fix it.
 \end{abstract}
 
 \begin{IEEEkeywords}
-query expansion, information retrieval, agentic systems, AI observability, retrieval-augmented generation, large language models, site reliability engineering
+query expansion, information retrieval, agentic systems, AI observability, retrieval-augmented generation, large language models
 \end{IEEEkeywords}
 
 \section{Introduction}
@@ -152,9 +151,7 @@ our observe-act-observe structure, but with a much smaller action
 space: typed retrieval operators under a non-LLM controller.
 OpenTelemetry's trace/metric/log separation and GenAI semantic
 conventions \cite{opentelemetry} supply a naming discipline for our
-telemetry; Google's SRE framing of an SLO as a target range
-\cite{sre-slo} motivates our Agent Search SLO: quality subject to
-harm, cost, and latency frozen \emph{before} evaluation.
+telemetry.
 
 \textbf{Query performance prediction and selective expansion.} Classic
 query performance prediction \cite{qpp-clarity} and selective query
@@ -189,7 +186,7 @@ paper's central experimental contrast (Section~\ref{sec:rq2}).
 
 \begin{figure*}[t]
 \centering
-\resizebox{0.36\textwidth}{!}{
+\resizebox{0.54\textwidth}{!}{
 \begin{tikzpicture}[
     node distance=4.5mm and 6mm,
     box/.style={draw, rounded corners, minimum height=6mm, minimum width=17mm, align=center, font=\footnotesize, fill=blue!4},
@@ -409,16 +406,14 @@ Linear, 13 features (+dense embedding) & $-0.015$ \\
 Nothing clears noise on validation: every candidate --- a hand-picked
 baseline, linear and gradient-boosted fits on the deployed 10-feature
 set, and a fit augmenting it with dense-embedding features --- lands
-at or below $|r|=0.02$. We select the 10-feature linear model, the
-only candidate fit on the corrected pipeline's distribution rather
-than a stale or untested one (configs/experimental\_protocol.yaml) ---
-though that criterion alone does not distinguish it from GBDT-10, fit
-on the identical distribution and statistically indistinguishable
-($r{=}{+}0.001$ vs.\ $-0.014$); linear is also the only class
-compatible with Section~\ref{sec:rq3}'s closed-form attribution, not
-the stated criterion at freeze time. We deploy it \emph{despite} its
-weak validation estimate, per Section~\ref{sec:protocol}: no decision
-is conditioned on test
+at or below $|r|=0.02$. We froze the 10-feature linear model before
+test evaluation: the only candidate fit on the corrected pipeline's
+distribution rather than a stale or untested one
+(configs/experimental\_protocol.yaml). GBDT-10, fit on the identical
+distribution, was statistically indistinguishable ($r{=}{+}0.001$
+vs.\ $-0.014$) and was not substituted after seeing test results. We
+deploy the linear model \emph{despite} its weak validation estimate,
+per Section~\ref{sec:protocol}: no decision is conditioned on test
 performance.
 
 \begin{table}[t]
@@ -777,20 +772,19 @@ Reranker disabled & $+0.1296$ & 0.000 & 0.002 & NS \\
 We tested this prospectively on three held-out faults never used to
 derive the rule (\texttt{scripts/12}, \texttt{18}, \texttt{19}):
 removing the query's most discriminative term, appending an irrelevant
-term, and truncating the retrieval pool. Written predictions went
-1-for-3 --- correct for query-term removal, but wrong for
-append-irrelevant-term (guessed it would pattern-match; it came out
-weakly positive, low recall) and wrong for truncated pool (guessed
+term, and truncating the retrieval pool. \textbf{Human intuition about
+a new fault went 1-for-3}: correct for query-term removal, but wrong
+for append-irrelevant-term (guessed it would pattern-match; it came
+out weakly positive, low recall) and wrong for truncated pool (guessed
 grounding-like; it came out strongly positive, recall $0.000$, same
-dominant feature as reranker disabled). Human intuition about a new
-fault went \textbf{1-for-3}. \textbf{Yet the underlying statistic did
-not miss}: sorting all six fault types by net contribution reproduces
-the same monotone recall ordering with no exceptions
-(Table~\ref{tab:diagnostic}). The qrel-free statistic, needing no
-guessing, tracked recoverability regime across content, evidence,
-system-component, and query-level corruption alike where our own
-guesses often did not --- a post-probe capability, not a zero-shot one
-(Section~\ref{sec:limitations}). Whether that regime converts into a
+dominant feature as reranker disabled). Across the six tested fault
+classes, sorting by net telemetry contribution reproduced the observed
+recall ordering (Table~\ref{tab:diagnostic}). For the three held-out
+faults, this should be read as post-probe characterization rather than
+zero-shot prediction (Section~\ref{sec:limitations}): the qrel-free
+statistic, needing no guessing, tracked recoverability regime across
+content, evidence, system-component, and query-level corruption alike
+where our own guesses often did not. Whether that regime converts into a
 significant gain remains harder: only grounding produced one.
 
 \section{Does the Verifier Generalize Beyond TAIL?}
@@ -826,7 +820,11 @@ $0.552$ on TAIL (95\% CI $[0.518,0.586]$) to $0.234$ on TORSO
 ($[0.189,0.281]$) and $0.143$ on HEAD ($[0.107,0.180]$) --- both CIs
 entirely \emph{below} chance, anti-correlated with true utility, not
 merely uninformative. A verifier calibrated on one frequency regime
-does not just fail to add value in another; its ranking inverts.
+does not just fail to add value in another; its ranking inverts. These
+HEAD/TORSO estimates use fixed $n{=}400$ subsets for comparability
+across splits (unlike TAIL's full $n{=}1175$), so read them as evidence
+of ranking inversion rather than precise bucket-level performance
+figures.
 
 \section{Does the Finding Replicate on a Second Corpus?}
 \label{sec:nq}
@@ -894,11 +892,10 @@ from weakly informative on TAIL to below-chance on HEAD/TORSO --- new
 failure types within the calibration split generalize, the same
 behavior outside it does not.
 
-The BM25 baseline and reranker-wiring defects were both found only by
-refusing a convenient result: an error that looks coherent rather than
-broken. A frozen protocol with a mandatory sanity check defends
-against the first kind; the second we only found by distrusting a
-result that seemed too good.
+The BM25 baseline and reranker-wiring defects both looked coherent
+rather than broken, so neither surfaced from an error message. A
+frozen protocol with a mandatory sanity check caught the first; the
+second surfaced only from distrusting a result that seemed too good.
 
 \section{Limitations}
 \label{sec:limitations}
@@ -926,26 +923,26 @@ measured AUC.
 
 We evaluated a closed-loop, observability-guided query-expansion agent
 under a corrected protocol separating model selection from final
-evaluation --- surfacing the paper's first finding: an
-honestly-selected BM25 fix inverted every downstream conclusion.
-Runtime observability is moderately predictive of retrieval failure
-(detection AUC $0.649$), but autonomous recovery needs a stronger
-property the same telemetry does not deliver: predicting whether a
-specific intervention will help (action-utility AUC $0.552$, below
-chance outside its calibration split). That gap is why the closed-loop
-agent does not outperform static expansion and neither outperforms
-BM25, despite real headroom going uncaptured. The recovery study shows
-this is a per-fault, mechanistically explicable property --- in one
-case the verifier is actively misled, not merely blind --- and, tested
-on three held-out faults, supports label-free diagnosis of a new
-failure's detection regime from its telemetry signature, even when our
-own guesses did not; converting that into a significant gain still
-needs a full evaluation. The same ranking inverts across
-query-frequency regimes, yet the core detection-vs-actionability gap
-itself replicates on a second, unrelated corpus (BEIR NQ,
-Section~\ref{sec:nq}). We report both implementation defects found by
-refusing a convenient result, in the belief that the discipline to
-catch them is worth more than a flattering number.
+evaluation --- surfacing the paper's first finding: a
+validation-selected BM25 correction changed every downstream
+conclusion. Runtime observability is moderately predictive of
+retrieval failure (detection AUC $0.649$), but autonomous recovery
+needs a stronger property the same telemetry does not deliver:
+predicting whether a specific intervention will help (action-utility
+AUC $0.552$, below chance outside its calibration split). That gap is
+why the closed-loop agent does not outperform static expansion and
+neither outperforms BM25, despite real headroom going uncaptured. The
+recovery study shows this is a per-fault, mechanistically explicable
+property --- in one case the verifier is actively misled, not merely
+blind --- and, tested on three held-out faults, supports label-free
+diagnosis of a new failure's detection regime from its telemetry
+signature; converting that into a significant gain still needs a full
+evaluation. The same ranking inverts across query-frequency regimes,
+yet the core detection-vs-actionability gap itself replicates on a
+second, unrelated corpus (BEIR NQ, Section~\ref{sec:nq}). Both
+implementation defects reported here (Sections~\ref{sec:bm25-fix},
+\ref{sec:defect}) are methodological findings in their own right, not
+incidental fixes.
 
 \section*{Acknowledgment}
 The authors thank the TripClick maintainers for access to the dataset
