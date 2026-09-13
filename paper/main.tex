@@ -464,8 +464,8 @@ $0.450$), selected by 5-fold CV on validation and touched once on
 frozen test, identically to Section~\ref{sec:calib-method}'s protocol
 --- Table~\ref{tab:rq1-test}'s last row.
 
-The gap is large and consistent across val and test: telemetry
-moderately predictive of \emph{whether} retrieval is failing
+On both val and test, telemetry moderately predictive of
+\emph{whether} retrieval is failing
 ($\text{AUC}=0.649$, 95\% CI $[0.618,0.680]$) is markedly weaker at
 predicting whether a \emph{specific candidate action fixes it}
 ($\text{AUC}=0.552$, 95\% CI $[0.518,0.586]$) --- both frozen
@@ -572,9 +572,8 @@ candidate pool but behaves better once expansion has already reshaped
 it. Static QE's near-parity with BM25 is this interaction landing
 close to neutral, not one component compensating for the other.
 \textbf{On natural queries, neither expansion flavor moves the needle
-once the retriever is competitive} --- materially different from what
-a weak baseline would
-have supported.
+once the retriever is competitive} --- a weaker baseline would have
+made both look like they help.
 
 \subsection{Is There Any Headroom at All?}
 \label{sec:oracle}
@@ -859,7 +858,7 @@ all-or-nothing extension over all of them: no early stopping, no
 retuning, pooled result reported regardless of outcome ($n{=}2{,}652$).
 Table~\ref{tab:nq} reports the pooled
 result: as on TripClick, Static QE does not significantly beat BM25
-despite real oracle-capturable headroom ($p<0.001$), and the same
+despite oracle-capturable headroom ($p<0.001$), and the same
 ordering replicates, now decisively --- pre-action telemetry is more
 predictive of retrieval failure (AUC $0.670$) than post-action
 telemetry is of intervention utility (AUC $0.550$, 95\% CI
@@ -899,8 +898,8 @@ is failing (AUC $0.649$) but weakly informative about whether a
 specific action on an ordinary query will fix it (AUC $0.552$). RQ2
 shows the consequence: a closed loop built on the weaker signal adds
 nothing over a matched static pipeline, and the oracle/selectivity-frontier
-analyses show real headroom exists that the verifier reaches at
-most $12\%$ of. RQ3's attribution shows this is a per-fault property,
+analyses show $+0.0246$ nDCG@10 of headroom that the verifier reaches
+at most $12\%$ of. RQ3's attribution shows this is a per-fault property,
 sharp enough in one case that the verifier reads the fault as an
 improvement. The diagnostic rule (Section~\ref{sec:diagnostic}) provides
 the clearest positive evidence: for \emph{large, structured} faults,
@@ -950,7 +949,8 @@ needs a stronger property the same telemetry does not deliver:
 predicting whether a specific intervention will help (action-utility
 AUC $0.552$, below chance outside its calibration split). That gap is
 why the closed-loop agent does not outperform static expansion and
-neither outperforms BM25, despite real headroom going uncaptured. The
+neither outperforms BM25, despite $+0.0246$ nDCG@10 of headroom going
+uncaptured. The
 recovery study shows this is a per-fault, mechanistically explicable
 property --- in one case the verifier is actively misled, not merely
 blind --- and, tested on three held-out faults, supports label-free
