@@ -779,10 +779,10 @@ Reranker disabled & $+0.1296$ & 0.000 & 0.002 & NS \\
 \bottomrule
 \end{tabular}
 \\[0.5pt]
-\footnotesize $\dagger$: held out, predicted before running. *: significant, $p<0.05$. NS: not significant.
+\footnotesize $\dagger$: held out from rule derivation; regime characterized from the fault's telemetry shift before evaluating recovery quality (post-probe, not zero-shot). *: significant, $p<0.05$. NS: not significant.
 \end{table}
 
-We tested this prospectively on three held-out faults never used to
+We evaluated this on three held-out faults never used to
 derive the rule (\texttt{scripts/12}, \texttt{18}, \texttt{19}):
 removing the query's most discriminative term, appending an irrelevant
 term, and truncating the retrieval pool. \textbf{Human intuition about
@@ -852,10 +852,10 @@ BM25 config and detectors on val only (same features/model classes as
 TripClick's, refit since corpus-specific), then evaluate on test. The
 initial $n{=}600$ touch was a valid, frozen single touch whose
 action-utility AUC CI straddled chance --- too imprecise to resolve the
-ordering. In response, before touching any of the remaining
-$2{,}052$ never-seen NQ queries, we pre-committed to a fixed,
-all-or-nothing extension over all of them: no early stopping, no
-retuning, pooled result reported regardless of outcome ($n{=}2{,}652$).
+ordering. Before evaluating any of the remaining $2{,}052$ NQ queries,
+we fixed an all-or-nothing extension over that entire remainder: no
+early stopping, no retuning, pooled result reported regardless of
+outcome ($n{=}2{,}652$).
 Table~\ref{tab:nq} reports the pooled
 result: as on TripClick, Static QE does not significantly beat BM25
 despite oracle-capturable headroom ($p<0.001$), and the same
@@ -875,7 +875,7 @@ held-out queries.
 
 \begin{table}[t]
 \centering
-\caption{TripClick TAIL vs.\ BEIR NQ~\cite{beir,natural-questions} (frozen, $n{=}2{,}652$: val 800, test 600 + a pre-committed $2{,}052$-query power extension, seed 42, ours --- NQ has no partition). Bootstrap 95\% CIs. NS: crosses zero. *: $p<0.001$.}
+\caption{TripClick TAIL vs.\ BEIR NQ~\cite{beir,natural-questions} (frozen, $n{=}2{,}652$: val 800, test 600 + a fixed $2{,}052$-query extension, seed 42, ours --- NQ has no partition). Bootstrap 95\% CIs. NS: crosses zero. *: $p<0.001$.}
 \label{tab:nq}
 \scriptsize
 \renewcommand{\arraystretch}{0.85}
@@ -905,11 +905,11 @@ improvement. The diagnostic rule (Section~\ref{sec:diagnostic}) provides
 the clearest positive evidence: for \emph{large, structured} faults,
 the same weights characterize which regime a new fault falls into after
 a telemetry-only probe.
-Section~\ref{sec:robustness} bounds this differently: holding the
-fault fixed and varying query frequency instead, the same ranking goes
-from weakly informative on TAIL to below-chance on HEAD/TORSO --- new
-failure types within the calibration split generalize, the same
-behavior outside it does not.
+Section~\ref{sec:robustness} bounds this differently, holding the
+fault fixed and varying query frequency instead: the diagnostic rule
+transfers to held-out fault types after a telemetry-only probe,
+whereas the action-utility ranking does not transfer across
+query-frequency regimes.
 
 The BM25 baseline and reranker-wiring defects both looked coherent
 rather than broken, so neither surfaced from an error message. A
@@ -951,8 +951,8 @@ AUC $0.552$, below chance outside its calibration split). That gap is
 why the closed-loop agent does not outperform static expansion and
 neither outperforms BM25, despite $+0.0246$ nDCG@10 of headroom going
 uncaptured. The
-recovery study shows this is a per-fault, mechanistically explicable
-property --- in one case the verifier is actively misled, not merely
+recovery study shows this is a per-fault property with distinct,
+interpretable telemetry signatures --- in one case the verifier is actively misled, not merely
 blind --- and, tested on three held-out faults, supports label-free
 characterization of a new failure's detection regime after a
 telemetry-only probe; converting that into a significant gain still needs a full
