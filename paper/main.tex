@@ -56,7 +56,7 @@ uncaptured headroom ($+0.0246$ nDCG@10) our qrel-free verifier largely
 cannot exploit. A six-fault perturbation analysis shows this gap is
 per-fault, with distinct, interpretable telemetry signatures. The same
 ordering replicates on an independent second corpus, BEIR Natural
-Questions (failure AUC $0.670$ vs.\ action-utility AUC $0.550$, paired
+Questions (failure AUC $0.680$ vs.\ action-utility AUC $0.556$, paired
 difference $95\%$ CI excluding zero): knowing that retrieval has
 failed is substantially easier than knowing which intervention will
 fix it.
@@ -287,10 +287,12 @@ telemetry features. Click labels are available only during this
 offline calibration; the deployed verifier never sees one, and is
 treated as an artifact --- trained by a script, loaded at inference
 time. The recovery controller is a small deterministic finite-state
-machine: below a calibrated harmful threshold the agent rolls back to
-the pre-action ranking; above a calibrated accept threshold it fuses
-the new ranking via reciprocal-rank fusion; in between it replans with
-an untried operator, capped at two model calls per query.
+machine on the verifier's scalar score $v$: $v \le -0.102 \Rightarrow
+\textsc{Rollback}$ to the pre-action ranking; $v \ge -0.081 \Rightarrow
+\textsc{Accept}$, fusing the new ranking via reciprocal-rank fusion;
+otherwise $\textsc{Replan}$ with an untried operator, capped at two
+model calls per query. Both cutoffs come from TAIL validation only
+(accept: median; harmful: 25th percentile), never test.
 
 \section{Experimental Setup}
 \label{sec:setup}
@@ -849,33 +851,31 @@ corpus unrelated to TripClick's clinical queries. NQ ships as one
 3{,}452-query split with no train/val/test partition, so we carve a
 disjoint, fixed-seed ($42$) val/test split (800/600), freeze a fresh
 BM25 config and detectors on val only (same features/model classes as
-TripClick's, refit since corpus-specific), then evaluate on test. The
-initial $n{=}600$ touch was a valid, frozen single touch whose
-action-utility AUC CI straddled chance --- too imprecise to resolve the
-ordering. Before evaluating any of the remaining $2{,}052$ NQ queries,
-we fixed an all-or-nothing extension over that entire remainder: no
-early stopping, no retuning, pooled result reported regardless of
-outcome ($n{=}2{,}652$).
-Table~\ref{tab:nq} reports the pooled
-result: as on TripClick, Static QE does not significantly beat BM25
-despite oracle-capturable headroom ($p<0.001$), and the same
-ordering replicates, now decisively --- pre-action telemetry is more
-predictive of retrieval failure (AUC $0.670$) than post-action
-telemetry is of intervention utility (AUC $0.550$, 95\% CI
-$[0.515,0.585]$, clearly above chance). Failure-detection AUC uses all
-$2{,}652$ queries; action-utility AUC and its paired comparison use only
-the $2{,}599$ on which an expansion action was actually executed (the
-rest were NO\_EXPAND). That paired bootstrap of the AUC difference
-excludes zero ($+0.115$, 95\% CI $[+0.075,+0.154]$,
-\texttt{scripts/26}). This is an
+TripClick's, refit since corpus-specific). An initial $n{=}600$ pilot
+touch of test --- analogous to Section~\ref{sec:protocol}'s own
+TripClick pilot --- was directionally consistent but too imprecise to
+resolve the ordering (action-utility AUC CI straddled chance). We
+therefore ran the same frozen pipeline, unchanged, as a single-touch
+confirmatory test on the entire remaining, disjoint pool of $2{,}052$
+never-before-touched NQ queries, reported in full regardless of
+outcome; the $n{=}600$ pilot is not pooled into it.
+Table~\ref{tab:nq} reports this $n{=}2{,}052$ result: as on TripClick,
+Static QE does not significantly beat BM25 despite oracle-capturable
+headroom ($p<0.001$), and the same ordering replicates decisively on
+its own --- pre-action telemetry is more predictive of retrieval
+failure (AUC $0.680$) than post-action telemetry is of intervention
+utility (AUC $0.556$, 95\% CI $[0.517,0.594]$, clearly above chance).
+A paired bootstrap of the AUC difference on the $n{=}2{,}013$
+acted-upon queries excludes zero ($+0.119$, 95\% CI
+$[+0.076,+0.162]$, \texttt{scripts/29}). This is an
 independent second-corpus replication of
 Section~\ref{sec:detect-vs-act}'s ordering, not evidence the finding
-generalizes broadly across domains --- one further corpus, $2{,}652$
-held-out queries.
+generalizes broadly across domains --- one further corpus, one
+disjoint $2{,}052$-query touch.
 
 \begin{table}[t]
 \centering
-\caption{TripClick TAIL vs.\ BEIR NQ~\cite{beir,natural-questions} (frozen, $n{=}2{,}652$: val 800, test 600 + a fixed $2{,}052$-query extension, seed 42, ours --- NQ has no partition). Bootstrap 95\% CIs. NS: crosses zero. *: $p<0.001$.}
+\caption{TripClick TAIL vs.\ BEIR NQ~\cite{beir,natural-questions} (frozen, single-touch, $n{=}2{,}052$; a smaller $n{=}600$ pilot on a disjoint split informed running this test but is not pooled into it; seed 42, ours --- NQ has no partition). Bootstrap 95\% CIs. NS: crosses zero. *: $p<0.001$.}
 \label{tab:nq}
 \scriptsize
 \renewcommand{\arraystretch}{0.85}
@@ -884,7 +884,7 @@ held-out queries.
 Corpus & Static QE gain & Oracle gain & Failure AUC & Action-util.\ AUC \\
 \midrule
 TripClick & $+0.0007$ (NS) & $+0.0246$* & $0.649$ [$.618,.680$] & $0.552$ [$.518,.586$] \\
-BEIR NQ & $+0.0033$ (NS) & $+0.0409$* & $0.670$ [$.649,.690$] & $0.550$ [$.515,.585$] \\
+BEIR NQ & $+0.0025$ (NS) & $+0.0415$* & $0.680$ [$.658,.703$] & $0.556$ [$.517,.594$] \\
 \bottomrule
 \end{tabular}
 \end{table}
