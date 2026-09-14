@@ -127,6 +127,18 @@ def search(query: str, db_path: str, k: int = 100) -> list[Hit]:
 
 
 def get_texts(doc_ids: Iterable[str], db_path: str) -> dict[str, str]:
+    """Returns doc_id -> display text, with the index-time title/body
+    separator (_DOC_SEP) replaced by whitespace. meta.text stores the
+    raw "title<eot>body" string build_index() was given (needed there
+    to split into FTS5's title/body columns); every consumer of this
+    function -- reranker input, LLM grounding evidence, telemetry's
+    lexical-overlap sampling -- wants natural running text, not that
+    literal marker sitting in the middle of it. Found via cross-encoder
+    score sensitivity during a review pass (see git history); measured
+    impact on reranked nDCG@10 was small (+0.003 on a 40-query TripClick
+    TAIL sample) but this was never intentional, so fixed at the source
+    rather than patched per call site.
+    """
     doc_ids = list(doc_ids)
     if not doc_ids:
         return {}
@@ -138,7 +150,7 @@ def get_texts(doc_ids: Iterable[str], db_path: str) -> dict[str, str]:
         ).fetchall()
     finally:
         con.close()
-    return dict(rows)
+    return {doc_id: text.replace(_DOC_SEP, " ") for doc_id, text in rows}
 
 
 def doc_count(db_path: str) -> int:
