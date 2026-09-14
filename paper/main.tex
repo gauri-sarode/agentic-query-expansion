@@ -106,8 +106,7 @@ action's consequences and recover from a bad one?
 rewrite or a simulated system-level fault, can observability-driven
 verification detect the degradation and select a recovery action to
 restore retrieval quality under a bounded budget --- even given RQ1's
-finding that this verifier's general-purpose detection power is only
-weakly informative?
+finding that its action-utility signal is weak?
 
 \subsection{Contributions}
 
@@ -466,9 +465,9 @@ $0.450$), selected by 5-fold CV on validation and touched once on
 frozen test, identically to Section~\ref{sec:calib-method}'s protocol
 --- Table~\ref{tab:rq1-test}'s last row.
 
-On both val and test, telemetry moderately predictive of
+On frozen test, telemetry is moderately predictive of
 \emph{whether} retrieval is failing
-($\text{AUC}=0.649$, 95\% CI $[0.618,0.680]$) is markedly weaker at
+($\text{AUC}=0.649$, 95\% CI $[0.618,0.680]$) but markedly weaker at
 predicting whether a \emph{specific candidate action fixes it}
 ($\text{AUC}=0.552$, 95\% CI $[0.518,0.586]$) --- both frozen
 single-touch test numbers from the same features and protocol, not the
@@ -729,7 +728,7 @@ every time but flagged almost as often, netting out non-significant.
 \textbf{Reranker disabled} is never detected: the controller
 essentially always accepts.
 
-\textbf{How, mechanistically.} Fitted weights alone show which
+\textbf{Decomposing the score shift.} Fitted weights alone show which
 features the verifier ignores, not what a fault \emph{does} to its
 score: $\Delta x_j = \mathbb{E}[x_j^{\text{fault}} - x_j^{\text{clean}}]$,
 $\text{Contribution}_j = w_j \cdot \Delta x_j$ ($n{=}79$/fault) --- a
@@ -861,8 +860,8 @@ never-before-touched NQ queries, reported in full regardless of
 outcome; the $n{=}600$ pilot is not pooled into it.
 Table~\ref{tab:nq} reports this $n{=}2{,}052$ result: as on TripClick,
 Static QE does not significantly beat BM25 despite oracle-capturable
-headroom ($p<0.001$), and the same ordering replicates decisively on
-its own --- pre-action telemetry is more predictive of retrieval
+headroom ($p<0.001$), and the same ordering replicates on the disjoint
+confirmatory set --- pre-action telemetry is more predictive of retrieval
 failure (AUC $0.680$) than post-action telemetry is of intervention
 utility (AUC $0.556$, 95\% CI $[0.517,0.594]$, clearly above chance).
 A paired bootstrap of the AUC difference on the $n{=}2{,}013$
@@ -960,8 +959,8 @@ evaluation. The same ranking inverts across query-frequency regimes,
 yet the core detection-vs-actionability gap itself replicates on a
 second, unrelated corpus (BEIR NQ, Section~\ref{sec:nq}). Both
 implementation defects reported here (Sections~\ref{sec:bm25-fix},
-\ref{sec:defect}) are methodological findings in their own right, not
-incidental fixes.
+\ref{sec:defect}) also illustrate how retrieval and observability
+failures can produce coherent but misleading experimental conclusions.
 
 \section*{Acknowledgment}
 The authors thank the TripClick maintainers for access to the dataset
