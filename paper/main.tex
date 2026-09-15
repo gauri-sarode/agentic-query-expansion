@@ -221,7 +221,7 @@ paper's central experimental contrast (Section~\ref{sec:rq2}).
 \draw[arr] (verify) -- node[above,font=\scriptsize]{harmed} (rollback);
 \draw[arr] (verify) -- node[right,font=\scriptsize]{ambiguous} (replan);
 \draw[arr] (verify) -- node[above,font=\scriptsize]{improved} (accept);
-\draw[arr] (replan.west) .. controls +(-26mm,4mm) and +(-30mm,10mm) .. node[left,font=\scriptsize,align=center]{budget\\remains} (llm.west);
+\draw[arr] (replan.west) .. controls +(-40mm,6mm) and +(-48mm,12mm) .. node[left,font=\scriptsize,align=center]{budget\\remains} (llm.west);
 \end{tikzpicture}
 }
 \caption{The observability-guided control loop. Telemetry $O_t$ (orange) drives both operator selection and the accept/rollback/replan/stop decision. The static comparator (Section~\ref{sec:rq2}) runs the same chain once, with no path back from \textsc{Verify} to the LLM tool.}
@@ -494,6 +494,7 @@ to this weakness.
     tick label style={font=\footnotesize},
     label style={font=\footnotesize},
     title style={font=\footnotesize},
+    ytick={0,0.5,1},
 ]
 \nextgroupplot[
     xlabel={False Alarm Rate},
