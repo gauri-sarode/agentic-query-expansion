@@ -144,18 +144,17 @@ neither retrieval-state telemetry nor a harmful rewrite's recovery.
 
 \textbf{Agentic control and observability.} ReAct \cite{react}
 interleaves reasoning with actions and observations, the template for
-our observe-act-observe structure, but with a much smaller action
-space: typed retrieval operators under a non-LLM controller.
-OpenTelemetry's trace/metric/log separation and GenAI semantic
-conventions \cite{opentelemetry} supply a naming discipline for our
-telemetry.
+our structure, with a much smaller action space (typed retrieval
+operators, non-LLM controller). OpenTelemetry's trace/metric/log
+separation and GenAI conventions \cite{opentelemetry} supply our
+telemetry's naming discipline.
 
 \textbf{Query performance prediction and selective expansion.} Classic
 query performance prediction \cite{qpp-clarity} and selective query
 expansion \cite{selective-qe} already ask whether a query is hard, or
 likely to benefit from expansion, from retrieval signal alone. We
 split that into two targets sharing one telemetry vocabulary --- is
-retrieval failing, versus will \emph{this} action fix it --- and show
+retrieval failing, versus will \emph{this} action fix it --- showing
 qrel-free telemetry answers the first far better (Section~\ref{sec:rq1}).
 
 \textbf{Benchmarks.} TripClick \cite{tripclick} has genuine
@@ -874,7 +873,7 @@ disjoint $2{,}052$-query touch.
 
 \begin{table}[t]
 \centering
-\caption{TripClick TAIL vs.\ BEIR NQ~\cite{beir,natural-questions} (frozen, single-touch, $n{=}2{,}052$; a smaller $n{=}600$ pilot on a disjoint split informed running this test but is not pooled into it; seed 42, ours --- NQ has no partition). Bootstrap 95\% CIs. NS: crosses zero. *: $p<0.001$.}
+\caption{TripClick TAIL vs.\ BEIR NQ~\cite{beir,natural-questions} (frozen, single-touch, $n{=}2{,}052$; pilot/protocol details in Section~\ref{sec:nq}). Bootstrap 95\% CIs. NS: crosses zero. *: $p<0.001$.}
 \label{tab:nq}
 \scriptsize
 \renewcommand{\arraystretch}{0.85}
@@ -910,10 +909,9 @@ transfers to held-out fault types after a telemetry-only probe,
 whereas the action-utility ranking does not transfer across
 query-frequency regimes.
 
-The BM25 baseline and reranker-wiring defects both looked coherent
-rather than broken, so neither surfaced from an error message. A
-frozen protocol with a mandatory sanity check caught the first; the
-second surfaced only from distrusting a result that seemed too good.
+Both the BM25 baseline and reranker-wiring defects looked coherent
+rather than broken: a frozen protocol with a mandatory sanity check
+caught the first, distrusting a too-good result caught the second.
 
 \section{Limitations}
 \label{sec:limitations}
@@ -928,11 +926,10 @@ finding replicates on one further corpus (Section~\ref{sec:nq}); broader
 coverage remains untested. Click-derived qrels are an imperfect
 relevance proxy inherited from TripClick. The diagnostic rule
 (Section~\ref{sec:diagnostic}) orders all six fault types' detection
-recall correctly, including three held out, even though our own
-guesses about each fault's regime were often wrong; six fault types is
-still a small, hand-designed set. It is also post-probe, not
-zero-shot: it needs a fault's own telemetry shift to compute. The
-failure-detection model uses one binary
+recall correctly, though our own guesses about each fault's regime
+were often wrong; six fault types is still small and hand-designed,
+and post-probe rather than zero-shot: it needs a fault's own telemetry
+shift to compute. The failure-detection model uses one binary
 definition of ``poor retrieval''; a graded definition could shift its
 measured AUC.
 
@@ -965,6 +962,11 @@ failures can produce coherent but misleading experimental conclusions.
 \section*{Acknowledgment}
 The authors thank the TripClick maintainers for access to the dataset
 under its non-commercial research license.
+
+\section*{AI Declaration}
+We used Claude (Anthropic), to assist with the paper and code. The
+authors take full responsibility for the accuracy, originality, and
+integrity of the submitted work.
 
 \begingroup
 \let\oldfootnotesize\footnotesize
