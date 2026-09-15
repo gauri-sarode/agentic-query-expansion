@@ -225,19 +225,24 @@ detection-vs-actionability comparison is replicated on BEIR Natural
 Questions — an open-domain corpus unrelated to TripClick's clinical
 queries, with its own fresh, fixed-seed val/test split, fresh BM25
 config, and fresh failure/action-utility detectors (never reusing
-TripClick's fitted weights). Frozen test, pooled to n=2,652 after a
-pre-committed statistical-power extension:
+TripClick's fitted weights). An initial n=600 pilot touch of test was
+directionally consistent but too imprecise to resolve the ordering, so
+we ran the same frozen pipeline, unchanged, as a single-touch
+confirmatory test on the entire remaining, disjoint pool of 2,052
+never-before-touched NQ queries — reported in full regardless of
+outcome, with the n=600 pilot not pooled into it:
 
 | Corpus | Static QE gain | Oracle gain | Failure AUC | Action-utility AUC |
 |---|---|---|---|---|
 | TripClick | +0.0007 (NS) | +0.0246* | 0.649 [0.618, 0.680] | 0.552 [0.518, 0.586] |
-| BEIR NQ | +0.0033 (NS) | +0.0409* | 0.670 [0.649, 0.690] | 0.550 [0.515, 0.585] |
+| BEIR NQ | +0.0025 (NS) | +0.0415* | 0.680 [0.658, 0.703] | 0.556 [0.517, 0.594] |
 
-The same ordering replicates, decisively: a paired bootstrap of the AUC
-difference on the acted-upon subset (n=2,599) excludes zero (+0.115, 95%
-CI [+0.075, +0.154]). This is an independent second-corpus replication,
-not evidence of broad cross-domain generalization — one further corpus,
-one further query population.
+The same ordering replicates on this disjoint confirmatory set: a
+paired bootstrap of the AUC difference on the n=2,013 acted-upon
+queries excludes zero (+0.119, 95% CI [+0.076, +0.162]). This is an
+independent second-corpus replication, not evidence of broad
+cross-domain generalization — one further corpus, one disjoint
+2,052-query touch.
 
 ## Two real defects, found by distrusting convenient results
 
