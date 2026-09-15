@@ -212,16 +212,21 @@ paper's central experimental contrast (Section~\ref{sec:rq2}).
 \draw[arr] (query) -- (bm25);
 \draw[arr] (bm25) -- (obs0);
 \draw[arr] (obs0) -- (ctrl);
-\draw[arr] (ctrl) -- node[above,font=\scriptsize]{healthy} (noexp);
-\draw[arr] (ctrl) -- node[above,font=\scriptsize,sloped]{unhealthy} (llm);
+\draw[arr] (ctrl) -- node[above,font=\scriptsize,fill=white,inner sep=1pt]{healthy} (noexp);
+\draw[arr] (ctrl) -- node[above,font=\scriptsize,sloped,fill=white,inner sep=1pt]{unhealthy} (llm);
 \draw[arr] (llm) -- (retr2);
 \draw[arr] (retr2) -- (rerank);
 \draw[arr] (rerank) -- (obs1);
 \draw[arr] (obs1) -- (verify);
-\draw[arr] (verify) -- node[above,font=\scriptsize]{harmed} (rollback);
-\draw[arr] (verify) -- node[right,font=\scriptsize]{ambiguous} (replan);
-\draw[arr] (verify) -- node[above,font=\scriptsize]{improved} (accept);
-\draw[arr] (replan.west) .. controls +(-40mm,6mm) and +(-48mm,12mm) .. node[left,font=\scriptsize,align=center]{budget\\remains} (llm.west);
+\draw[arr] (verify) -- node[above,font=\scriptsize,fill=white,inner sep=1pt]{harmed} (rollback);
+\draw[arr] (verify) -- node[right,font=\scriptsize,fill=white,inner sep=1pt]{ambiguous} (replan);
+\draw[arr] (verify) -- node[above,font=\scriptsize,fill=white,inner sep=1pt]{improved} (accept);
+\draw[arr, rounded corners=3mm]
+  (replan.south) -- ++(0,-4mm)
+  -| ($(rollback.west)+(-6mm,0)$)
+  |- ($(llm.west)+(-6mm,0)$)
+  -- (llm.west);
+\node[font=\scriptsize,align=center,fill=white,inner sep=1pt] at ($(rollback.west)+(-6mm,18mm)$) {budget\\remains};
 \end{tikzpicture}
 }
 \caption{The observability-guided control loop. Telemetry $O_t$ (orange) drives both operator selection and the accept/rollback/replan/stop decision. The static comparator (Section~\ref{sec:rq2}) runs the same chain once, with no path back from \textsc{Verify} to the LLM tool.}
