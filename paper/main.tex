@@ -115,7 +115,12 @@ protocol (Section~\ref{sec:protocol}) so no result is conditioned on
 the split used to report it. \textbf{C1, detection vs.\ actionability}:
 qrel-free runtime telemetry predicts retrieval failure substantially
 better than it predicts intervention utility (AUC $0.649$ vs.\
-$0.552$). \textbf{C2, consequences for agentic control}: a matched
+$0.552$). Existing selective-expansion and query-performance-prediction
+work primarily asks whether retrieval is difficult or whether
+expansion is likely to help; we separate state diagnosis from
+post-action verification within the same closed-loop system and show
+empirically that successful diagnosis does not imply actionable
+intervention selection. \textbf{C2, consequences for agentic control}: a matched
 static-vs-agent evaluation, plus an oracle and selectivity-frontier
 analysis, shows substantial control headroom exists ($+0.0246$
 nDCG@10) but is mostly inaccessible to the verifier ($0.5$--$12\%$
