@@ -301,7 +301,13 @@ weights to predict that change from Section~\ref{sec:observability}'s
 telemetry features. Click labels are available only during this
 offline calibration; the deployed verifier never sees one, and is
 treated as an artifact --- trained by a script, loaded at inference
-time. The recovery controller is a small deterministic finite-state
+time. Throughout this paper, ``qrel-free'' describes this
+deployment/inference regime specifically, not the method as a whole:
+the weights, thresholds, and action-utility targets that make
+inference qrel-free are themselves fit offline against click-derived
+qrels, and that dependency does not disappear at deployment --- it
+resurfaces as a generalization question (Section~\ref{sec:robustness}).
+The recovery controller is a small deterministic finite-state
 machine on the verifier's scalar score $v$: $v \le -0.102 \Rightarrow
 \textsc{Rollback}$ to the pre-action ranking; $v \ge -0.081 \Rightarrow
 \textsc{Accept}$, fusing the new ranking via reciprocal-rank fusion;
@@ -335,8 +341,16 @@ left implicit: TAIL \emph{validation} may be used for any
 retrieval-config, verifier, or threshold decision; TAIL \emph{test} may
 be touched at most once per research question, purely for evaluation,
 after every upstream decision is frozen, with no decision afterward
-conditioned on a test-set outcome. This discipline directly produced
-the paper's first finding, below.
+conditioned on a test-set outcome. Implementation defects that break
+the described apparatus itself are a distinct case from an
+analysis-conditioned decision: when one is found (Sections~\ref{sec:bm25-fix},
+\ref{sec:defect}), it is diagnosed on validation evidence --- never by
+iterating on a test-set outcome --- and, once fixed, every research
+question whose reported result depends on the broken component is
+evaluated on test exactly once more, under the corrected pipeline. Both
+defects found in this study were caught this way; each is reported
+below with what changed and why, rather than silently corrected. This
+discipline directly produced the paper's first finding, below.
 
 \subsection{A Corrected Retrieval Baseline}
 \label{sec:bm25-fix}
@@ -368,12 +382,23 @@ error) and an unindexed companion lookup that degrades to a full table
 scan ($18\times$ slower at $1.5$M rows). Cross-encoder
 reranking (\texttt{cross-encoder/ms-marco-MiniLM-L6-v2}
 \cite{minilm-cross-encoder}) applies to the top 100 BM25 candidates,
-reranking the top 50. Generation uses a locally hosted, 4-bit quantized
-2--3B-parameter model, capped at two calls per query episode with a
-32--64 token structured output, so the language model is never the
-entire decision surface, only one typed tool within it. Code, configs,
-and analysis scripts are available at an anonymized repository for
-review: \url{https://anonymous.4open.science/r/agentic-query-expansion-8939/}.
+reranking the top 50. Generation uses \texttt{qwen2.5:3b} (3.1B
+parameters, Q4\_K\_M 4-bit quantization) served locally via Ollama,
+greedy decoding (temperature $0$), capped at two calls per query
+episode with a $4096$-token context window and a $32$--$64$ token
+structured output, so the language model is never the entire decision
+surface, only one typed tool within it. Prompts are corpus-grounded,
+one fixed template per expansion operator (\texttt{src/expansion/prompts.py}
+in the linked repository); telemetry feature definitions are listed in
+full in Section~\ref{sec:observability}. All experiments run on a single
+consumer machine (Apple M4 MacBook Air, 16GB unified memory) --- no GPU
+cluster or cloud spend; per-experiment call counts and latency are
+reported where relevant (e.g.\ Section~\ref{sec:rq2}) rather than as an
+aggregate study-wide cost figure, which was not tracked. Every
+data split, bootstrap resample, and stochastic subsample in this paper
+uses the same fixed seed ($42$). Code, configs, and analysis scripts
+are available at an anonymized repository for review:
+\url{https://anonymous.4open.science/r/agentic-query-expansion-8939/}.
 
 \subsection{Verifier Calibration Methodology}
 \label{sec:calib-method}
@@ -573,7 +598,9 @@ does not significantly outperform Static QE ($+0.0002$, 95\% CI
 $[-0.0027, 0.0032]$; changes 3.9\% of outcomes, 2.1\% helped, 1.7\%
 harmed). The agent still costs 24\% more model calls (1.22 vs.\ 0.98
 per query) and 36\% higher mean latency (15.1\,s vs.\ 11.1\,s,
-excluding sleep-inflated episodes) for no offsetting gain. Decomposing
+excluding sleep-inflated episodes, isolated per-pipeline batches with
+alternated run order and a discarded warm-up call to avoid cache and
+drift confounds, \texttt{scripts/07}) for no offsetting gain. Decomposing
 the two components (Table~\ref{tab:rq2}) as a $2\times2$ factorial and
 computing the interaction directly, $I = \text{mean}(\text{QE}+\text{rerank})
 - \text{mean}(\text{QE}) - \text{mean}(\text{rerank}) + \text{mean}(\text{BM25})$,
@@ -632,6 +659,31 @@ verifier, $r=0.114$ on frozen test, is far too weak to discriminate the
 two groups --- converting RQ2's null result from ``maybe there's
 nothing here'' into ``there is something here, and our qrel-free
 verifier cannot see it.''
+
+This oracle is susceptible to a specific optimism: it selects the
+better system separately for every query using the same sparse,
+noisy click labels the gain is then evaluated on, which can inflate
+the reported headroom beyond what a real, imperfect selector could
+ever capture. We check this directly rather than assert it away, by
+computing the identical oracle definition on TAIL \emph{validation}
+(never used to select the oracle itself, only to calibrate the
+verifier and BM25 config) as an out-of-sample stability check
+(\texttt{scripts/30}). The two disagree sharply: validation gives
+$+0.0533$ nDCG@10, 95\% CI $[+0.0452,+0.0617]$ ($n{=}1147$) ---
+more than double the frozen test figure above, with non-overlapping
+CIs. On the NQ replication, by contrast, the same comparison is far
+more stable: validation oracle $+0.0399$ vs.\ test/extension oracle
+$+0.0415$ (Section~\ref{sec:nq}). We read this as evidence that the
+oracle ceiling is a noisier, less split-stable quantity than its
+single point estimate suggests --- on TripClick specifically, not
+uniformly --- and that the reported $+0.0246$ is, if anything, the
+more conservative of the two TripClick estimates, not an inflated
+one; NQ's much closer agreement suggests the instability is tied to
+TripClick's sparser per-query click signal rather than the oracle
+definition itself. A fully debiased estimator (cross-fitting the
+selection and evaluation folds, or averaging over repeated relevance
+draws) would characterize this more precisely than a single
+cross-split comparison can, and is left for future work.
 
 \begin{table}[t]
 \caption{Selectivity frontier, TAIL test ($n=1175$, \texttt{scripts/14}). Each policy treats \emph{exactly} $X\%$ of queries with Static QE (an intervention quota, not a cap), ranked by true benefit (oracle) or verifier score (verifier), rest at BM25; mean nDCG@10 gain over always-BM25. Oracle gain need not be monotone in $X$: past the fraction treatment truly helps, it is forced onto harmful queries too. \% column: verifier gain as a fraction of oracle gain.}
@@ -703,19 +755,29 @@ episodes, an always-accept ablation against the real controller.
 \subsection{A Defect That Changed the Answer}
 \label{sec:defect}
 
-An early pass found the reranker-disabled fault essentially
-undetectable (recall $0.185$) while the other two looked strong.
-Tracing this revealed a real defect: the reranked ranking was
-computed, at real latency cost, but never actually applied to the
-accepted ranking --- disabling the reranker was mechanically a no-op.
-Fixing it exposed a second, entangled defect: the verifier's telemetry
-was still computed from the pre-rerank ranking. We corrected both and
-re-ran calibration to confirm the deployed verifier did not need
-retraining (corrected Pearson $r=0.146$ vs.\ $0.134$). We report this
-because a component computed purely for observability is
+An early diagnostic pass --- an $n{=}149$--$150$-per-fault-type pilot
+on TAIL \emph{validation}, never test --- found the reranker-disabled
+fault essentially undetectable (recall $0.185$) while the other two
+looked strong. Tracing this revealed a real defect: the reranked
+ranking was computed, at real latency cost, but never actually applied
+to the accepted ranking --- disabling the reranker was mechanically a
+no-op regardless of what the fault-injection code did. Fixing it
+exposed a second, entangled defect: the verifier's telemetry was still
+computed from the pre-rerank ranking. We corrected both, re-ran
+calibration to confirm the deployed verifier did not need retraining
+(corrected Pearson $r=0.146$ vs.\ $0.134$), and only then ran the full
+$n{=}1175$ TAIL \emph{test} replication reported in
+Table~\ref{tab:rq3} --- this fault-injection study's single frozen
+touch, on the pipeline with this fix and Section~\ref{sec:bm25-fix}'s
+baseline correction both already applied. (The BM25 fix is a shared
+upstream component; its correction is why the numbers below differ
+from an earlier, pre-fix full-scale run --- disclosed, not discarded,
+per the protocol carve-out in Section~\ref{sec:protocol}.) We report
+this because a component computed purely for observability is
 architecturally easy to leave disconnected from the outcome it
 explains, and the error looked coherent --- unrealistically strong ---
-until an implausible near-zero effect prompted investigation.
+until an implausible near-zero effect on the validation pilot, not a
+test result, prompted investigation.
 
 \subsection{Frozen Results}
 
@@ -851,7 +913,12 @@ $0.552$ on TAIL (95\% CI $[0.518,0.586]$) to $0.234$ on TORSO
 ($[0.189,0.281]$) and $0.143$ on HEAD ($[0.107,0.180]$) --- both CIs
 entirely \emph{below} chance, anti-correlated with true utility, not
 merely uninformative. A verifier calibrated on one frequency regime
-does not just fail to add value in another; its ranking inverts. These
+does not just fail to add value in another; its ranking inverts. This
+is the cost of Section~\ref{sec:controller}'s qrel-dependent
+calibration made concrete: the weights are an artifact of TAIL's
+click-label distribution specifically, not a domain-general signal,
+and qrel-free \emph{inference} does nothing to protect against that
+regime mismatch. These
 HEAD/TORSO estimates use fixed $n{=}400$ subsets for comparability
 across splits (unlike TAIL's full $n{=}1175$), so read them as evidence
 of ranking inversion rather than precise bucket-level performance
@@ -936,7 +1003,10 @@ caught the first, distrusting a too-good result caught the second.
 
 The oracle ceiling (Section~\ref{sec:oracle}) is retrospective, using
 test-set click labels directly --- a valid upper bound, never
-deployable. The generator is a locally hosted, quantized 2--3B
+deployable, and, on TripClick specifically, unstable across splits
+(validation oracle more than double the test figure, \texttt{scripts/30});
+read it as directional evidence of headroom, not a tight bound. The
+generator is a locally hosted, quantized 2--3B
 parameter model under a two-call budget; a larger generator might
 change RQ1's ceiling or RQ2's null result. Cross-split robustness
 covers TripClick's three buckets, and the core detection-vs-actionability
