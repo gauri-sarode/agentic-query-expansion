@@ -427,8 +427,9 @@ features) against three model classes each (fixed-weight, 5-fold CV
 linear, 5-fold CV GBDT), under Pearson correlation (Table~\ref{tab:rq1}),
 to characterize the detection ceiling rather than accept the first
 plausible fit --- never itself reported as evidence the signal
-generalizes (Section~\ref{sec:rq1} does that separately, from one
-frozen touch of test). Recovery thresholds are calibrated the same
+generalizes (Section~\ref{sec:rq1} does that separately, from a single
+evaluation on test under the frozen configuration, not repeated or
+selected among). Recovery thresholds are calibrated the same
 way, from candidate cutoffs on validation.
 
 \subsection{Metrics}
@@ -478,7 +479,7 @@ per Section~\ref{sec:protocol}: no decision is conditioned on test
 performance.
 
 \begin{table}[t]
-\caption{RQ1's frozen results: both models evaluated \emph{once} on withheld TAIL test ($n=1157$), never touched during selection. Bracketed values are bootstrap 95\% CIs (\texttt{scripts/17}).}
+\caption{RQ1's frozen results: both models evaluated on withheld TAIL test ($n=1157$) under the frozen, corrected configuration; no subsequent model selection was conditioned on these results. Bracketed values are bootstrap 95\% CIs (\texttt{scripts/17}).}
 \label{tab:rq1-test}
 \centering
 \begin{tabular}{lc}
@@ -510,17 +511,20 @@ prior, cheaper question uses only pre-action telemetry: is unexpanded
 retrieval already unhealthy? We build a second model from the same
 eight retrieval-telemetry features, labeling a query ``poor'' when
 BM25 surfaces zero relevant documents in the top 10 (test prevalence
-$0.450$), selected by 5-fold CV on validation and touched once on
-frozen test, identically to Section~\ref{sec:calib-method}'s protocol
---- Table~\ref{tab:rq1-test}'s last row.
+$0.450$), selected by 5-fold CV on validation and evaluated on frozen
+test under that fixed configuration, with no subsequent selection
+conditioned on the result, identically to
+Section~\ref{sec:calib-method}'s protocol --- Table~\ref{tab:rq1-test}'s
+last row.
 
 On frozen test, telemetry is moderately predictive of
 \emph{whether} retrieval is failing
 ($\text{AUC}=0.649$, 95\% CI $[0.618,0.680]$) but markedly weaker at
 predicting whether a \emph{specific candidate action fixes it}
-($\text{AUC}=0.552$, 95\% CI $[0.518,0.586]$) --- both frozen
-single-touch test numbers from the same features and protocol, not the
-same result at different noise levels. Non-overlapping CIs alone don't
+($\text{AUC}=0.552$, 95\% CI $[0.518,0.586]$) --- both evaluated once
+under the same frozen, corrected features and protocol, with no
+selection conditioned on either outcome, not the same result at
+different noise levels. Non-overlapping CIs alone don't
 formally test the difference; a paired bootstrap on the $n{=}1157$
 acted-upon queries (failure AUC on this subset: $0.643$) gives
 $+0.0905$, 95\% CI $[+0.0446,+0.1361]$, excluding zero
@@ -570,7 +574,9 @@ to this weakness.
 \end{tikzpicture}
 \caption{RQ1's frozen result: ROC and precision-recall curves for the
 selected verifier's score against true harm (nDCG@10 delta $<0$) on
-withheld TAIL \emph{test} ($n=1157$, single touch). The curve sits
+withheld TAIL \emph{test} ($n=1157$), evaluated once under the frozen
+configuration with no subsequent selection conditioned on the result.
+The curve sits
 consistently, but only modestly, above the no-skill baseline (dashed)
 in both panels.}
 \label{fig:roc-pr}
@@ -997,10 +1003,11 @@ TripClick's, refit since corpus-specific). An initial $n{=}600$ pilot
 touch of test --- analogous to Section~\ref{sec:protocol}'s own
 TripClick pilot --- was directionally consistent but too imprecise to
 resolve the ordering (action-utility AUC CI straddled chance). We
-therefore ran the same frozen pipeline, unchanged, as a single-touch
+therefore ran the same frozen pipeline, unchanged, exactly once as a
 confirmatory test on the entire remaining, disjoint pool of $2{,}052$
-never-before-touched NQ queries, reported in full regardless of
-outcome; the $n{=}600$ pilot is not pooled into it.
+never-before-touched NQ queries, with no decision conditioned on the
+outcome, reported in full regardless of what it showed; the $n{=}600$
+pilot is not pooled into it.
 Table~\ref{tab:nq} reports this $n{=}2{,}052$ result: as on TripClick,
 Static QE does not significantly beat BM25 despite oracle-capturable
 headroom ($p<0.001$), and the same ordering replicates on the disjoint
@@ -1017,7 +1024,7 @@ disjoint $2{,}052$-query touch.
 
 \begin{table}[t]
 \centering
-\caption{TripClick TAIL vs.\ BEIR NQ~\cite{beir,natural-questions} (frozen, single-touch, $n{=}2{,}052$; pilot/protocol details in Section~\ref{sec:nq}). Bootstrap 95\% CIs. NS: crosses zero. *: $p<0.001$.}
+\caption{TripClick TAIL vs.\ BEIR NQ~\cite{beir,natural-questions} ($n{=}2{,}052$ NQ confirmatory queries, evaluated once with no decision conditioned on the outcome; pilot/protocol details in Section~\ref{sec:nq}). Bootstrap 95\% CIs. NS: crosses zero. *: $p<0.001$.}
 \label{tab:nq}
 \scriptsize
 \renewcommand{\arraystretch}{0.85}
