@@ -52,14 +52,15 @@ saishsureshsali@gmail.com}
 LLM query expansion is typically applied unconditionally, despite
 evidence it can be net-harmful on a measurable fraction of queries. We
 formulate expansion as a bounded, observable agentic decision: observe
-telemetry, act, verify before committing. Our central finding: qrel-free
-telemetry recorded \emph{before} an action is reasonably predictive of
+telemetry, act, verify before committing. Our central finding:
+telemetry available without relevance judgments at inference time,
+recorded \emph{before} an action, is reasonably predictive of
 retrieval failure (AUC $0.649$), but recorded \emph{after} the action,
 it is markedly weaker at telling whether that action helped (AUC
 $0.552$). Detection is not actionability. Neither a static expansion
 pipeline nor a closed-loop recovery agent beats a properly-tuned
-retriever on ordinary queries, despite a retrospective oracle showing
-uncaptured headroom ($+0.0246$ nDCG@10) our qrel-free verifier largely
+retriever on ordinary queries, despite a retrospective oracle
+indicating uncaptured headroom ($+0.0246$ nDCG@10) our verifier largely
 cannot exploit. A six-fault perturbation analysis shows this gap is
 per-fault, with distinct, interpretable telemetry signatures. The same
 ordering replicates on an independent second corpus, BEIR Natural
@@ -339,18 +340,25 @@ characterization unsuited to an out-of-sample generalization claim. We
 froze a stricter protocol instead, in a committed config rather than
 left implicit: TAIL \emph{validation} may be used for any
 retrieval-config, verifier, or threshold decision; TAIL \emph{test} may
-be touched at most once per research question, purely for evaluation,
-after every upstream decision is frozen, with no decision afterward
-conditioned on a test-set outcome. Implementation defects that break
-the described apparatus itself are a distinct case from an
-analysis-conditioned decision: when one is found (Sections~\ref{sec:bm25-fix},
-\ref{sec:defect}), it is diagnosed on validation evidence --- never by
-iterating on a test-set outcome --- and, once fixed, every research
-question whose reported result depends on the broken component is
-evaluated on test exactly once more, under the corrected pipeline. Both
-defects found in this study were caught this way; each is reported
-below with what changed and why, rather than silently corrected. This
-discipline directly produced the paper's first finding, below.
+be touched at most once per research question for its \emph{reported}
+result, with no decision afterward conditioned on a test-set outcome.
+Implementation defects that break the described apparatus itself are a
+distinct case, and we hold them to a narrower standard than "never
+touched" rather than claim one that does not survive scrutiny: a
+defect is diagnosed because a result is self-evidently implausible (an
+ablation with no effect, a baseline far below a published reference),
+not because a plausible result was disliked, and no model, threshold,
+or feature choice is ever changed in response to what a diagnostic
+touch shows --- only the broken component itself is fixed. Both
+defects found in this study (Sections~\ref{sec:bm25-fix},
+\ref{sec:defect}) were caught this way, and both required accessing
+TAIL test more than once as a direct, disclosed consequence: a
+reduced-scale diagnostic touch under a broken implementation, then one
+full-scale evaluation under the corrected pipeline. We report the
+complete access history for each, including what the pre-fix numbers
+were, rather than assert a single-touch claim the history does not
+support. This discipline directly produced the paper's first finding,
+below.
 
 \subsection{A Corrected Retrieval Baseline}
 \label{sec:bm25-fix}
@@ -583,11 +591,12 @@ BM25 only & 0.3152 & 0.7750 & 0.3014 \\
 BM25 + rerank, no QE & 0.2850$^\dagger$ & 0.7750 & 0.2701 \\
 BM25 + QE, no rerank & 0.2992$^\ddagger$ & 0.7716 & 0.2856 \\
 Static QE (QE + rerank) & 0.3159 & 0.7759 & 0.2993 \\
+Failure-selective QE$^\S$ & 0.3179 & 0.7749 & 0.3019 \\
 Agent & 0.3161 & 0.7770 & 0.3015 \\
 \bottomrule
 \end{tabular}
 \\[0.5pt]
-\footnotesize $\dagger$: significantly below BM25 only, $-0.0302$ [$-0.0447,-0.0154$], $p<0.001$. $\ddagger$: significantly below BM25 only, $-0.0160$ [$-0.0237,-0.0086$], $p<0.001$. QE $\times$ rerank interaction (paired bootstrap, \texttt{scripts/13}): $+0.0468$ [$+0.0303,+0.0630$], excludes zero.
+\footnotesize $\dagger$: significantly below BM25 only, $-0.0302$ [$-0.0447,-0.0154$], $p<0.001$. $\ddagger$: significantly below BM25 only, $-0.0160$ [$-0.0237,-0.0086$], $p<0.001$. QE $\times$ rerank interaction (paired bootstrap, \texttt{scripts/13}): $+0.0468$ [$+0.0303,+0.0630$], excludes zero. $\S$: routes to Static QE iff pre-action failure probability exceeds a validation-median threshold, no post-action verifier or agent loop (\texttt{scripts/31}); gain vs.\ BM25 $+0.0027$ [$-0.0023,+0.0079$], not significant.
 \end{table}
 
 Once BM25 is corrected (Section~\ref{sec:bm25-fix}), the comparison
@@ -619,6 +628,27 @@ close to neutral, not one component compensating for the other.
 \textbf{On natural queries, neither expansion flavor moves the needle
 once the retriever is competitive} --- a weaker baseline would have
 made both look like they help.
+
+RQ1's finding suggests a cheaper test: if failure detection
+(AUC $0.649$) is the strong half of the signal, does routing on it
+\emph{alone} --- no verifier, no rollback, no agent loop, just
+Static QE when the pre-action failure probability exceeds a
+validation-chosen threshold and BM25 otherwise --- do any better than
+either unconditional policy? We re-combine already-frozen per-query
+outcomes under this new, pre-specified rule (never swept to flatter
+the comparison; \texttt{scripts/31}) and add it to Table~\ref{tab:rq2}.
+Its point estimate is the best of the three real policies
+($+0.0027$ nDCG@10 vs.\ BM25, routing $48.7\%$ of queries to QE) ---
+higher than unconditional Static QE ($+0.0007$) and higher than the
+full closed-loop Agent ($+0.0009$) --- but, like both, not
+significantly different from BM25 (95\% CI $[-0.0023,+0.0079]$), nor
+significantly different from either of them directly (vs.\ Static QE:
+$+0.0020$, 95\% CI $[-0.0030,+0.0072]$; vs.\ Agent: $+0.0018$, 95\% CI
+$[-0.0041,+0.0078]$). We read this as mildly favorable to the
+failure-selective controller without treating it as established:
+detection alone gets no further than unconditional expansion or the
+full agent do, on this sample size, even though it uses the paper's
+single strongest signal and none of its weakest one.
 
 \subsection{Is There Any Headroom at All?}
 \label{sec:oracle}
@@ -674,13 +704,18 @@ more than double the frozen test figure above, with non-overlapping
 CIs. On the NQ replication, by contrast, the same comparison is far
 more stable: validation oracle $+0.0399$ vs.\ test/extension oracle
 $+0.0415$ (Section~\ref{sec:nq}). We read this as evidence that the
-oracle ceiling is a noisier, less split-stable quantity than its
-single point estimate suggests --- on TripClick specifically, not
-uniformly --- and that the reported $+0.0246$ is, if anything, the
-more conservative of the two TripClick estimates, not an inflated
-one; NQ's much closer agreement suggests the instability is tied to
-TripClick's sparser per-query click signal rather than the oracle
-definition itself. A fully debiased estimator (cross-fitting the
+oracle magnitude is substantially split-sensitive on TripClick ---
+unlike NQ, where the two nearly agree, suggesting the instability is
+tied to TripClick's sparser per-query click signal rather than the
+oracle definition itself. This discrepancy does not by itself show
+which estimate, if either, is closer to a real selector's reachable
+gain: both use per-query maximization against the same kind of sparse
+click labels they are evaluated on, so split disagreement demonstrates
+instability, not which direction the bias runs. We therefore interpret
+$+0.0246$ as directional evidence that heterogeneous per-query
+treatment effects exist, rather than as a precise estimate of
+deployable selective-expansion headroom. A fully debiased estimator
+(cross-fitting the
 selection and evaluation folds, or averaging over repeated relevance
 draws) would characterize this more precisely than a single
 cross-split comparison can, and is left for future work.
@@ -755,29 +790,53 @@ episodes, an always-accept ablation against the real controller.
 \subsection{A Defect That Changed the Answer}
 \label{sec:defect}
 
-An early diagnostic pass --- an $n{=}149$--$150$-per-fault-type pilot
-on TAIL \emph{validation}, never test --- found the reranker-disabled
-fault essentially undetectable (recall $0.185$) while the other two
-looked strong. Tracing this revealed a real defect: the reranked
-ranking was computed, at real latency cost, but never actually applied
-to the accepted ranking --- disabling the reranker was mechanically a
-no-op regardless of what the fault-injection code did. Fixing it
-exposed a second, entangled defect: the verifier's telemetry was still
-computed from the pre-rerank ranking. We corrected both, re-ran
-calibration to confirm the deployed verifier did not need retraining
-(corrected Pearson $r=0.146$ vs.\ $0.134$), and only then ran the full
-$n{=}1175$ TAIL \emph{test} replication reported in
-Table~\ref{tab:rq3} --- this fault-injection study's single frozen
-touch, on the pipeline with this fix and Section~\ref{sec:bm25-fix}'s
-baseline correction both already applied. (The BM25 fix is a shared
-upstream component; its correction is why the numbers below differ
-from an earlier, pre-fix full-scale run --- disclosed, not discarded,
-per the protocol carve-out in Section~\ref{sec:protocol}.) We report
-this because a component computed purely for observability is
+TAIL test was accessed more than once for this research question. We
+report the complete sequence rather than a single-touch claim:
+
+\begin{table}[t]
+\caption{Complete TAIL-test access history for RQ3. ``Affected final numbers?'' means whether that stage's own outcome changed any model, threshold, or analytical choice --- not whether a later, purely mechanical re-evaluation superseded it.}
+\label{tab:chronology}
+\centering
+\scriptsize
+\begin{tabular}{p{1.85cm}p{1.6cm}p{4.15cm}}
+\toprule
+Stage & Split & Affected a choice? \\
+\midrule
+Pilot fault-injection run ($n{=}150$/fault type) & TAIL test, reduced scale & No --- surfaced an implausible result (recall $0.185$ for an ablation that should degrade something), which triggered code inspection, not re-analysis \\
+Reranker-wiring fix & implementation only & N/A: a code correction, not a data-conditioned decision \\
+BM25 baseline correction & TAIL validation (selection) + one TAIL test sanity check & Yes, but pre-committed: config chosen entirely on validation; test used once to confirm, not to select (Section~\ref{sec:bm25-fix}) \\
+Full-scale replication ($n{=}1175$) & TAIL test & Yes --- this is the reported result; no further tuning followed \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Concretely: an early pilot ($n{=}150$ per fault type, TAIL test) found
+the reranker-disabled fault essentially undetectable (recall $0.185$)
+while the other two looked strong (entity injection recall $1.000$,
+gain $+0.0238$; grounding corruption recall $0.773$, gain $+0.0278$
+--- both since superseded). An ablation that disables a pipeline stage
+showing no effect at all is implausible on its face, independent of
+whether one likes or dislikes the number; tracing it revealed a real
+defect: the reranked ranking was computed, at real latency cost, but
+never actually applied to the accepted ranking --- disabling the
+reranker was mechanically a no-op regardless of what the
+fault-injection code did. Fixing it exposed a second, entangled
+defect: the verifier's telemetry was still computed from the
+pre-rerank ranking. We corrected both, re-ran calibration on TAIL
+\emph{validation} to confirm the deployed verifier did not need
+retraining (corrected Pearson $r=0.146$ vs.\ $0.134$), and then ran the
+full $n{=}1175$ TAIL \emph{test} replication reported in
+Table~\ref{tab:rq3}, with Section~\ref{sec:bm25-fix}'s baseline
+correction --- a shared upstream component --- also already applied;
+that correction is the other reason the reported numbers differ from
+the pilot. No model, threshold, or feature choice was ever changed
+because of what the pilot or the pre-BM25-fix run showed --- both
+triggered fixes to the apparatus itself, and the table above discloses
+every access rather than compressing it into ``single touch.'' We
+report this because a component computed purely for observability is
 architecturally easy to leave disconnected from the outcome it
 explains, and the error looked coherent --- unrealistically strong ---
-until an implausible near-zero effect on the validation pilot, not a
-test result, prompted investigation.
+until an implausible near-zero effect prompted investigation.
 
 \subsection{Frozen Results}
 
@@ -981,8 +1040,8 @@ is failing (AUC $0.649$) but weakly informative about whether a
 specific action on an ordinary query will fix it (AUC $0.552$). RQ2
 shows the consequence: a closed loop built on the weaker signal adds
 nothing over a matched static pipeline, and the oracle/selectivity-frontier
-analyses show $+0.0246$ nDCG@10 of headroom that the verifier reaches
-at most $12\%$ of. RQ3's attribution shows this is a per-fault property,
+analyses indicate $+0.0246$ nDCG@10 of directional headroom (Section~\ref{sec:oracle})
+that the verifier reaches at most $12\%$ of. RQ3's attribution shows this is a per-fault property,
 sharp enough in one case that the verifier reads the fault as an
 improvement. The diagnostic rule (Section~\ref{sec:diagnostic}) provides
 the clearest positive evidence: for \emph{large, structured} faults,
@@ -1033,8 +1092,9 @@ needs a stronger property the same telemetry does not deliver:
 predicting whether a specific intervention will help (action-utility
 AUC $0.552$, below chance outside its calibration split). That gap is
 why the closed-loop agent does not outperform static expansion and
-neither outperforms BM25, despite $+0.0246$ nDCG@10 of headroom going
-uncaptured. The
+neither outperforms BM25, despite a retrospective oracle indicating
+heterogeneous per-query headroom ($+0.0246$ nDCG@10 on TAIL test,
+Section~\ref{sec:oracle}). The
 recovery study shows this is a per-fault property with distinct,
 interpretable telemetry signatures --- in one case the verifier is actively misled, not merely
 blind --- and, tested on three held-out faults, supports label-free
