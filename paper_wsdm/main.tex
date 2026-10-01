@@ -207,12 +207,22 @@ AUC $\mathbf{0.649}$ & & AUC $\mathbf{0.552}$ \\
 
 \section{Result 1: Detection Is Easier Than Actionability}
 
-A failure detector, fit on eight pre-action retrieval-telemetry
-features (5-fold CV on validation, touched once on frozen test), is
-moderately predictive of whether retrieval has already failed. An
-action-utility model, using the same telemetry family but observing a
-\emph{specific} candidate action's consequences, is markedly weaker at
-predicting whether that action helped.
+A failure detector --- a logistic classifier on eight pre-action
+retrieval-telemetry features (top retrieval score, score margin, score
+entropy, query-term coverage, mean rare-term IDF, entity overlap,
+lexical result coherence, and ranking stability under a small
+controlled query perturbation) --- is moderately predictive of whether
+retrieval has already failed (5-fold CV on validation, touched once on
+frozen test). An action-utility model, observing a \emph{specific}
+candidate action's consequences through ten post-action features
+(score and coverage \emph{gains}, drift, reranker disagreement, and
+reranker-specific signals the detector does not have access to) fit by
+linear regression against the true nDCG change, is markedly weaker at
+predicting whether that action helped. The action-utility model has
+more features, including reranker signals entirely unavailable to the
+detector, yet still under-performs it --- the gap in
+Table~\ref{tab:headline} is not an artifact of the detector having a
+richer or more favorable feature set.
 
 \begin{table}[h]
 \caption{Detection vs.\ actionability AUC, both corpora. Both numbers
@@ -277,6 +287,15 @@ detector that cleanly separates failing from healthy retrieval
 (Result 1) does not, by itself, translate into a selective-expansion
 policy that reliably beats doing nothing.
 
+Cost favors the simple policy regardless. The closed-loop agent costs
+$24\%$ more generator calls (1.22 vs.\ 0.98 per query) and $36\%$
+higher mean latency (15.1s vs.\ 11.1s) than unconditional Static QE
+for no significant gain over it. Failure-selective QE, by construction,
+invokes the generator on only $48.7\%$ of queries, versus $100\%$ for
+both Static QE and the closed-loop agent --- the cheapest of the three
+real policies tested is also the one with the best point estimate,
+even though none is statistically distinguishable from the others.
+
 \section{Why Selective QE Remains Difficult}
 
 A null policy result is ambiguous: either no benefit exists to select
@@ -303,6 +322,22 @@ left for future work. The evidence as a whole points to
 \emph{action-utility prediction}, not the absence of opportunity, as
 selective QE's binding constraint.
 
+\textbf{Why the two tasks differ in difficulty.} One plausible
+explanation is what each task conditions on. Detection asks a question
+about a state that already exists and has already been fully observed:
+is \emph{this} ranking, as retrieved, adequate? Action-utility asks a
+counterfactual about a state that does not yet exist: would \emph{this
+specific}, LLM-generated rewrite have produced a better ranking than
+the one already in hand? The second question's target is itself a
+high-variance artifact --- a single sampled generation, conditioned on
+retrieved evidence the generator did not choose and may misuse --- so
+even a telemetry vocabulary rich enough to characterize the current
+state well need not characterize the effect of an intervention that
+state did not determine. This is consistent with Table~\ref{tab:headline}'s
+asymmetry despite the action-utility model's richer feature set, and
+with why gating signals in general (Section~2) struggle to double as
+treatment-effect predictors.
+
 \textbf{Limitations.} The generator is a small, locally hosted 3B-parameter
 model under a two-call budget; a larger model might shift either AUC
 or the policy comparison. Corpus coverage is two domains, one clinical
@@ -324,8 +359,8 @@ as a proxy for treatment benefit --- the two are empirically different
 problems of different difficulty, and conflating them is where
 selective QE's promise currently stalls.
 
-\textit{Experimental integrity.} All model, threshold, and
-retrieval-configuration choices were made on validation data.
+\textit{Experimental integrity.} All model, threshold, and retrieval
+configuration choices were made on validation data.
 Implementation defects surfaced during development were diagnosed from
 self-evidently implausible results and fixed before any confirmatory
 test evaluation; the complete experimental history, including every
