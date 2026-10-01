@@ -143,8 +143,15 @@ split per bucket); we report the TAIL split, click-derived labels.
 BEIR Natural Questions~\cite{beir,natural-questions} is an independent
 replication corpus, open-domain and unrelated to TripClick's clinical
 queries, with no native train/val/test partition; we carve a disjoint,
-fixed-seed (42) split ourselves and fit fresh detectors, never reusing
-TripClick's weights.
+fixed-seed (42) split ourselves (800 validation) and fit fresh
+detectors, never reusing TripClick's weights. An initial $n{=}600$
+pilot touch of test was directionally consistent with TripClick but
+too imprecise to resolve the AUC ordering on its own; we then ran the
+identical frozen pipeline, unchanged, as a single confirmatory test on
+the entire remaining, disjoint pool of $2{,}052$ never-before-touched
+NQ queries, reported here in full and never pooled with the pilot. The
+$n{=}2{,}013$ in Table~\ref{tab:headline} is this confirmatory set's
+acted-upon subset.
 
 \textbf{Retrieval failure}, the detection target, is defined as BM25
 returning zero relevant documents in its top 10 results for that
@@ -169,10 +176,16 @@ Closed-loop QE & Expand, then accept/rollback on post-action telemetry \\
 \end{center}
 
 $\tau$ is the median predicted failure probability on validation,
-fixed before touching test. Failure-selective QE uses \emph{only}
-pre-action telemetry; Closed-loop QE additionally consults post-action
-telemetry through a calibrated verifier and a bounded
-accept/rollback/replan loop.
+fixed before touching test, never swept or re-chosen against any
+reported result. Failure-selective QE uses \emph{only} pre-action
+telemetry; Closed-loop QE additionally consults post-action telemetry
+through the same action-utility model as Result 1 (Section 4), scored
+against thresholds calibrated on validation only: a sufficiently
+positive score \emph{accepts} the rewrite via reciprocal-rank fusion
+with the pre-action ranking, a sufficiently negative score
+\emph{rolls back} to the pre-action ranking, and an ambiguous score
+\emph{replans} with a different expansion operator, capped at two
+generator calls per query.
 
 \textbf{Implementation.} Sparse retrieval is BM25 over a SQLite FTS5
 index, reranked with
@@ -192,7 +205,15 @@ threshold, or retrieval decision conditioned on those outcomes;
 earlier implementation-debugging accesses to test, from fixing two
 apparatus defects mid-development, are disclosed and documented in the
 supplementary repository rather than omitted. Significance throughout
-is a paired bootstrap (10{,}000 resamples, seed $42$).
+is a paired bootstrap (10{,}000 resamples, seed $42$). Every number in
+this paper is produced by a numbered, archived script in that
+repository and is reproducible from frozen artifacts without rerunning
+the generator: Table~\ref{tab:headline}'s AUCs and paired differences
+from the frozen detection/calibration runs; Table~\ref{tab:policies}
+and Section 6's oracle, selectivity-frontier, and failure-selective
+figures from one shared frozen checkpoint, combined under each
+policy's decision rule; and Section 6's validation-oracle robustness
+check from a dedicated script that touches no test data.
 
 \begin{center}
 \small
