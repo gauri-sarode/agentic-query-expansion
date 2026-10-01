@@ -112,14 +112,27 @@ signal and the treatment-effect signal are the same predictive problem
 or two different ones of differing difficulty. We make that separation
 explicit and test it directly.
 
-\textbf{Agentic retrieval control.} ReAct~\cite{react} interleaves
-reasoning with actions and observations against external tools, the
-template for action-conditioned control generally, but with a much
-larger, open-ended action space than ours. We deliberately use a
-small, typed action space (expand or not) specifically so that the
-detection and actionability questions can be isolated and measured
-against each other, rather than folded into a single opaque policy
-decision.
+\textbf{Selective rewriting and adaptive retrieval.} Two recent,
+independent studies reach a conclusion consistent with ours through
+different mechanisms. Abe et al.~\cite{qe-fails-unfamiliar} show LLM
+QE degrades retrieval specifically when the model lacks query
+knowledge or the query is ambiguous --- evidence that unconditional
+expansion's harm is systematic, not noise, reinforcing why selective
+gating is worth attempting in the first place. Kotte~\cite{not-all-queries-need-rewriting}
+tests selective gating directly: on three BEIR domains with dense
+retrievers and prompt-only (non-grounded) rewriting, a feature-based
+gate achieves AUC $0.593$ and does not reliably beat never-rewriting,
+with an oracle ceiling of only $+3$pp ($6\%$ relative). This
+corroborates our Result 2 on an unrelated retrieval stack, rewriting
+mechanism, and domain set, strengthening the case that the difficulty
+is general rather than an artifact of either study's setup. Neither
+that work nor Adaptive-RAG~\cite{adaptive-rag}, which routes queries
+to a retrieval depth using a learned complexity classifier validated
+only on end-to-end accuracy, separately measures whether a gating
+signal's own detection accuracy matches its accuracy at predicting the
+chosen intervention's benefit. We make that decomposition explicit,
+quantify the gap directly as two different AUCs, and show it is
+significant and replicates across two further corpora.
 
 \section{Selective Query Expansion Setup}
 
@@ -132,6 +145,11 @@ replication corpus, open-domain and unrelated to TripClick's clinical
 queries, with no native train/val/test partition; we carve a disjoint,
 fixed-seed (42) split ourselves and fit fresh detectors, never reusing
 TripClick's weights.
+
+\textbf{Retrieval failure}, the detection target, is defined as BM25
+returning zero relevant documents in its top 10 results for that
+query --- a binary, click-derived judgment available without any
+model predictions, fixed identically across both corpora.
 
 \textbf{Policies compared.} All four share the same retriever,
 grounding, and generator, differing only in when/whether QE fires:
@@ -168,10 +186,13 @@ language model is never the entire decision surface, only one typed
 action within a small, fixed action space. All experiments run on a
 single consumer machine (Apple M4 MacBook Air, 16GB unified memory),
 no GPU cluster or cloud spend. All retrieval-config, detector, and
-threshold decisions are made on validation only; test is evaluated
-once per reported result under that frozen configuration, with no
-subsequent decision conditioned on the outcome. Significance
-throughout is a paired bootstrap (10{,}000 resamples, seed $42$).
+threshold decisions are made on validation only. Reported confirmatory
+results use frozen configurations, with no subsequent model,
+threshold, or retrieval decision conditioned on those outcomes;
+earlier implementation-debugging accesses to test, from fixing two
+apparatus defects mid-development, are disclosed and documented in the
+supplementary repository rather than omitted. Significance throughout
+is a paired bootstrap (10{,}000 resamples, seed $42$).
 
 \begin{center}
 \small
@@ -220,8 +241,8 @@ population, and a paired bootstrap on the acted-upon subset confirms
 the difference itself, not just non-overlapping point estimates. This
 ordering --- pre-action telemetry beats post-action telemetry at
 predicting intervention utility --- replicates on an open-domain
-corpus unrelated to TripClick's clinical queries, ruling out a
-TripClick-specific artifact.
+corpus unrelated to TripClick's clinical queries, providing evidence
+that the ordering is not specific to TripClick.
 
 \section{Result 2: Does Detection Enable Selective QE?}
 
