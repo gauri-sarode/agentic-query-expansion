@@ -266,7 +266,13 @@ predicting whether that action helped. The action-utility model has
 more features, including reranker signals entirely unavailable to the
 detector, yet still under-performs it --- the gap in
 Table~\ref{tab:headline} is not an artifact of the detector having a
-richer or more favorable feature set.
+richer or more favorable feature set. It is also not an artifact of
+comparing a classifier against a regressor: refitting the
+action-utility model directly as a logistic classifier on the same ten
+features and the identical val/test protocol gives AUC $0.563$, 95\%
+CI $[0.529,0.598]$ (\texttt{scripts/32}) --- indistinguishable from the
+regression-based $0.552$ and still clearly below detection's CI on
+this corpus, with no overlap.
 
 \begin{table}[h]
 \caption{Detection vs.\ actionability AUC, both corpora. Both numbers
@@ -308,12 +314,12 @@ that the ordering is not specific to TripClick.
     bar width=9pt,
     ymin=0.45, ymax=0.75,
     ylabel={AUC},
-    ylabel style={font=\scriptsize},
+    ylabel style={font=\footnotesize},
     xtick={1,3},
     xticklabels={TripClick,BEIR NQ},
     xmin=0.3, xmax=3.7,
-    tick label style={font=\scriptsize},
-    legend style={font=\tiny,draw=none,at={(0.5,1.03)},anchor=south,
+    tick label style={font=\footnotesize},
+    legend style={font=\footnotesize,draw=none,at={(0.5,1.05)},anchor=south,
         legend columns=2,column sep=4pt},
     axis line style={draw=black},
 ]
@@ -384,11 +390,11 @@ even though none is statistically distinguishable from the others.
     bar width=13pt,
     ymin=0.305, ymax=0.328,
     ylabel={nDCG@10},
-    ylabel style={font=\scriptsize},
+    ylabel style={font=\footnotesize},
     symbolic x coords={BM25,Static,Fail.-sel.,Closed-loop},
     xtick=data,
-    x tick label style={font=\scriptsize},
-    tick label style={font=\scriptsize},
+    x tick label style={font=\footnotesize},
+    tick label style={font=\footnotesize},
     enlarge x limits=0.22,
     axis line style={draw=black},
 ]
