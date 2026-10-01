@@ -1,0 +1,334 @@
+\documentclass[sigconf,anonymous,review]{acmart}
+
+\acmConference[WSDM '27]{The 20th ACM International Conference on Web Search and Data Mining}{February 2027}{Hong Kong}
+\settopmatter{printacmref=false}
+\renewcommand\footnotetextcopyrightpermission[1]{}
+\pagestyle{plain}
+
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{xcolor}
+
+\begin{document}
+
+\title{Detection Is Not Actionability: When Should LLM Query Expansion Be Applied?}
+
+\author{Anonymous Author(s)}
+\affiliation{\institution{Affiliation withheld for double-blind review}}
+
+\begin{abstract}
+LLM query expansion can improve retrieval, but applying it
+unconditionally also harms a measurable fraction of queries. A natural
+response is to apply it selectively: expand only queries where
+retrieval is predicted to be failing. We test this directly. Qrel-free
+retrieval telemetry, recorded before any action, is a reasonably
+effective detector of retrieval failure (AUC $0.649$ on TripClick
+TAIL test, replicating at $0.680$ on an independent BEIR Natural
+Questions split). The same kind of telemetry, recorded after a specific
+expansion action, is markedly worse at predicting whether that action
+helped (AUC $0.552$ on TripClick, $0.556$ on NQ) --- a statistically
+significant gap on both corpora. We then test the obvious consequence:
+does routing expansion on the easier signal alone, a failure-selective
+controller, recover selective-QE's promise? It does not: the
+failure-selective policy's point estimate is the best of three real
+policies tested, but is not significantly different from unconditional
+expansion, from doing nothing, or from a more expensive closed-loop
+agent that also consults post-action telemetry. Detecting that
+retrieval needs help is not the same problem as knowing what will
+actually help it, and the gap between the two is where selective query
+expansion's promise currently stalls.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+
+Large language models can generate useful pseudo-documents,
+alternative phrasings, and disambiguating context for a search query,
+and corpus-grounded expansion --- conditioning the rewrite on
+retrieved evidence rather than the query alone --- improves on naive
+query-only rewriting. But LLM query expansion (QE) applied
+unconditionally can also be net-harmful on a measurable fraction of
+queries, particularly ones that are already well served or already
+underspecified in a way expansion cannot fix. Existing work establishes
+that QE \emph{can} help; it leaves open when a system should trust an
+expansion enough to apply it, and in practice QE is deployed either
+unconditionally or not at all.
+
+The natural fix is selective expansion: identify queries where
+retrieval is already failing, and expand only those. This requires two
+different predictive judgments, which prior query-performance-prediction
+and selective-expansion work has not clearly separated:
+
+\[
+\underbrace{P(\text{retrieval failure} \mid x)}_{\text{detection}}
+\quad\neq\quad
+\underbrace{P(\Delta\text{nDCG} > 0 \mid x, a)}_{\text{actionability}}
+\]
+
+Detection asks whether something is already wrong. Actionability asks
+whether a \emph{specific} intervention will fix it. A system could
+answer the first question well and the second poorly, in which case
+selective expansion gated on detection alone would not actually
+recover expansion's promise --- it would route the right queries to an
+intervention whose benefit is still a coin flip.
+
+\textbf{Research question.} Can retrieval telemetry that identifies
+poorly served queries also determine when LLM query expansion should
+be applied?
+
+\textbf{Contributions.}
+\textbf{(C1) Detection $\neq$ actionability.} Pre-action retrieval
+telemetry identifies failing retrieval significantly better than
+post-action telemetry predicts whether a specific QE action helped,
+replicating on an independent second corpus.
+\textbf{(C2) Detection alone does not solve selective QE.} A
+failure-selective controller built directly on the stronger signal has
+the best point estimate of the policies tested, but does not
+significantly outperform unconditional QE, BM25 alone, or a more
+expensive closed-loop agent.
+\textbf{(C3) The gap is not corpus-specific.} TripClick's
+detection-vs-actionability ordering ($0.649$ vs.\ $0.552$) replicates
+on BEIR Natural Questions ($0.680$ vs.\ $0.556$), an open-domain
+corpus unrelated to TripClick's clinical queries.
+
+\section{Related Work}
+
+\textbf{LLM query expansion.} Query2doc~\cite{query2doc} generates
+pseudo-documents from an LLM and appends them to the query; MuGI
+\cite{mugi} generates and fuses multiple expansions. Both treat
+expansion as unconditional, one-shot generation, conditioning on
+neither retrieval-state telemetry nor a harmful rewrite's recoverability.
+
+\textbf{Query performance prediction and selective expansion.} Classic
+query performance prediction~\cite{qpp-clarity} and selective query
+expansion~\cite{selective-qe} ask whether a query is hard, or likely to
+benefit from expansion, from retrieval signal alone --- the same
+underlying question as our detection task. Neither separates that
+question from the distinct, harder one of whether a \emph{specific}
+candidate action will help: prior selective-QE evaluations report
+whether expansion was gated well in aggregate, not whether the gating
+signal and the treatment-effect signal are the same predictive problem
+or two different ones of differing difficulty. We make that separation
+explicit and test it directly.
+
+\textbf{Agentic retrieval control.} ReAct~\cite{react} interleaves
+reasoning with actions and observations against external tools, the
+template for action-conditioned control generally, but with a much
+larger, open-ended action space than ours. We deliberately use a
+small, typed action space (expand or not) specifically so that the
+detection and actionability questions can be isolated and measured
+against each other, rather than folded into a single opaque policy
+decision.
+
+\section{Selective Query Expansion Setup}
+
+\textbf{Datasets.} TripClick~\cite{tripclick} is the primary benchmark:
+1{,}523{,}878 documents, split into head/torso/tail query-frequency
+buckets, each with train/validation/test splits (1{,}175 queries per
+split per bucket); we report the TAIL split, click-derived labels.
+BEIR Natural Questions~\cite{beir,natural-questions} is an independent
+replication corpus, open-domain and unrelated to TripClick's clinical
+queries, with no native train/val/test partition; we carve a disjoint,
+fixed-seed (42) split ourselves and fit fresh detectors, never reusing
+TripClick's weights.
+
+\textbf{Policies compared.} All four share the same retriever,
+grounding, and generator, differing only in when/whether QE fires:
+
+\begin{center}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+Policy & Decision rule \\
+\midrule
+BM25 & Never expand \\
+Static QE & Always expand \\
+Failure-selective QE & Expand iff $P(\text{fail}\mid x) > \tau$ \\
+Closed-loop QE & Expand, then accept/rollback on post-action telemetry \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+$\tau$ is the median predicted failure probability on validation,
+fixed before touching test. Failure-selective QE uses \emph{only}
+pre-action telemetry; Closed-loop QE additionally consults post-action
+telemetry through a calibrated verifier and a bounded
+accept/rollback/replan loop.
+
+\textbf{Implementation.} Sparse retrieval is BM25 over a SQLite FTS5
+index, reranked with
+\texttt{cross-\allowbreak encoder/\allowbreak ms-marco-\allowbreak
+MiniLM-\allowbreak L6-\allowbreak v2}~\cite{minilm-cross-encoder}, a
+cross-encoder fine-tuned on MS MARCO passage ranking. Generation uses
+\texttt{qwen2.5:3b}, 4-bit quantized (Q4\_K\_M), served locally via
+Ollama with greedy decoding (temperature $0$), capped at two calls per
+query episode with a $32$--$64$ token structured output --- the
+language model is never the entire decision surface, only one typed
+action within a small, fixed action space. All experiments run on a
+single consumer machine (Apple M4 MacBook Air, 16GB unified memory),
+no GPU cluster or cloud spend. All retrieval-config, detector, and
+threshold decisions are made on validation only; test is evaluated
+once per reported result under that frozen configuration, with no
+subsequent decision conditioned on the outcome. Significance
+throughout is a paired bootstrap (10{,}000 resamples, seed $42$).
+
+\begin{center}
+\small
+\begin{tabular}{@{}ccc@{}}
+\multicolumn{3}{c}{\textit{Retrieval telemetry}} \\[2pt]
+\multicolumn{3}{c}{$\big\downarrow$} \\[2pt]
+\textit{Failure detection} & \hspace{1cm} & \textit{Action utility} \\
+``Is retrieval bad?'' & & ``Did QE help?'' \\
+AUC $\mathbf{0.649}$ & & AUC $\mathbf{0.552}$ \\
+\end{tabular}
+\end{center}
+
+\section{Result 1: Detection Is Easier Than Actionability}
+
+A failure detector, fit on eight pre-action retrieval-telemetry
+features (5-fold CV on validation, touched once on frozen test), is
+moderately predictive of whether retrieval has already failed. An
+action-utility model, using the same telemetry family but observing a
+\emph{specific} candidate action's consequences, is markedly weaker at
+predicting whether that action helped.
+
+\begin{table}[h]
+\caption{Detection vs.\ actionability AUC, both corpora. Both numbers
+per corpus are frozen, evaluated once under the corpus's fixed
+configuration.}
+\label{tab:headline}
+\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Task & TripClick & BEIR NQ & Difference \\
+\midrule
+Failure detection & 0.649 & 0.680 & --- \\
+QE action utility & 0.552 & 0.556 & --- \\
+\midrule
+Paired difference & $+0.091$* & $+0.119$* & \\
+\bottomrule
+\end{tabular}
+\\[2pt]
+\footnotesize *: 95\% CI excludes zero (TripClick: $[+0.045,+0.136]$,
+$n{=}1157$; NQ: $[+0.076,+0.162]$, $n{=}2013$).
+\end{table}
+
+The gap is not an artifact of comparing different noise levels: both
+numbers per corpus come from the same features, protocol, and
+population, and a paired bootstrap on the acted-upon subset confirms
+the difference itself, not just non-overlapping point estimates. This
+ordering --- pre-action telemetry beats post-action telemetry at
+predicting intervention utility --- replicates on an open-domain
+corpus unrelated to TripClick's clinical queries, ruling out a
+TripClick-specific artifact.
+
+\section{Result 2: Does Detection Enable Selective QE?}
+
+The natural response to Result 1 is: detection is hard enough,
+fine --- just expand the queries the detector flags as failing. We
+test this directly rather than assume it follows.
+
+\begin{table}[h]
+\caption{TripClick TAIL test ($n{=}1175$), frozen configuration. Gain
+is mean nDCG@10 relative to BM25 alone; NS: 95\% CI crosses zero.}
+\label{tab:policies}
+\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Policy & nDCG@10 & $\Delta$ vs.\ BM25 & \\
+\midrule
+BM25 & 0.3152 & --- & \\
+Static QE & 0.3159 & $+0.0007$ & NS \\
+Failure-selective QE & 0.3179 & $+0.0027$ & NS \\
+Closed-loop QE & 0.3161 & $+0.0009$ & NS \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Failure-selective QE's point estimate is the best of the three real
+policies --- higher than unconditional Static QE and higher than the
+far more expensive closed-loop agent --- while routing only $48.7\%$
+of queries to expansion. But none of the three is significantly
+different from BM25, and failure-selective QE is not significantly
+different from either Static QE or the closed-loop agent directly. The
+detector that cleanly separates failing from healthy retrieval
+(Result 1) does not, by itself, translate into a selective-expansion
+policy that reliably beats doing nothing.
+
+\section{Why Selective QE Remains Difficult}
+
+A null policy result is ambiguous: either no benefit exists to select
+for, or a selector exists but ours cannot find it. A retrospective
+oracle --- per query, the better of BM25 or Static QE under true click
+labels, never deployable --- separates these: it gains $+0.0246$
+nDCG@10 over BM25 ($p<0.001$), while unconditional Static QE gains only
+$+0.0007$. Static QE helps $11.6\%$ of queries and harms $10.6\%$, a
+real, roughly balanced mix a perfect selector could exploit. At a
+$20\%$ intervention quota, oracle selection reaches $+0.0246$;
+verifier-score selection reaches only $+0.0025$, about $10\%$ of the
+oracle's gain. This oracle is itself susceptible to selection
+optimism --- it selects per query using the same sparse click labels
+it is evaluated on. Checking the identical oracle definition on TAIL
+\emph{validation}, never used to select the oracle itself, shows the
+magnitude is split-sensitive on TripClick: $+0.0533$ nDCG@10 there
+versus $+0.0246$ on test, non-overlapping CIs, while on NQ the two
+nearly agree ($+0.0399$ validation vs.\ $+0.0415$ confirmatory test).
+We therefore read the oracle as directional evidence that
+heterogeneous, query-specific treatment effects exist, not as a
+precise, deployable bound; a fully debiased estimator (cross-fitting
+the selection and evaluation folds, or repeated relevance draws) is
+left for future work. The evidence as a whole points to
+\emph{action-utility prediction}, not the absence of opportunity, as
+selective QE's binding constraint.
+
+\textbf{Limitations.} The generator is a small, locally hosted 3B-parameter
+model under a two-call budget; a larger model might shift either AUC
+or the policy comparison. Corpus coverage is two domains, one clinical
+and one open-domain; broader coverage remains untested. Click-derived
+labels are an imperfect relevance proxy inherited from TripClick.
+
+\section{Conclusion}
+
+Detecting that retrieval has already failed is significantly easier
+than predicting whether a specific LLM query-expansion action will fix
+it, on two unrelated corpora. As a direct consequence, neither
+unconditional QE, a failure-selective controller built on the stronger
+detection signal, nor a more expensive closed-loop policy that also
+consults post-action telemetry significantly improves a properly-tuned
+retriever on ordinary queries. Selective query expansion research
+should therefore evaluate intervention-utility prediction directly,
+rather than treating query difficulty or retrieval-failure detection
+as a proxy for treatment benefit --- the two are empirically different
+problems of different difficulty, and conflating them is where
+selective QE's promise currently stalls.
+
+\textit{Experimental integrity.} All model, threshold, and
+retrieval-configuration choices were made on validation data.
+Implementation defects surfaced during development were diagnosed from
+self-evidently implausible results and fixed before any confirmatory
+test evaluation; the complete experimental history, including every
+implementation-debugging touch, is documented in the supplementary
+repository rather than omitted.
+
+\section*{Ethical Considerations}
+
+All data used (TripClick, BEIR Natural Questions) are existing public
+or access-granted research benchmarks, used under their stated
+licenses; TripClick's click logs are aggregate, de-identified search
+interactions released for non-commercial research, and we do not
+attempt to re-identify individual searchers. No new human-subjects
+data was collected. The generator is a small, locally hosted model
+used only for corpus-grounded query rewriting within a bounded action
+space, never for open-ended generation or decisions outside retrieval.
+Our central finding --- that detecting retrieval failure is easier
+than predicting whether a specific intervention helps --- is a caution
+against deploying LLM query expansion (or similar generative
+interventions) on the strength of a failure/difficulty detector alone;
+we see this as reducing the risk of over-trusting such systems, not
+introducing new risk.
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+
+\end{document}
