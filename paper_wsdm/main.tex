@@ -272,7 +272,11 @@ action-utility model directly as a logistic classifier on the same ten
 features and the identical val/test protocol gives AUC $0.563$, 95\%
 CI $[0.529,0.598]$ (\texttt{scripts/32}) --- indistinguishable from the
 regression-based $0.552$ and still clearly below detection's CI on
-this corpus, with no overlap.
+this corpus, with no overlap. A non-linear model class does not close
+it either: a gradient-boosted alternative was tried on this same
+feature set during development and scored worse under 5-fold CV
+(Pearson $r=0.045$ vs.\ $0.134$ for linear regression), so the deployed
+model was never swapped in.
 
 \begin{table}[h]
 \caption{Detection vs.\ actionability AUC, both corpora. Both numbers
@@ -450,9 +454,16 @@ versus $+0.0246$ on test, non-overlapping CIs, while on NQ the two
 nearly agree ($+0.0399$ validation vs.\ $+0.0415$ confirmatory test).
 We therefore read the oracle as directional evidence that
 heterogeneous, query-specific treatment effects exist, not as a
-precise, deployable bound; a fully debiased estimator (cross-fitting
-the selection and evaluation folds, or repeated relevance draws) is
-left for future work. The evidence as a whole points to
+precise, deployable bound. We checked whether a more formally debiased
+estimate is possible from this benchmark rather than assuming it is:
+TripClick's public release provides only already-binarized click
+labels, even in its ``raw'' qrels, with no underlying click counts or
+impression data to bootstrap or split for a repeated-draws correction,
+and no independent expert-judgment source (unlike, e.g., TREC DL) to
+substitute in its place. A debiased estimate is future work
+conditional on access to richer label data this benchmark does not
+publicly provide, not a gap we can close with the data at hand. The
+evidence as a whole points to
 \emph{action-utility prediction}, not the absence of opportunity, as
 selective QE's binding constraint.
 
