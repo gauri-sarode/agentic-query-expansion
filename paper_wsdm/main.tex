@@ -8,6 +8,8 @@
 \usepackage{booktabs}
 \usepackage{multirow}
 \usepackage{xcolor}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
 
 \begin{document}
 
@@ -316,6 +318,39 @@ invokes the generator on only $48.7\%$ of queries, versus $100\%$ for
 both Static QE and the closed-loop agent --- the cheapest of the three
 real policies tested is also the one with the best point estimate,
 even though none is statistically distinguishable from the others.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.95\linewidth,
+    height=0.6\linewidth,
+    ybar,
+    bar width=13pt,
+    ymin=0.305, ymax=0.328,
+    ylabel={nDCG@10},
+    ylabel style={font=\scriptsize},
+    symbolic x coords={BM25,Static,Fail.-sel.,Closed-loop},
+    xtick=data,
+    x tick label style={font=\scriptsize},
+    tick label style={font=\scriptsize},
+    enlarge x limits=0.22,
+    axis line style={draw=black},
+]
+\addplot[fill=gray!35,draw=black] coordinates
+    {(BM25,0.3152) (Static,0.3159) (Fail.-sel.,0.3179) (Closed-loop,0.3161)};
+\draw[thick] (axis cs:Static,0.3086) -- (axis cs:Static,0.3231);
+\draw[thick] (axis cs:Fail.-sel.,0.3129) -- (axis cs:Fail.-sel.,0.3231);
+\draw[thick] (axis cs:Closed-loop,0.3083) -- (axis cs:Closed-loop,0.3239);
+\draw[dashed,gray] (axis cs:BM25,0.3152) -- (axis cs:Closed-loop,0.3152);
+\end{axis}
+\end{tikzpicture}
+\caption{Table~\ref{tab:policies} as bars (BM25's bar has no error
+range, shown as the reference); the other three show the gain's 95\%
+CI relative to BM25, translated into absolute nDCG@10. All three
+ranges cross BM25's reference line.}
+\label{fig:policies}
+\end{figure}
 
 \section{Why Selective QE Remains Difficult}
 
