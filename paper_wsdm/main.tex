@@ -324,9 +324,14 @@ than independently significant here. One difference from the full-scale
 BM25 result is worth flagging rather than smoothing over: intervening
 looked \emph{more} net-harmful under this dense pipeline (harmed
 $29\%$ vs.\ helped $15$--$19\%$ across splits) than the roughly
-balanced mix Static QE shows on BM25 (Section 6). We
-read this pilot as suggestive that the ordering is not purely a BM25
-artifact, not as a confirmed replication at the scale of
+balanced mix Static QE shows on BM25 (Section 6). One plausible reading
+is that dense retrieval already captures some of what lexical
+expansion is for (semantic/vocabulary matching BM25 needs an explicit
+rewrite to get), narrowing the margin where a rewrite still helps
+without directly increasing how often it hurts; we have not tested
+this explanation directly and flag it as a hypothesis, not a finding.
+We read this pilot as suggestive that the ordering is not purely a
+BM25 artifact, not as a confirmed replication at the scale of
 Table~\ref{tab:headline}.
 
 \begin{figure}[t]
@@ -352,9 +357,17 @@ Table~\ref{tab:headline}.
 \addplot[fill=gray!15,draw=black] coordinates {(1.2,0.552) (3.2,0.556)};
 \legend{Detection,Action-utility}
 \draw[thick] (axis cs:0.8,0.618) -- (axis cs:0.8,0.680);
+\draw[thick] (axis cs:0.8,0.618) ++(-3pt,0pt) -- ++(6pt,0pt);
+\draw[thick] (axis cs:0.8,0.680) ++(-3pt,0pt) -- ++(6pt,0pt);
 \draw[thick] (axis cs:1.2,0.518) -- (axis cs:1.2,0.586);
+\draw[thick] (axis cs:1.2,0.518) ++(-3pt,0pt) -- ++(6pt,0pt);
+\draw[thick] (axis cs:1.2,0.586) ++(-3pt,0pt) -- ++(6pt,0pt);
 \draw[thick] (axis cs:2.8,0.658) -- (axis cs:2.8,0.703);
+\draw[thick] (axis cs:2.8,0.658) ++(-3pt,0pt) -- ++(6pt,0pt);
+\draw[thick] (axis cs:2.8,0.703) ++(-3pt,0pt) -- ++(6pt,0pt);
 \draw[thick] (axis cs:3.2,0.517) -- (axis cs:3.2,0.594);
+\draw[thick] (axis cs:3.2,0.517) ++(-3pt,0pt) -- ++(6pt,0pt);
+\draw[thick] (axis cs:3.2,0.594) ++(-3pt,0pt) -- ++(6pt,0pt);
 \end{axis}
 \end{tikzpicture}
 \caption{Table~\ref{tab:headline} as bars with 95\% CIs. Detection's
@@ -426,8 +439,14 @@ even though none is statistically distinguishable from the others.
 \addplot[fill=gray!35,draw=black] coordinates
     {(BM25,0.3152) (Static,0.3159) (Fail.-sel.,0.3179) (Closed-loop,0.3161)};
 \draw[thick] (axis cs:Static,0.3086) -- (axis cs:Static,0.3231);
+\draw[thick] (axis cs:Static,0.3086) ++(-3pt,0pt) -- ++(6pt,0pt);
+\draw[thick] (axis cs:Static,0.3231) ++(-3pt,0pt) -- ++(6pt,0pt);
 \draw[thick] (axis cs:Fail.-sel.,0.3129) -- (axis cs:Fail.-sel.,0.3231);
+\draw[thick] (axis cs:Fail.-sel.,0.3129) ++(-3pt,0pt) -- ++(6pt,0pt);
+\draw[thick] (axis cs:Fail.-sel.,0.3231) ++(-3pt,0pt) -- ++(6pt,0pt);
 \draw[thick] (axis cs:Closed-loop,0.3083) -- (axis cs:Closed-loop,0.3239);
+\draw[thick] (axis cs:Closed-loop,0.3083) ++(-3pt,0pt) -- ++(6pt,0pt);
+\draw[thick] (axis cs:Closed-loop,0.3239) ++(-3pt,0pt) -- ++(6pt,0pt);
 \draw[dashed,gray] (axis cs:BM25,0.3152) -- (axis cs:Closed-loop,0.3152);
 \end{axis}
 \end{tikzpicture}
@@ -495,11 +514,15 @@ is \emph{this} ranking, as retrieved, adequate? Action-utility asks a
 counterfactual about a state that does not yet exist: would \emph{this
 specific}, LLM-generated rewrite have produced a better ranking than
 the one already in hand? The second question's target is itself a
-high-variance artifact --- a single sampled generation, conditioned on
-retrieved evidence the generator did not choose and may misuse --- so
-even a telemetry vocabulary rich enough to characterize the current
-state well need not characterize the effect of an intervention that
-state did not determine. This is consistent with Table~\ref{tab:headline}'s
+high-variance artifact. Decoding is greedy (temperature $0$), so the
+generator's output is not stochastic given a fixed input --- the
+variance is across \emph{different} queries and evidence, not sampling
+noise within one: a deterministic function of (query, evidence) whose
+behavior is highly sensitive to evidence the generator did not choose
+and may misuse, yielding outputs whose quality is hard to anticipate
+from the state that produced them. So even a telemetry vocabulary rich
+enough to characterize the current state well need not characterize
+the effect of an intervention that state did not determine. This is consistent with Table~\ref{tab:headline}'s
 asymmetry despite the action-utility model's richer feature set, and
 with why gating signals in general (Section~2) struggle to double as
 treatment-effect predictors.
