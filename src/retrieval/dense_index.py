@@ -136,14 +136,20 @@ class DenseIndex:
         with open(ids_path) as f:
             self.doc_ids = [line.strip() for line in f]
         n = len(self.doc_ids)
-        self.mat = np.memmap(embed_path, dtype=np.float16, mode="r", shape=(n, EMBED_DIM))
+        mat16 = np.memmap(embed_path, dtype=np.float16, mode="r", shape=(n, EMBED_DIM))
+        # Cast to float32 once at load time, not per search() call -- at
+        # full corpus scale (1.52M x 384) that cast is a ~2.3GB copy; done
+        # once per process rather than on every one of thousands of
+        # search() calls (two per acted-upon episode), this turned a
+        # dominant per-call cost into a one-time startup cost.
+        self.mat = mat16.astype(np.float32)
         self.model = _get_model()
 
     def search(self, query: str, k: int = 100) -> list[Hit]:
         q_emb = self.model.encode(
             [_QUERY_PREFIX + query], normalize_embeddings=True, show_progress_bar=False
         )[0].astype(np.float32)
-        scores = self.mat.astype(np.float32) @ q_emb
+        scores = self.mat @ q_emb
         top_idx = np.argpartition(-scores, min(k, len(scores) - 1))[:k]
         top_idx = top_idx[np.argsort(-scores[top_idx])]
         return [(self.doc_ids[i], float(scores[i])) for i in top_idx]
