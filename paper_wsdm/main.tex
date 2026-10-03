@@ -308,31 +308,31 @@ predicting intervention utility --- replicates on an open-domain
 corpus unrelated to TripClick's clinical queries, providing evidence
 that the ordering is not specific to TripClick.
 
-\textbf{A bounded dense-retrieval pilot.} Both results above use BM25.
-To check whether first-stage retrieval family matters, we ran a
-bounded pilot substituting a dense bi-encoder
-(\texttt{BAAI/\allowbreak bge-small-\allowbreak en-v1.5}~\cite{bge-embedding}) for BM25 on TripClick TAIL: 300
-queries (150 val, 150 test, seed 42) against a scoped corpus (all
-qrel-relevant documents for these queries plus $150$k random
-distractors, not the full $1.52$M-document collection), with a reduced
-6/9-feature telemetry set that drops the two features requiring
-BM25/FTS5's IDF machinery, which this pilot's leaner index does not
-build. Detection AUC $0.654$ [$0.559,0.747$]; action-utility AUC
-$0.580$ [$0.477,0.681$] --- the same ordering, but at this sample size
-the CIs overlap, so the gap itself is directionally consistent rather
-than independently significant here. One difference from the full-scale
-BM25 result is worth flagging rather than smoothing over: intervening
-looked \emph{more} net-harmful under this dense pipeline (harmed
-$29\%$ vs.\ helped $15$--$19\%$ across splits) than the roughly
-balanced mix Static QE shows on BM25 (Section 6). One plausible reading
-is that dense retrieval already captures some of what lexical
-expansion is for (semantic/vocabulary matching BM25 needs an explicit
-rewrite to get), narrowing the margin where a rewrite still helps
-without directly increasing how often it hurts; we have not tested
-this explanation directly and flag it as a hypothesis, not a finding.
-We read this pilot as suggestive that the ordering is not purely a
-BM25 artifact, not as a confirmed replication at the scale of
-Table~\ref{tab:headline}.
+\textbf{Does this hold under dense retrieval?} Both results above use
+BM25. We substituted a dense bi-encoder
+(\texttt{BAAI/\allowbreak bge-small-\allowbreak en-v1.5}~\cite{bge-embedding})
+for first-stage retrieval on TripClick TAIL, at the same scale as the
+BM25 result: the full $1.52$M-document collection and the full
+val/test populations ($n{=}1175$ each), with a reduced 6/9-feature
+telemetry set dropping the two features that need BM25/FTS5's IDF
+machinery. Detection AUC $0.638$ [$0.606,0.669$]; action-utility AUC
+$0.599$ [$0.555,0.642$] --- the same \emph{direction} as BM25, but a
+smaller gap, and a paired bootstrap of the difference ($+0.039$) gives
+$95\%$ CI $[-0.004,+0.083]$: it does not exclude zero. At matching
+scale, this specific dense setup does not significantly reproduce
+Table~\ref{tab:headline}'s asymmetry. One likely confound: this
+bi-encoder's own pre-action failure rate is $57$--$59\%$ here, well
+above BM25's validated $45.0\%$ on the same split --- a general-purpose
+embedding model, never tuned for TripClick's clinical domain, appears
+to simply be a weaker retriever here than the validated BM25
+configuration (Section 3), which would compress both AUCs toward each
+other independent of any retrieval-family effect. This is consistent
+with Kotte's~\cite{not-all-queries-need-rewriting} similarly weak
+single gating AUC ($0.593$) on dense retrievers elsewhere in the
+literature. We read this as a genuine, unresolved limitation rather
+than a clean second replication: whether the detection-actionability
+gap depends on retrieval family, or on how well-tuned the retriever is
+for its domain, remains open.
 
 \begin{figure}[t]
 \centering
