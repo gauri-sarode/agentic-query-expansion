@@ -134,7 +134,9 @@ scripts/                     -- dataset setup, index builds, experiment runners 
 docs/                        -- observability model, failure taxonomy, milestones, sources
 data/                        -- gitignored; local indexes/caches/downloaded corpora
 tests/
-paper/                       -- LaTeX source and compiled PDF
+paper/                       -- LaTeX source and compiled PDF (full-length version)
+paper_wsdm/                  -- LaTeX source and compiled PDF (short-paper version,
+                                 focused on the detection-vs-actionability finding)
 ```
 
 ## Setup
@@ -243,6 +245,31 @@ queries excludes zero (+0.119, 95% CI [+0.076, +0.162]). This is an
 independent second-corpus replication, not evidence of broad
 cross-domain generalization — one further corpus, one disjoint
 2,052-query touch.
+
+### Generalization check: does this hold under dense retrieval?
+
+Both results above use BM25. We separately checked whether first-stage
+retrieval family matters, substituting a general-purpose dense bi-encoder
+(`BAAI/bge-small-en-v1.5`) for BM25 on TripClick TAIL, at the same scale
+as the BM25 result (full 1.52M-document collection, full val/test
+populations, n=1175 each):
+
+| Task | AUC |
+|---|---|
+| Failure detection | 0.638 [0.606, 0.669] |
+| Action-utility | 0.599 [0.555, 0.642] |
+
+Same direction as BM25, but a smaller gap, and a paired bootstrap of the
+difference (+0.039) gives 95% CI [−0.004, +0.083] — it does not exclude
+zero. At matching statistical power, this specific dense-retrieval setup
+does not significantly reproduce the BM25/NQ asymmetry. One plausible
+(unconfirmed) confound: this bi-encoder's own pre-action failure rate is
+57–59% here, well above BM25's validated 45.0% on the identical split —
+a general-purpose embedding model never tuned for TripClick's clinical
+domain may simply be a weaker retriever here than the validated BM25
+config, which would compress both AUCs toward each other independent of
+any genuine retrieval-family effect. Reported as a real, unresolved
+limitation rather than a clean third replication (`scripts/33`–`36`).
 
 ## Two real defects, found by distrusting convenient results
 
