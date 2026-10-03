@@ -89,7 +89,7 @@ failure-selective controller built directly on the stronger signal has
 the best point estimate of the policies tested, but does not
 significantly outperform unconditional QE, BM25 alone, or a more
 expensive closed-loop agent.
-\textbf{(C3) The gap is not corpus-specific.} TripClick's
+\textbf{(C3) The gap replicates across domains.} TripClick's
 detection-vs-actionability ordering ($0.649$ vs.\ $0.552$) replicates
 on BEIR Natural Questions ($0.680$ vs.\ $0.556$), an open-domain
 corpus unrelated to TripClick's clinical queries.
@@ -300,13 +300,15 @@ $n{=}1157$; NQ: $[+0.076,+0.162]$, $n{=}2013$).
 \end{table}
 
 The gap is not an artifact of comparing different noise levels: both
-numbers per corpus come from the same features, protocol, and
-population, and a paired bootstrap on the acted-upon subset confirms
-the difference itself, not just non-overlapping point estimates. This
-ordering --- pre-action telemetry beats post-action telemetry at
-predicting intervention utility --- replicates on an open-domain
-corpus unrelated to TripClick's clinical queries, providing evidence
-that the ordering is not specific to TripClick.
+numbers per corpus come from the same protocol and population (the
+feature sets differ only in whether telemetry is recorded pre- or
+post-action, as described above), and a paired bootstrap on the
+acted-upon subset confirms the difference itself, not just
+non-overlapping point estimates. This ordering --- pre-action
+telemetry beats post-action telemetry at predicting intervention
+utility --- replicates on an open-domain corpus unrelated to
+TripClick's clinical queries, providing evidence that the ordering is
+not specific to TripClick.
 
 \textbf{Does this hold under dense retrieval?} Both results above use
 BM25. We substituted a dense bi-encoder
@@ -320,13 +322,15 @@ $0.599$ [$0.555,0.642$] --- the same \emph{direction} as BM25, but a
 smaller gap, and a paired bootstrap of the difference ($+0.039$) gives
 $95\%$ CI $[-0.004,+0.083]$: it does not exclude zero. At matching
 scale, this specific dense setup does not significantly reproduce
-Table~\ref{tab:headline}'s asymmetry. One likely confound: this
-bi-encoder's own pre-action failure rate is $57$--$59\%$ here, well
-above BM25's validated $45.0\%$ on the same split --- a general-purpose
-embedding model, never tuned for TripClick's clinical domain, appears
-to simply be a weaker retriever here than the validated BM25
-configuration (Section 3), which would compress both AUCs toward each
-other independent of any retrieval-family effect. This is consistent
+Table~\ref{tab:headline}'s asymmetry. One plausible confound, though we
+have no direct head-to-head effectiveness comparison to confirm it:
+this bi-encoder's own pre-action failure rate is $57$--$59\%$ here,
+well above BM25's validated $45.0\%$ on the same split, consistent
+with (not proof of) a general-purpose embedding model, never tuned for
+TripClick's clinical domain, being a weaker retriever here than the
+validated BM25 configuration (Section 3) --- which would compress both
+AUCs toward each other independent of any retrieval-family effect.
+This is consistent
 with Kotte's~\cite{not-all-queries-need-rewriting} similarly weak
 single gating AUC ($0.593$) on dense retrievers elsewhere in the
 literature. We read this as a genuine, unresolved limitation rather
