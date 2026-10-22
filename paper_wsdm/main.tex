@@ -487,21 +487,51 @@ nDCG@10 over BM25 ($p<0.001$), while unconditional Static QE gains only
 $+0.0007$. Static QE helps $11.6\%$ of queries and harms $10.6\%$, a
 real, roughly balanced mix a perfect selector could exploit. Sweeping
 the intervention budget rather than fixing one quota shows this is not
-a single unlucky operating point:
+a single unlucky operating point (Figure~\ref{fig:quota}):
 
-\begin{center}
-\small
-\begin{tabular}{@{}lccc@{}}
-\toprule
-Quota & Oracle gain & Verifier gain & Verifier \% of oracle \\
-\midrule
-5\% & $+0.0184$ & $+0.0001$ & $0.5\%$ \\
-10\% & $+0.0242$ & $+0.0006$ & $2.5\%$ \\
-20\% & $+0.0246$ & $+0.0025$ & $10.2\%$ \\
-40\% & $+0.0246$ & $+0.0029$ & $11.8\%$ \\
-\bottomrule
-\end{tabular}
-\end{center}
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.95\linewidth,
+    height=0.5\linewidth,
+    xlabel={Intervention budget (quota)},
+    ylabel={nDCG@10 gain over BM25},
+    xlabel style={font=\footnotesize},
+    ylabel style={font=\footnotesize},
+    xtick={1,2,3,4},
+    xticklabels={5\%,10\%,20\%,40\%},
+    tick label style={font=\footnotesize},
+    xmin=0.7, xmax=4.3,
+    ymin=-0.001, ymax=0.031,
+    legend style={font=\footnotesize,draw=none,at={(0.5,1.1)},anchor=south,
+        legend columns=2,column sep=4pt},
+    axis line style={draw=black},
+    legend cell align=left,
+    clip=false,
+]
+\addplot[thick,mark=*,mark size=2pt,color=black]
+    coordinates {(1,0.0184) (2,0.0242) (3,0.0246) (4,0.0246)};
+\addplot[thick,mark=square*,mark size=2pt,color=gray,densely dashed]
+    coordinates {(1,0.0001) (2,0.0006) (3,0.0025) (4,0.0029)};
+\legend{Oracle,Verifier}
+\node[above,font=\scriptsize] at (axis cs:1,0.0184) {0.0184};
+\node[above,font=\scriptsize] at (axis cs:2,0.0242) {0.0242};
+\node[above,font=\scriptsize] at (axis cs:3,0.0246) {0.0246};
+\node[above,font=\scriptsize] at (axis cs:4,0.0246) {0.0246};
+\node[above,font=\scriptsize,yshift=2pt] at (axis cs:1,0.0001) {$0.5\%$};
+\node[above,font=\scriptsize,yshift=2pt] at (axis cs:2,0.0006) {$2.5\%$};
+\node[above,font=\scriptsize,yshift=2pt] at (axis cs:3,0.0025) {$10.2\%$};
+\node[above,font=\scriptsize,yshift=2pt] at (axis cs:4,0.0029) {$11.8\%$};
+\end{axis}
+\end{tikzpicture}
+\caption{Oracle vs.\ verifier-ranked nDCG@10 gain across intervention
+budgets. Oracle labels are the raw gain at each quota; verifier labels
+are the verifier's \% of the oracle's gain it captures. The oracle
+saturates by a 20\% budget; the verifier stays a small, slowly growing
+fraction of it throughout, capturing at most $11.8\%$.}
+\label{fig:quota}
+\end{figure}
 
 At every budget below treating every query, the verifier-ranked policy
 captures at most $11.8\%$ of the oracle's own gain --- this oracle is
