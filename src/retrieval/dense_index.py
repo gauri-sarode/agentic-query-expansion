@@ -90,11 +90,7 @@ def build_embeddings(
     model = _get_model()
 
     con = sqlite3.connect(db_path)
-    try:
-        (total,) = con.execute("SELECT COUNT(*) FROM meta").fetchone()
-        rows = con.execute("SELECT doc_id, text FROM meta ORDER BY doc_id").fetchall()
-    finally:
-        con.close()
+    (total,) = con.execute("SELECT COUNT(*) FROM meta").fetchone()
     print(f"[dense_index] {total} docs to embed", flush=True)
 
     start = 0
@@ -106,10 +102,17 @@ def build_embeddings(
     mode = "r+" if (resume and Path(embed_path).exists()) else "w+"
     mat = np.memmap(embed_path, dtype=np.float16, mode=mode, shape=(total, EMBED_DIM))
 
+    # Streamed via a single cursor (SELECT ... OFFSET, fetchmany per batch)
+    # rather than fetchall()-ing the whole table: at NQ's 2.68M-doc scale,
+    # materializing every (doc_id, text) row in Python memory at once drove
+    # this 16GB machine into severe swap thrashing (12.9/13GB swap used,
+    # <50MB free RAM observed) -- fetchmany keeps at most one batch resident.
+    cur = con.execute("SELECT doc_id, text FROM meta ORDER BY doc_id LIMIT -1 OFFSET ?", (start,))
+
     ids_f = open(ids_path, "a" if start else "w")
     t0 = time.time()
     for i in range(start, total, batch_size):
-        batch = rows[i : i + batch_size]
+        batch = cur.fetchmany(batch_size)
         doc_ids = [d for d, _ in batch]
         texts = [t.replace(_DOC_SEP, " ") for _, t in batch]
         emb = model.encode(texts, batch_size=batch_size, show_progress_bar=False, normalize_embeddings=True)
@@ -124,6 +127,7 @@ def build_embeddings(
         eta_min = (total - n_done) / rate / 60 if rate > 0 else float("inf")
         print(f"[dense_index] embedded {n_done}/{total} ({rate:.1f} docs/s, ETA {eta_min:.0f}min)", flush=True)
     ids_f.close()
+    con.close()
     print(f"[dense_index] done: {total} docs -> {embed_path}")
 
 
