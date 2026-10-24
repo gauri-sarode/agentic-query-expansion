@@ -324,15 +324,15 @@ $0.599$ [$0.555,0.642$] --- the same \emph{direction} as BM25, but a
 smaller gap, and a paired bootstrap of the difference ($+0.039$) gives
 $95\%$ CI $[-0.004,+0.083]$: it does not exclude zero. At matching
 scale, this specific dense setup does not significantly reproduce
-Table~\ref{tab:headline}'s asymmetry. One plausible confound, though we
-have no direct head-to-head effectiveness comparison to confirm it:
-this bi-encoder's own pre-action failure rate is $57$--$59\%$ here,
-well above BM25's validated $45.0\%$ on the same split, consistent
-with (not proof of) a general-purpose embedding model, never tuned for
-TripClick's clinical domain, being a weaker retriever here than the
-validated BM25 configuration (Section 3) --- which would compress both
-AUCs toward each other independent of any retrieval-family effect.
-This is consistent
+Table~\ref{tab:headline}'s asymmetry. A direct head-to-head confirms
+the plausible confound rather than leaving it unverified: this
+bi-encoder's own pre-action failure rate is $57$--$59\%$ here, well
+above BM25's validated $45.0\%$ on the same split, and its mean
+nDCG@10 is $0.217$ versus BM25's tuned $0.315$ (Section 3) --- a
+general-purpose embedding model, never tuned for TripClick's clinical
+domain, is substantially the weaker retriever here, which would
+compress both AUCs toward each other independent of any
+retrieval-family effect. This is consistent
 with Kotte's~\cite{not-all-queries-need-rewriting} similarly weak
 single gating AUC ($0.593$) on dense retrievers elsewhere in the
 literature. We read this as a genuine, unresolved limitation rather
