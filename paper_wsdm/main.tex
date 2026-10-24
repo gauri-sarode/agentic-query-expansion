@@ -268,17 +268,17 @@ predicting whether that action helped. The action-utility model has
 more features, including reranker signals entirely unavailable to the
 detector, yet still under-performs it --- the gap in
 Table~\ref{tab:headline} is not an artifact of the detector having a
-richer or more favorable feature set. It is also not an artifact of
-comparing a classifier against a regressor: refitting the
-action-utility model directly as a logistic classifier on the same ten
-features and the identical val/test protocol gives AUC $0.563$, 95\%
-CI $[0.529,0.598]$ (\texttt{scripts/32}) --- indistinguishable from the
-regression-based $0.552$ and still clearly below detection's CI on
-this corpus, with no overlap. A non-linear model class does not close
-it either: a gradient-boosted alternative was tried on this same
-feature set during development and scored worse under 5-fold CV
-(Pearson $r=0.045$ vs.\ $0.134$ for linear regression), so the deployed
-model was never swapped in.
+richer or more favorable feature set. Nor is it classifier-vs.-regressor
+artifact: refit directly as a logistic classifier on the same ten
+features, AUC is $0.563$ --- indistinguishable from $0.552$ and still
+clearly below detection's CI. A non-linear model class does not close
+it either: a gradient-boosted alternative scored worse under 5-fold CV
+for action-utility, so the deployed model was never swapped in. The
+symmetric check for detection is sharper: a gradient-boosted classifier
+beat the deployed logistic model under 5-fold CV, consistently across
+six seeds on both corpora ($+0.023$/$+0.025$ AUC), but is not
+distinguishable from it on one frozen-test touch per corpus (TripClick
+$0.655$ vs.\ $0.649$; NQ $0.680$ vs.\ $0.680$).
 
 \begin{table}[h]
 \caption{Detection vs.\ actionability AUC, both corpora. Both numbers
