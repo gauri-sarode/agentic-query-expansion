@@ -138,9 +138,10 @@ docs/                        -- observability model, failure taxonomy, milestone
 data/                        -- gitignored; local indexes/caches/downloaded corpora
 tests/
 paper/                       -- LaTeX source and compiled PDF (full-length version)
-paper_wsdm/                  -- "The Actionability Gap: When Should Search
-                                 Agents Expand a Query?" -- short-paper version,
-                                 focused on the detection-vs-actionability finding
+paper_wsdm/                  -- "Observability-Guided LLM Query Expansion in
+                                 Search: The Actionability Gap" -- short-paper
+                                 version, focused on the detection-vs-actionability
+                                 finding
 ```
 
 ## Setup
