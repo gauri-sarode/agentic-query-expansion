@@ -1,22 +1,20 @@
-# The Actionability Gap
+# Observability-Guided LLM Query Expansion in Search: The Actionability Gap
 
-When should a search agent expand a query — and can it tell, in advance,
-whether a *specific* expansion will actually help?
+When should a search agent expand a query — and can observability signals
+tell it, in advance, whether a *specific* expansion will actually help?
 
 LLM query expansion is usually applied unconditionally or not at all. This
-project treats *when to expand* as a search-agent decision problem in its
-own right: an agent observes retrieval signals, selectively invokes a
+project treats *when to expand* as an observability-guided search-agent
+decision: an agent observes retrieval telemetry, selectively invokes a
 corpus-grounded LLM expansion operator, observes the consequences of that
-action, and decides to accept, roll back, replan, or abstain — under an
-explicit budget, with no relevance judgments (qrels) available at inference
-time. Retrieval and agent-runtime telemetry is the signal this decision
-runs on, not the project's subject.
+action through runtime telemetry, and decides to accept, roll back, replan,
+or abstain — under an explicit budget, with no relevance judgments (qrels)
+available at inference time.
 
-Two ideas stay fused rather than separate: LLM query expansion is the
-**task**, and an agentic control loop is the **decision process** around
-it — runtime telemetry is causal input to that loop's policy and verifier,
-not just logging, but it's in service of the search/agent decision, not a
-topic of its own.
+Three ideas stay fused rather than separate: LLM query expansion is the
+**task mechanism**, an agentic control loop is the **decision process**,
+and AI observability is the **feedback/control layer** — telemetry is
+causal input to the agent's policy and verifier, not just logging.
 
 ## Central finding
 
