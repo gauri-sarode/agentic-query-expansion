@@ -321,8 +321,9 @@ val/test populations ($n{=}1175$ each), with a reduced 6/9-feature
 telemetry set dropping the two features that need BM25/FTS5's IDF
 machinery. Detection AUC $0.638$ [$0.606,0.669$]; action-utility AUC
 $0.599$ [$0.555,0.642$] --- the same \emph{direction} as BM25, but a
-smaller gap, and a paired bootstrap of the difference ($+0.039$) gives
-$95\%$ CI $[-0.004,+0.083]$: it does not exclude zero. At matching
+smaller gap; a paired bootstrap of the difference on the $n{=}1050$
+acted-upon queries ($+0.022$) gives $95\%$ CI $[-0.028,+0.072]$: it
+does not exclude zero. At matching
 scale, this specific dense setup does not significantly reproduce
 Table~\ref{tab:headline}'s asymmetry. A direct head-to-head confirms
 the plausible confound rather than leaving it unverified: this
