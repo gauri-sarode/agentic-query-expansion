@@ -1,0 +1,67 @@
+{
+  "decision_date": "2026-10-31",
+  "binding_from": "the git commit that adds this file -- that commit must precede any NQ dense episode run on the test population below",
+  "reason": "The paper's dense-retrieval check ('Does this hold under dense retrieval?', Section 4) is TripClick-only, and there the paired AUC-difference CI does not exclude zero ([-0.004,+0.083]). A second-corpus dense replication on BEIR NQ tests whether that null-ish result is TripClick-specific. Its test scope is fixed here, before any NQ dense episode exists, so the scope cannot be chosen after seeing an outcome.",
+
+  "populations": {
+    "fit": {
+      "source": "configs/nq_split.json val",
+      "n": 800,
+      "sha256_sorted_qids": "218d0cdd5b9cbc2a06a5a4b32d3209f801953b30fe0b41aba9fcb9d87a413992",
+      "use": "every model fit, CV diagnostic, and any smoke test"
+    },
+    "frozen_test": {
+      "source": "scripts/25_nq_test_extension.py extension_qids() -- full 3,452-query NQ pool minus nq_split.json val[800] and test[600]",
+      "n": 2052,
+      "sha256_sorted_qids": "5fbc4711c2f52a1d283b00b331514efc85f92e44e6491672da1663200260ff26",
+      "use": "single touch, evaluation only"
+    },
+    "excluded": {
+      "source": "configs/nq_split.json test (the n=600 pilot)",
+      "n": 600,
+      "sha256_sorted_qids": "a8de124a782f099248bb0f0b6a2388cdaae4d60195c0091a1b9e6ef3f3643cde",
+      "use": "never run under dense retrieval, not as primary, secondary, or pooled. Running it too would create a choice of which dense test number to report."
+    }
+  },
+  "scope_rationale": [
+    "Parity with the paper's main NQ result, which reports this same 2,052-query confirmatory set, unpooled with the 600 pilot (paper Section 3; Table 1's n=2,013 is its acted-upon subset).",
+    "Parity with the TripClick dense check's own standard: the same query population as the BM25 headline (full TAIL test, n=1175), not a subset.",
+    "The n=600 pool is already documented as underpowered for this AUC comparison (configs/nq_test_extension_precommit.json: action-utility CI [0.442,0.602]).",
+    "Status of these queries: touched once by the frozen BM25 pipeline, never by any dense pipeline -- the same status TripClick TAIL test had when its dense check ran."
+  ],
+
+  "frozen_pipeline": {
+    "retriever": "BAAI/bge-small-en-v1.5, float16 memmap, full BEIR NQ corpus (2,681,468 docs), built by scripts/41 into data/nq_dense_{meta.sqlite3,embeddings.f16,ids.txt}",
+    "retrieval_depth_k": 100,
+    "telemetry": "scripts/33 reduced telemetry set, unchanged (same features as the TripClick dense check)",
+    "action_selection": "scripts/35 select_action(), unchanged",
+    "episode_logic": "scripts/35 run_episode(), unchanged, pointed at the NQ dense index and NQ qrels",
+    "detection_label": "y_poor = 1 iff the dense retriever's original nDCG@10 <= 1e-9 (zero relevant in its own top 10), as in scripts/35",
+    "action_utility_label": "delta_ndcg < -1e-9, acted-upon episodes only (those with au_features), as in scripts/35/36",
+    "models": "LogisticRegression(max_iter=1000), sklearn defaults otherwise, for both tasks; fit once on all val episodes. No GBDT and no model sweep -- scripts/37/42's non-linear findings stay validation-only, consistent with the paper not adopting them.",
+    "val_diagnostic": "detection 5-fold StratifiedKFold CV AUC (shuffle, seed 42) on val, reported and labeled as validation-only, never as the result"
+  },
+
+  "reported_statistics": {
+    "primary": "test detection AUC and test action-utility AUC, each with a 95% percentile bootstrap CI (10,000 resamples, seed 42), plus the AUC difference (detection minus action-utility) and its 95% CI from a true paired bootstrap per scripts/28: both AUCs evaluated on the acted-upon test subset, and each resample of those queries recomputes BOTH AUCs on the same resampled indices (resamples with a single class in either label skipped).",
+    "difference_ci_note": "Deliberately NOT scripts/36's procedure, which holds detection AUC fixed on the full test set and resamples only the action-utility side -- that is not paired and understates the difference's variance. The TripClick dense difference CI will be recomputed with this same scripts/28 method from the saved results/dense_retrieval_full_scale_raw.json (existing records, existing val-fit models, no new test touch) so both dense rows in the paper use one correct procedure.",
+    "also_reported": ["n_val", "n_test", "n_acted_val", "n_acted_test", "dense pre-action failure rate on test", "dense mean nDCG@10 on test vs. frozen NQ BM25 on the same 2,052 queries (the retriever-strength confound the TripClick paragraph checks)"],
+    "interpretation_rule": "'Reproduces the asymmetry under dense retrieval on NQ' iff the difference CI's lower bound > 0 with detection > action-utility. Any other outcome is reported as not significantly reproducing it, in the same wording style as the TripClick dense paragraph.",
+    "reporting_commitment": "Reported in full regardless of outcome, including if it weakens the paper's claim."
+  },
+
+  "run_rules": [
+    "Val episodes run to completion before any test episode starts.",
+    "One test run. Resuming from checkpoint after a crash or kill is not a re-touch; the checkpoint must not be inspected for test outcomes (per-episode labels, deltas, partial AUCs) before the run completes.",
+    "Progress logging during the test run is limited to episode counts.",
+    "No change to code, config, models, or labels after the first test episode. A discovered bug means a new versioned precommit (nq_dense_precommit_v2.json) that states the bug, and the original result is still disclosed."
+  ],
+
+  "artifacts": {
+    "checkpoint": "results/nq_dense_retrieval_checkpoint.json",
+    "raw": "results/nq_dense_retrieval_raw.json",
+    "result": "results/nq_dense_retrieval_result.json",
+    "script": "scripts/43_nq_dense_retrieval_full_scale.py (to be written; NQ analogue of scripts/36)"
+  },
+  "compute_estimate": "2,852 episodes; ~7.5h at TripClick's observed ~9.5s/episode, after scripts/41 finishes. Must not overlap any other pool job."
+}
