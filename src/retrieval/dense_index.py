@@ -87,6 +87,8 @@ def build_embeddings(
     this is a multi-hour job on this hardware and the only realistic way
     to run it is as an interruptible background process.
     """
+    import torch
+
     model = _get_model()
 
     con = sqlite3.connect(db_path)
@@ -116,6 +118,12 @@ def build_embeddings(
         doc_ids = [d for d, _ in batch]
         texts = [t.replace(_DOC_SEP, " ") for _, t in batch]
         emb = model.encode(texts, batch_size=batch_size, show_progress_bar=False, normalize_embeddings=True)
+        # MPS's caching allocator never reuses buffers across batches of
+        # differing padded lengths: without this, driver memory grew
+        # 4GB -> 17GB within ~12 batches of NQ and throughput collapsed
+        # from ~75 to ~10 docs/s in swap. Flat at ~1GB with it.
+        if torch.backends.mps.is_available():
+            torch.mps.empty_cache()
         mat[i : i + len(batch)] = emb.astype(np.float16)
         for d in doc_ids:
             ids_f.write(d + "\n")
