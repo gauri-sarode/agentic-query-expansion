@@ -315,44 +315,41 @@ not specific to TripClick.
 \textbf{Does this hold under dense retrieval?} Both results above use
 BM25. We substituted a dense bi-encoder
 (\texttt{BAAI/\allowbreak bge-small-\allowbreak en-v1.5}~\cite{bge-embedding})
-for first-stage retrieval on TripClick TAIL, at the same scale as the
-BM25 result: the full $1.52$M-document collection and the full
-val/test populations ($n{=}1175$ each), with a reduced 6/9-feature
-telemetry set dropping the two features that need BM25/FTS5's IDF
-machinery. Detection AUC $0.638$ [$0.606,0.669$]; action-utility AUC
-$0.599$ [$0.555,0.642$] --- the same \emph{direction} as BM25, but a
-smaller gap; a paired bootstrap of the difference on the $n{=}1050$
-acted-upon queries ($+0.022$) gives $95\%$ CI $[-0.028,+0.072]$: it
-does not exclude zero. At matching
-scale, this specific dense setup does not significantly reproduce
-Table~\ref{tab:headline}'s asymmetry. A direct head-to-head confirms
-the plausible confound rather than leaving it unverified: this
-bi-encoder's own pre-action failure rate is $57$--$59\%$ here, well
-above BM25's validated $45.0\%$ on the same split, and its mean
-nDCG@10 is $0.217$ versus BM25's tuned $0.315$ (Section 3) --- a
-general-purpose embedding model, never tuned for TripClick's clinical
-domain, is substantially the weaker retriever here, which would
-compress both AUCs toward each other independent of any
-retrieval-family effect. This is consistent
-with Kotte's~\cite{not-all-queries-need-rewriting} similarly weak
-single gating AUC ($0.593$) on dense retrievers elsewhere in the
-literature. We read this as a genuine, unresolved limitation rather
-than a clean second replication: whether the detection-actionability
-gap depends on retrieval family, or on how well-tuned the retriever is
-for its domain, remains open.
+for first-stage retrieval on both corpora, at the same scale as each
+BM25 result: the full collections ($1.52$M and $2.68$M documents) and
+the same frozen populations, with a reduced 6/9-feature telemetry set
+dropping the two features that need BM25/\allowbreak FTS5's IDF machinery; NQ's
+scope and decision rule were committed in writing before its run. On
+BEIR NQ the asymmetry reproduces: detection AUC $0.688$
+[$0.662,0.713$] vs.\ action-utility $0.611$ [$0.583,0.639$], and a
+paired bootstrap of the difference on the $n{=}1932$ acted-upon
+queries gives $+0.084$, $95\%$ CI $[+0.045,+0.123]$. On TripClick it
+does not: $0.638$ [$0.606,0.669$] vs.\ $0.599$ [$0.555,0.642$],
+difference ($n{=}1050$) $+0.022$, CI $[-0.028,+0.072]$. Retriever
+strength separates the two. On NQ the bi-encoder is the
+\emph{stronger} retriever (mean nDCG@10 $0.500$ vs.\ BM25's $0.308$;
+pre-action failure rate $26\%$); on TripClick's clinical domain,
+for which it was never tuned, it is substantially weaker ($0.217$
+vs.\ $0.315$; failure $57$--$59\%$ vs.\ $45.0\%$), which would compress
+both AUCs toward each other. This is consistent with
+Kotte's~\cite{not-all-queries-need-rewriting} similarly weak gating AUC
+($0.593$) on dense retrievers. We read the gap as surviving a change
+of retrieval family when the retriever is competent for its domain;
+with two corpora, retriever strength and domain are confounded, so
+this is suggestive rather than settled.
 
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-    width=0.95\linewidth,
-    height=0.52\linewidth,
+    width=0.9\linewidth,
+    height=0.6\linewidth,
     xmin=0.45, xmax=0.75,
-    ymin=0.4, ymax=3.6,
+    ymin=0.4, ymax=4.6,
     xlabel={AUC},
     xlabel style={font=\footnotesize},
-    ytick={1,2,3},
-    yticklabels={Dense,BEIR NQ,TripClick},
+    ytick={1,2,3,4},
+    yticklabels={Dense NQ,Dense TripClick,BEIR NQ,TripClick},
     tick label style={font=\footnotesize},
     y dir=normal,
     legend style={font=\footnotesize,draw=none,at={(0.5,1.08)},anchor=south,
@@ -360,37 +357,43 @@ for its domain, remains open.
     axis line style={draw=black},
     clip=false,
 ]
-\draw[dashed,gray] (axis cs:0.5,0.4) -- (axis cs:0.5,3.6);
-\draw[thick] (axis cs:0.618,3.18) -- (axis cs:0.680,3.18);
-\draw[thick] (axis cs:0.618,3.18) ++(0pt,-3pt) -- ++(0pt,6pt);
-\draw[thick] (axis cs:0.680,3.18) ++(0pt,-3pt) -- ++(0pt,6pt);
-\draw[thick] (axis cs:0.518,2.82) -- (axis cs:0.586,2.82);
-\draw[thick] (axis cs:0.518,2.82) ++(0pt,-3pt) -- ++(0pt,6pt);
-\draw[thick] (axis cs:0.586,2.82) ++(0pt,-3pt) -- ++(0pt,6pt);
-\draw[thick] (axis cs:0.658,2.18) -- (axis cs:0.703,2.18);
-\draw[thick] (axis cs:0.658,2.18) ++(0pt,-3pt) -- ++(0pt,6pt);
-\draw[thick] (axis cs:0.703,2.18) ++(0pt,-3pt) -- ++(0pt,6pt);
-\draw[thick] (axis cs:0.517,1.82) -- (axis cs:0.594,1.82);
-\draw[thick] (axis cs:0.517,1.82) ++(0pt,-3pt) -- ++(0pt,6pt);
-\draw[thick] (axis cs:0.594,1.82) ++(0pt,-3pt) -- ++(0pt,6pt);
-\draw[thick] (axis cs:0.606,1.18) -- (axis cs:0.669,1.18);
-\draw[thick] (axis cs:0.606,1.18) ++(0pt,-3pt) -- ++(0pt,6pt);
-\draw[thick] (axis cs:0.669,1.18) ++(0pt,-3pt) -- ++(0pt,6pt);
-\draw[thick] (axis cs:0.555,0.82) -- (axis cs:0.642,0.82);
-\draw[thick] (axis cs:0.555,0.82) ++(0pt,-3pt) -- ++(0pt,6pt);
-\draw[thick] (axis cs:0.642,0.82) ++(0pt,-3pt) -- ++(0pt,6pt);
+\draw[dashed,gray] (axis cs:0.5,0.4) -- (axis cs:0.5,4.6);
+\draw[thick] (axis cs:0.618,4.18) -- (axis cs:0.680,4.18);
+\draw[thick] (axis cs:0.618,4.18) ++(0pt,-3pt) -- ++(0pt,6pt);
+\draw[thick] (axis cs:0.680,4.18) ++(0pt,-3pt) -- ++(0pt,6pt);
+\draw[thick] (axis cs:0.518,3.82) -- (axis cs:0.586,3.82);
+\draw[thick] (axis cs:0.518,3.82) ++(0pt,-3pt) -- ++(0pt,6pt);
+\draw[thick] (axis cs:0.586,3.82) ++(0pt,-3pt) -- ++(0pt,6pt);
+\draw[thick] (axis cs:0.658,3.18) -- (axis cs:0.703,3.18);
+\draw[thick] (axis cs:0.658,3.18) ++(0pt,-3pt) -- ++(0pt,6pt);
+\draw[thick] (axis cs:0.703,3.18) ++(0pt,-3pt) -- ++(0pt,6pt);
+\draw[thick] (axis cs:0.517,2.82) -- (axis cs:0.594,2.82);
+\draw[thick] (axis cs:0.517,2.82) ++(0pt,-3pt) -- ++(0pt,6pt);
+\draw[thick] (axis cs:0.594,2.82) ++(0pt,-3pt) -- ++(0pt,6pt);
+\draw[thick] (axis cs:0.606,2.18) -- (axis cs:0.669,2.18);
+\draw[thick] (axis cs:0.606,2.18) ++(0pt,-3pt) -- ++(0pt,6pt);
+\draw[thick] (axis cs:0.669,2.18) ++(0pt,-3pt) -- ++(0pt,6pt);
+\draw[thick] (axis cs:0.555,1.82) -- (axis cs:0.642,1.82);
+\draw[thick] (axis cs:0.555,1.82) ++(0pt,-3pt) -- ++(0pt,6pt);
+\draw[thick] (axis cs:0.642,1.82) ++(0pt,-3pt) -- ++(0pt,6pt);
+\draw[thick] (axis cs:0.662,1.18) -- (axis cs:0.713,1.18);
+\draw[thick] (axis cs:0.662,1.18) ++(0pt,-3pt) -- ++(0pt,6pt);
+\draw[thick] (axis cs:0.713,1.18) ++(0pt,-3pt) -- ++(0pt,6pt);
+\draw[thick] (axis cs:0.583,0.82) -- (axis cs:0.639,0.82);
+\draw[thick] (axis cs:0.583,0.82) ++(0pt,-3pt) -- ++(0pt,6pt);
+\draw[thick] (axis cs:0.639,0.82) ++(0pt,-3pt) -- ++(0pt,6pt);
 \addplot[only marks,mark=*,mark size=2.2pt,fill=gray!70,draw=black]
-    coordinates {(0.649,3.18) (0.680,2.18) (0.638,1.18)};
+    coordinates {(0.649,4.18) (0.680,3.18) (0.638,2.18) (0.688,1.18)};
 \addplot[only marks,mark=*,mark size=2.2pt,fill=white,draw=black]
-    coordinates {(0.552,2.82) (0.556,1.82) (0.599,0.82)};
+    coordinates {(0.552,3.82) (0.556,2.82) (0.599,1.82) (0.611,0.82)};
 \legend{Detection,Action-utility}
 \end{axis}
 \end{tikzpicture}
-\caption{Detection vs.\ action-utility AUC with 95\% CIs, all three
-settings (Table~\ref{tab:headline} plus the dense-retrieval check
-above). Dashed line: chance (AUC $0.5$). Detection's CI sits entirely
-above action-utility's on TripClick and BEIR NQ; under dense retrieval
-the point estimates keep the same order but the CIs overlap.}
+\caption{Detection vs.\ action-utility AUC with 95\% CIs: both corpora
+under BM25 (Table~\ref{tab:headline}) and under dense retrieval (above).
+Dashed line: chance (AUC $0.5$). Detection's CI sits entirely above
+action-utility's in every setting except dense TripClick, where the
+point estimates keep the same order but the CIs overlap.}
 \label{fig:headline}
 \end{figure}
 
