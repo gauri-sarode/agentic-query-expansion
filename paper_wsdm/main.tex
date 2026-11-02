@@ -29,7 +29,9 @@ TAIL test, replicating at $0.680$ on an independent BEIR Natural
 Questions split). The same kind of telemetry, recorded after a specific
 expansion action, is markedly worse at predicting whether that action
 helped (AUC $0.552$ on TripClick, $0.556$ on NQ) --- a statistically
-significant gap on both corpora. We then test the obvious consequence:
+significant gap on both corpora. Under a dense retriever the gap
+persists on NQ but not on TripClick, where that retriever is markedly
+weaker than BM25. We then test the obvious consequence:
 does routing expansion on the easier signal alone, a failure-selective
 controller, recover selective-QE's promise? It does not: the
 failure-selective policy's point estimate is the best of three real
@@ -92,7 +94,8 @@ expensive closed-loop agent.
 \textbf{(C3) The gap replicates across domains.} TripClick's
 detection-vs-actionability ordering ($0.649$ vs.\ $0.552$) replicates
 on BEIR Natural Questions ($0.680$ vs.\ $0.556$), an open-domain
-corpus unrelated to TripClick's clinical queries.
+corpus unrelated to TripClick's clinical queries, and on NQ survives a
+switch to dense retrieval ($0.688$ vs.\ $0.611$).
 
 \section{Related Work}
 
@@ -141,7 +144,8 @@ only on end-to-end accuracy, separately measures whether a gating
 signal's own detection accuracy matches its accuracy at predicting the
 chosen intervention's benefit. We make that decomposition explicit,
 quantify the gap directly as two different AUCs, and show it is
-significant and replicates across two further corpora.
+significant on two unrelated corpora and under both sparse and dense
+retrieval.
 
 \section{Selective Query Expansion Setup}
 
@@ -306,11 +310,7 @@ numbers per corpus come from the same protocol and population (the
 feature sets differ only in whether telemetry is recorded pre- or
 post-action, as described above), and a paired bootstrap on the
 acted-upon subset confirms the difference itself, not just
-non-overlapping point estimates. This ordering --- pre-action
-telemetry beats post-action telemetry at predicting intervention
-utility --- replicates on an open-domain corpus unrelated to
-TripClick's clinical queries, providing evidence that the ordering is
-not specific to TripClick.
+non-overlapping point estimates, on both corpora.
 
 \textbf{Does this hold under dense retrieval?} Both results above use
 BM25. We substituted a dense bi-encoder
@@ -318,8 +318,9 @@ BM25. We substituted a dense bi-encoder
 for first-stage retrieval on both corpora, at the same scale as each
 BM25 result: the full collections ($1.52$M and $2.68$M documents) and
 the same frozen populations, with a reduced 6/9-feature telemetry set
-dropping the two features that need BM25/\allowbreak FTS5's IDF machinery; NQ's
-scope and decision rule were committed in writing before its run. On
+dropping the two features that need BM25/\allowbreak FTS5's IDF machinery, and
+failure redefined against the dense ranking; NQ's scope and decision
+rule were committed in writing before its run. On
 BEIR NQ the asymmetry reproduces: detection AUC $0.688$
 [$0.662,0.713$] vs.\ action-utility $0.611$ [$0.583,0.639$], and a
 paired bootstrap of the difference on the $n{=}1932$ acted-upon
@@ -331,9 +332,9 @@ strength separates the two. On NQ the bi-encoder is the
 pre-action failure rate $26\%$); on TripClick's clinical domain,
 for which it was never tuned, it is substantially weaker ($0.217$
 vs.\ $0.315$; failure $57$--$59\%$ vs.\ $45.0\%$), which would compress
-both AUCs toward each other. This is consistent with
-Kotte's~\cite{not-all-queries-need-rewriting} similarly weak gating AUC
-($0.593$) on dense retrievers. We read the gap as surviving a change
+both AUCs toward each other. Kotte's~\cite{not-all-queries-need-rewriting}
+dense-retriever gate, which predicts rewriting benefit, lands near our
+dense action-utility AUCs ($0.593$). We read the gap as surviving a change
 of retrieval family when the retriever is competent for its domain;
 with two corpora, retriever strength and domain are confounded, so
 this is suggestive rather than settled.
@@ -538,26 +539,19 @@ fraction of it throughout, capturing at most $11.8\%$.}
 \end{figure}
 
 At every budget below treating every query, the verifier-ranked policy
-captures at most $11.8\%$ of the oracle's own gain --- this oracle is
-itself susceptible to selection
-optimism --- it selects per query using the same sparse click labels
-it is evaluated on. Checking the identical oracle definition on TAIL
+captures at most $11.8\%$ of the oracle's own gain. The oracle is
+itself prone to selection optimism: it selects per query using the
+same sparse click labels it is evaluated on. Checking the identical oracle definition on TAIL
 \emph{validation}, never used to select the oracle itself, shows the
 magnitude is split-sensitive on TripClick: $+0.0533$ nDCG@10 there
 versus $+0.0246$ on test, non-overlapping CIs, while on NQ the two
 nearly agree ($+0.0399$ validation vs.\ $+0.0415$ confirmatory test).
 We therefore read the oracle as directional evidence that
 heterogeneous, query-specific treatment effects exist, not as a
-precise, deployable bound. We checked whether a more formally debiased
-estimate is possible from this benchmark rather than assuming it is:
-TripClick's public release provides only already-binarized click
-labels, even in its ``raw'' qrels, with no underlying click counts or
-impression data to bootstrap or split for a repeated-draws correction,
-and no independent expert-judgment source (unlike, e.g., TREC DL) to
-substitute in its place. A debiased estimate is future work
-conditional on access to richer label data this benchmark does not
-publicly provide, not a gap we can close with the data at hand. The
-evidence as a whole points to
+precise, deployable bound; a formally debiased estimate is not
+possible here, since TripClick releases only binarized click labels,
+with no click counts, impressions, or expert judgments to correct
+against. The evidence as a whole points to
 \emph{action-utility prediction}, not the absence of opportunity, as
 selective QE's binding constraint.
 
@@ -584,14 +578,17 @@ treatment-effect predictors.
 \textbf{Limitations.} The generator is a small, locally hosted 3B-parameter
 model under a two-call budget; a larger model might shift either AUC
 or the policy comparison. Corpus coverage is two domains, one clinical
-and one open-domain; broader coverage remains untested. Click-derived
+and one open-domain; broader coverage remains untested. The dense
+check uses one off-the-shelf bi-encoder, so retriever strength and
+domain are confounded across its two corpora. Click-derived
 labels are an imperfect relevance proxy inherited from TripClick.
 
 \section{Conclusion}
 
 Detecting that retrieval has already failed is significantly easier
 than predicting whether a specific LLM query-expansion action will fix
-it, on two unrelated corpora. As a direct consequence, neither
+it, on two unrelated corpora under BM25 and on NQ under dense
+retrieval. As a direct consequence, neither
 unconditional QE, a failure-selective controller built on the stronger
 detection signal, nor a more expensive closed-loop policy that also
 consults post-action telemetry significantly improves a properly-tuned
@@ -603,7 +600,9 @@ problems of different difficulty, and conflating them is where
 selective QE's promise currently stalls.
 
 \textit{Experimental integrity.} All model, threshold, and retrieval
-configuration choices were made on validation data.
+configuration choices were made on validation data, and the scope
+and decision rule of both later NQ test touches (the confirmatory
+extension and the dense check) were committed in writing beforehand.
 Implementation defects surfaced during development were diagnosed from
 self-evidently implausible results and fixed before any confirmatory
 test evaluation; the complete experimental history, including every
