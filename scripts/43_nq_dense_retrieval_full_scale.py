@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """NQ analogue of scripts/36: the dense-retrieval check run on BEIR NQ,
 under the scope, pipeline, statistics and run rules pre-committed in
-configs/nq_dense_precommit.json (commit 731a751). Same telemetry
+configs/nq_dense_precommit.json (commit 0b343ca). Same telemetry
 (scripts/33), same episode logic (reuses scripts/35's run_episode/
 select_action directly), against the FULL 2,681,468-doc NQ dense index
 (scripts/41).

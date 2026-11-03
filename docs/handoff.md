@@ -2,13 +2,13 @@
 
 Status snapshot for picking this back up cold. Everything below "Done"
 is committed locally on `main`; nothing has been pushed to `origin`
-since `5f74ef4` (8 commits ahead as of this doc).
+since `fee4389` (8 commits ahead as of this doc).
 
 ## Done (committed, not pushed)
 
 All in `paper_wsdm/` unless noted. Commit hashes oldest → newest:
 
-- `03fab34` — Tested a non-linear (GBDT) model for the detection task
+- `879cbcc` — Tested a non-linear (GBDT) model for the detection task
   (the failure-selective-QE side), mirroring the existing action-utility
   non-linear check. Reported in Section 4: GBDT beats logistic
   regression on validation CV, consistently across 6 seeds on both
@@ -16,16 +16,16 @@ All in `paper_wsdm/` unless noted. Commit hashes oldest → newest:
   survive a single frozen-test touch on either corpus (TripClick 0.655
   vs. 0.649; NQ 0.680 vs. 0.680). Reported as a finding, not adopted —
   Table 1's numbers are unchanged.
-- `91694e2` — The dense-retrieval section used to hedge ("consistent
+- `253e236` — The dense-retrieval section used to hedge ("consistent
   with, not proof of" the bi-encoder being a weaker retriever). Computed
   the actual number from already-frozen data: mean nDCG@10 0.217
   (dense) vs. 0.315 (tuned BM25) on TripClick TAIL test. Confound now
   stated as confirmed, not assumed.
-- `8d735b2` — Verified all 12 `references.bib` entries against source
+- `5d7a019` — Verified all 12 `references.bib` entries against source
   (arXiv/ACL Anthology/DOI). Fixed two: `bge-embedding`'s title had two
   wrong words and silently dropped 2 of 6 real authors; `beir`'s title
   now matches the paper's actual (non-standard) spelling, "Heterogenous."
-- `d073068` — Added `scripts/41` (NQ dense-corpus build, see "Running
+- `f11c96d` — Added `scripts/41` (NQ dense-corpus build, see "Running
   now" below) and `scripts/42` (sweep of 8 non-linear classifiers for
   the detection task, validation-CV only, no test touch — tree
   ensembles consistently beat logistic ~0.02-0.025 AUC on both corpora;
@@ -33,12 +33,12 @@ All in `paper_wsdm/` unless noted. Commit hashes oldest → newest:
   picking a "best" model from this sweep and touching test with it
   would be the exact post-hoc model selection the paper's own
   "Experimental integrity" paragraph argues against.)
-- `b82ad53` — Real bug fix in `src/retrieval/dense_index.py`:
+- `70ccc85` — Real bug fix in `src/retrieval/dense_index.py`:
   `build_embeddings` used to `fetchall()` the entire corpus table into
   Python memory before embedding anything. Fine at TripClick's 1.52M
   docs; drove this 16GB machine into severe swap thrashing at BEIR NQ's
   2.68M-doc scale. Now streams via a cursor (`fetchmany` per batch).
-- `50530f7`, `fa97c4e`, `9c64e52` — Title/framing pass. Final WSDM paper
+- `40e036d`, `9985550`, `bc7b8fc` — Title/framing pass. Final WSDM paper
   title: **"Observability-Guided LLM Query Expansion in Search: The
   Actionability Gap"** (observability + ML-adjacent + LLM + search, per
   explicit request; "machine learning" was tried and then explicitly
