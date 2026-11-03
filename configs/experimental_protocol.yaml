@@ -111,7 +111,7 @@ result_fingerprint_required_fields:
   - git_commit
 
 retrieval_config_frozen:
-  commit: 06fb10a
+  commit: c353c0d
   retriever: fts5_bm25
   stemming: porter
   title_weight: 10.0
@@ -140,4 +140,4 @@ verifier_frozen:
     consistent with r=-0.014. Used the same median/25th-percentile convention
     as the prior calibration rather than chase spurious grid-search noise.
 
-freeze_commit: 0458927  # retrieval config (06fb10a) + verifier + thresholds (this commit) all frozen; only RQ1/RQ2/RQ3 TAIL-test evaluation remains
+freeze_commit: d3fc48d  # retrieval config (c353c0d) + verifier + thresholds (this commit) all frozen; only RQ1/RQ2/RQ3 TAIL-test evaluation remains
