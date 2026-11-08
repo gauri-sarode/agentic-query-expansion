@@ -1,125 +1,129 @@
-# Handoff — 2026-10-30
+# Handoff — 2026-11-08
 
-Status snapshot for picking this back up cold. Everything below "Done"
-is committed locally on `main`; nothing has been pushed to `origin`
-since `fee4389` (8 commits ahead as of this doc).
+Status snapshot for picking this back up cold. Everything listed below is
+committed and pushed up to `648cf73`; the 2026-11-08 revision commits
+are local until pushed.
 
-## Done (committed, not pushed)
+**Read first: history was rewritten on 2026-11-03** (see "TripClick
+license scrub" below). Any clone older than that must re-clone or
+`git reset --hard origin/main`; every commit hash before `648cf73`
+changed, and hashes in this doc are the post-rewrite ones.
 
-All in `paper_wsdm/` unless noted. Commit hashes oldest → newest:
+## Paper state
 
-- `879cbcc` — Tested a non-linear (GBDT) model for the detection task
-  (the failure-selective-QE side), mirroring the existing action-utility
-  non-linear check. Reported in Section 4: GBDT beats logistic
-  regression on validation CV, consistently across 6 seeds on both
-  corpora (+0.023 TripClick, +0.025 NQ), but that advantage does **not**
-  survive a single frozen-test touch on either corpus (TripClick 0.655
-  vs. 0.649; NQ 0.680 vs. 0.680). Reported as a finding, not adopted —
-  Table 1's numbers are unchanged.
-- `253e236` — The dense-retrieval section used to hedge ("consistent
-  with, not proof of" the bi-encoder being a weaker retriever). Computed
-  the actual number from already-frozen data: mean nDCG@10 0.217
-  (dense) vs. 0.315 (tuned BM25) on TripClick TAIL test. Confound now
-  stated as confirmed, not assumed.
-- `5d7a019` — Verified all 12 `references.bib` entries against source
-  (arXiv/ACL Anthology/DOI). Fixed two: `bge-embedding`'s title had two
-  wrong words and silently dropped 2 of 6 real authors; `beir`'s title
-  now matches the paper's actual (non-standard) spelling, "Heterogenous."
-- `f11c96d` — Added `scripts/41` (NQ dense-corpus build, see "Running
-  now" below) and `scripts/42` (sweep of 8 non-linear classifiers for
-  the detection task, validation-CV only, no test touch — tree
-  ensembles consistently beat logistic ~0.02-0.025 AUC on both corpora;
-  other non-linear families don't. Deliberately not acted on further —
-  picking a "best" model from this sweep and touching test with it
-  would be the exact post-hoc model selection the paper's own
-  "Experimental integrity" paragraph argues against.)
-- `70ccc85` — Real bug fix in `src/retrieval/dense_index.py`:
-  `build_embeddings` used to `fetchall()` the entire corpus table into
-  Python memory before embedding anything. Fine at TripClick's 1.52M
-  docs; drove this 16GB machine into severe swap thrashing at BEIR NQ's
-  2.68M-doc scale. Now streams via a cursor (`fetchmany` per batch).
-- `40e036d`, `9985550`, `bc7b8fc` — Title/framing pass. Final WSDM paper
-  title: **"Observability-Guided LLM Query Expansion in Search: The
-  Actionability Gap"** (observability + ML-adjacent + LLM + search, per
-  explicit request; "machine learning" was tried and then explicitly
-  dropped). README retitled and reframed to match verbatim, including
-  restoring the three-pillar framing (QE task / agentic control loop /
-  observability feedback layer) after an earlier misreading briefly
-  stripped the observability angle out entirely.
+WSDM short paper, **"Observability-Guided LLM Query Expansion in Search:
+The Actionability Gap"** (`paper_wsdm/main.tex`, `main.pdf`). Page budget:
+4 content pages, references + Ethical Considerations on page 5 (WSDM's
+limit excludes both). Holds after every edit below.
 
-Also earlier in this session (already committed before this doc existed):
-Figure 1/2 redesigned as forest plots (fixed a real pgfplots bar/error-bar
-misalignment bug), Figure 3 added (oracle-vs-verifier quota-sweep line
-chart, replacing a table), the verified-current anonymized-repo link
-added to the paper, and the final title change to "The Actionability
-Gap: When Should Search Agents Expand a Query?" (since superseded by the
-observability-inclusive title above).
+Core claim (C1-C3): qrel-free retrieval telemetry predicts *whether a
+query is failing* (detection AUC) significantly better than *whether
+acting on it will help* (action-utility AUC) — the "actionability gap" —
+on two unrelated corpora and under both sparse and dense retrieval.
 
-Page budget throughout: holds at 4 content pages + references/Ethical
-Considerations overflow onto page 5 (WSDM's limit excludes those two
-sections) — verified after every edit in this stack, no regressions.
+## Done since the 2026-10-30 handoff
 
-## Running now
+- **NQ dense-retrieval replication — complete, reproduces.**
+  - Frozen scope written *before* any test touch:
+    `configs/nq_dense_precommit.json` (`0b343ca`). Fit = NQ val (n=800);
+    frozen test = the 2,052-query extension pool (sha256-pinned); the
+    n=600 pilot excluded; LogisticRegression only; scripts/28 paired
+    bootstrap; "reproduces" iff the difference CI's lower bound > 0.
+  - Index: `scripts/41` built the full 2,681,468-doc bge-small index
+    (finished 2026-11-01 07:59). `be5dcee` fixed an MPS caching-allocator
+    leak in `build_embeddings` (driver memory 4→17 GB, swap thrash) with
+    `torch.mps.empty_cache()` per batch.
+  - Episodes: `scripts/43_nq_dense_retrieval_full_scale.py` (`f8947da`),
+    800 val + 2,052 test, 0 LLM errors (737 / 1,932 acted).
+  - Result (`results/nq_dense_retrieval_result.json`): detection 0.688
+    [0.662, 0.713] vs action-utility 0.611 [0.583, 0.639]; paired
+    difference +0.084 [+0.045, +0.123] on n=1,932 → **reproduces**.
+    Dense nDCG@10 0.500 vs frozen BM25 0.308; dense failure rate 26%.
+- **TripClick dense CI corrected.** scripts/36's "paired" bootstrap held
+  detection AUC fixed — not paired. `scripts/44` (`ead6a93`) recomputes it
+  the scripts/28 way on the acted subset (n=1,050): +0.022 [-0.028,
+  +0.072] — *not* significant. The paper says so (`cfd8fc0`).
+- **Paper integration** (`35c87d5`, `120e3ec`): dense paragraph covers
+  both corpora with a retriever-strength explanation (NQ dense > BM25,
+  TripClick dense < BM25 → gap resolves where dense is strong); Figure 1
+  is a 4-row forest plot (TripClick, NQ, Dense TripClick, Dense NQ);
+  abstract, C3, related work, limitations, conclusion, experimental
+  integrity all updated. Did **not** claim BGE was/wasn't trained on NQ
+  (unverified).
+- **Anonymized mirror** (`anonymous.4open.science/r/agentic-query-expansion-8939/`)
+  resynced by the user 2026-11-02 and verified byte-identical for the
+  new scripts/configs/paper. Content is unchanged by the scrub below, so
+  it needs no resync for that. Expires 2027-03-14.
 
-**`scripts/41_nq_dense_build_full_corpus.py`** — building the full BEIR
-NQ dense corpus (2,681,468 docs, `BAAI/bge-small-en-v1.5`, float16
-memmap) at the same scale as the existing TripClick dense-retrieval
-check, for a second-corpus dense-retrieval replication (currently the
-paper's dense-retrieval check is TripClick-only).
+## TripClick license scrub (2026-11-03)
 
-- Log: `/tmp/nq_dense_build2.log`. Checkpointed/resumable
-  (`data/nq_dense_embeddings.f16` + `data/nq_dense_ids.txt`).
-- **Reliability history, read before trusting a silent "it's running":**
-  died once from resource contention with an unrelated job (`~/dev/o-drift`,
-  a different repo) running concurrently on this machine — paused/resumed
-  manually around that a few times. Died a **second** time with no error
-  in the log at all (just a benign semaphore-cleanup warning), most
-  likely an OS-level kill under memory pressure — restarted from
-  checkpoint, currently healthy (~43-70 docs/s observed post-restart).
-- A `Monitor` task is currently watching: fires on either the `[dense_index]
-  done` completion line OR the process disappearing without one (the
-  second death produced no error text, so a pure error-grep watcher
-  would have stayed silent forever — this one polls process liveness
-  directly instead).
-- Standalone `caffeinate -d -i -s` is running independent of the job's
-  own process tree, so system sleep isn't a risk even if the job's own
-  wrapper dies again.
-- The script's own printed `docs/s` and `ETA` fields go garbage after
-  any pause/resume cycle (wall-clock `t0` never resets, so paused time
-  gets counted as near-zero throughput) — don't trust them. Measure real
-  throughput from raw doc-count deltas over fresh wall-clock samples
-  instead.
-- Rough ETA as of this doc: **2-4 days**, bursty (7-70 docs/s observed
-  across samples), not a single confident number.
+TripClick terms (tripdatabase.github.io/tripclick): non-commercial
+research only; no part of the dataset may be publicly shared except
+aggregated findings/visualizations; **statistical models or resources
+created from it may not be shared publicly without the data owners'
+permission**; a violation ends usage rights automatically.
 
-## Next (not started yet)
+Audit: no raw docs/queries/qrels/IDs tracked anywhere in history;
+`models/*.joblib` gitignored (the August `verifier_v1.joblib` leak was
+already scrubbed). One remaining violation: old commit `1676e2d`
+hardcoded the 10 TripClick-fitted verifier coefficients in
+`src/agent/verify.py`. Fixed with `git filter-repo --replace-text`
+(values → `None  # redacted ...`, now commit `f943c20`), force-pushed;
+cited hashes in docs/configs/scripts remapped in `648cf73`. Current tree
+byte-identical to before. Local backup bundle deleted.
 
-The embedding build (`scripts/41`) only produces the dense index.
-**The actual NQ dense-retrieval episode pipeline does not exist yet** —
-scripts 33-36 (TripClick's pilot telemetry / corpus-scoping / pilot
-runner / full-scale runner) are all hardcoded to TripClick's data paths,
-configs, and query splits. Once `scripts/41` finishes, still need:
+**Still open:** GitHub still serves `.../commit/1676e2d` by direct URL
+(unreferenced, but not GC'd). Purge needs a GitHub Support "remove
+sensitive data" request — the user's to file.
 
-1. An NQ-equivalent of `scripts/35`/`36`: run episodes over NQ's val
-   (n=800) and test (n=600, or possibly the n=2,052 extension pool for
-   parity with the paper's main NQ numbers — not yet decided) query
-   populations against the new dense index, computing detection AUC and
-   action-utility AUC the same way the TripClick dense check does.
-2. Decide the frozen population size/scope for this touch *before*
-   running it, same discipline as every other result in this paper —
-   this hasn't been written down yet and should be before any code runs
-   against frozen NQ test data.
-3. Once results land: likely a new subsection or extension to the
-   existing "Does this hold under dense retrieval?" part of Section 4,
-   same page-budget constraints as everything else (currently zero
-   slack — expect to need trims elsewhere, same pattern as every other
-   addition in this stack).
+Rule going forward: never commit anything fit on TripClick (weights,
+coefficients, joblib, per-query outputs). Aggregate metrics and scalar
+thresholds are fine. NQ (BEIR) artifacts are not under this restriction.
 
-## Also unresolved, not blocking
+## Machine notes (16 GB M-series Mac)
 
-- Two untracked zip files in repo root (`paper.zip`, `paper 5.33.28 PM.zip`)
-  — flagged early in this session, never explained or cleaned up. Not
-  touched.
-- Nothing has been pushed to `origin`, and the anonymized
-  `anonymous.4open.science` mirror has not been resynced since before
-  this entire commit stack — both need an explicit go-ahead.
+- `caffeinate` does **not** stop lid-close sleep on battery — an
+  overnight run stalled 8h this way. Keep the lid open / on AC, or
+  `sudo pmset -a disablesleep 1`.
+- One pool job at a time; other repos (e.g. `~/dev/o-drift`) also run
+  long jobs here — check `ps` before starting anything heavy.
+- A standalone `caffeinate -d -i -s` (PID 2777) from the NQ build is
+  still running; safe to `kill 2777`.
+
+## Loose ends, not blocking
+
+- Untracked `logs/` (NQ build/episode logs, launcher script) and
+  `paper 5.33.28 PM.zip` in the repo root — never explained, untouched.
+- `scripts/41`'s printed docs/s and ETA are wrong after any pause
+  (wall-clock `t0` never resets).
+
+## Revision after the simulated WSDM review (2026-11-08)
+
+Simulated 5-seat review (ARS academic-paper-reviewer, scratchpad only):
+Major Revision. All must-fix items addressed in `paper_wsdm/main.tex`.
+
+- Pre-committed the analyses first: `configs/revision_analyses_precommit.json`
+  (`fbe56ac`), then `scripts/46_revision_analyses.py` ->
+  `results/revision_analyses.json` (local, gitignored). `scripts/45` re-ran
+  frozen NQ BM25 retrieval to store score lists for the QPP baseline.
+- **The central claim changed.** The harm-label AUC gap holds in 3/4
+  settings, but it is largely structural: 84-94% of failing queries stay
+  at nDCG 0 after expansion (ties, "not harmed"), so the two labels are
+  coupled. On queries whose nDCG changed (post hoc), the BM25 gaps vanish;
+  only dense NQ keeps one (+0.122 [+0.047,+0.197]).
+- New robust finding: a perfect failure detector recovers only 42%
+  (TripClick) / 33% (NQ) of the oracle's gain; the rest is on healthy
+  queries and needs action-utility prediction.
+- NQC alone matches our detector (TripClick 0.647 vs 0.649).
+- Correction: NQ's stored `accepted_ndcg` is the verifier-GATED policy,
+  not unconditional QE. Unconditional (unfused) QE on NQ hurts (-0.022,
+  significant); failure-selective beats it (+0.015). The NQ BM25 run
+  never reranked (`use_reranker=False`); the paper now says so.
+- Pre-revision paper kept only in the session scratchpad; git has it.
+
+## Possible next steps
+
+- Re-review the revised draft (ARS re-review mode).
+- Resync the anonymized mirror after pushing.
+- If page budget allows: nothing else is pending experimentally. Any new
+  test touch needs a precommit first, same discipline as above.
