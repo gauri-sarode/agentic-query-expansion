@@ -1,0 +1,920 @@
+{
+ "precommit": "configs/revision_analyses_precommit.json",
+ "settings": {
+  "tripclick_bm25": {
+   "A1": {
+    "detection_full_population": {
+     "point": 0.6493,
+     "ci_lo": 0.6182,
+     "ci_hi": 0.6799,
+     "n": 1175,
+     "pos_rate": 0.4502
+    },
+    "detection_acted": {
+     "point": 0.6429,
+     "ci_lo": 0.6119,
+     "ci_hi": 0.6735,
+     "n": 1157,
+     "pos_rate": 0.4564
+    },
+    "action_utility_acted": {
+     "point": 0.5524,
+     "ci_lo": 0.5181,
+     "ci_hi": 0.5863,
+     "n": 1157,
+     "pos_rate": 0.3302
+    },
+    "difference_acted": {
+     "point": 0.0905,
+     "ci_lo": 0.0446,
+     "ci_hi": 0.1361,
+     "n": 1157
+    }
+   },
+   "A2_A3": {
+    "label_rates": {
+     "n": 1157,
+     "tied": 0.4788,
+     "helped": 0.191,
+     "harmed": 0.3302
+    },
+    "rule_a_harmed_vs_rest": {
+     "point": 0.5524,
+     "ci_lo": 0.5181,
+     "ci_hi": 0.5863,
+     "n": 1157,
+     "pos_rate": 0.3302
+    },
+    "rule_b_helped_vs_rest": {
+     "point": 0.5397,
+     "ci_lo": 0.4987,
+     "ci_hi": 0.5809,
+     "n": 1157,
+     "pos_rate": 0.191
+    },
+    "rule_c_helped_vs_harmed": {
+     "point": 0.5721,
+     "ci_lo": 0.5239,
+     "ci_hi": 0.6198,
+     "n": 603,
+     "pos_rate": 0.3665
+    },
+    "noise_large_effects_rule_c": {
+     "point": 0.6438,
+     "ci_lo": 0.5742,
+     "ci_hi": 0.712,
+     "n": 312,
+     "pos_rate": 0.2821,
+     "abs_delta_threshold": 0.3155
+    },
+    "harm_possible_only_rule_a": {
+     "point": 0.5528,
+     "ci_lo": 0.5059,
+     "ci_hi": 0.598,
+     "n": 629,
+     "pos_rate": 0.6073
+    },
+    "blp_slope": {
+     "point": 1.0924,
+     "ci_lo": 0.5381,
+     "ci_hi": 1.6748
+    },
+    "gates_top_minus_bottom_quartile": {
+     "point": 0.0934,
+     "ci_lo": 0.0486,
+     "ci_hi": 0.1401
+    }
+   },
+   "A5": {
+    "alignment": {
+     "replayed_no_expand": 28,
+     "recorded": 28,
+     "aligned": true
+    },
+    "n_pre_features": 8,
+    "n_post_features": 10,
+    "pre_only": {
+     "point": 0.5917,
+     "ci_lo": 0.5574,
+     "ci_hi": 0.6259,
+     "n": 1157,
+     "pos_rate": 0.3302
+    },
+    "post_only": {
+     "point": 0.5824,
+     "ci_lo": 0.5478,
+     "ci_hi": 0.6161,
+     "n": 1157,
+     "pos_rate": 0.3302
+    },
+    "pre_plus_post": {
+     "point": 0.6027,
+     "ci_lo": 0.5691,
+     "ci_hi": 0.6362,
+     "n": 1157,
+     "pos_rate": 0.3302
+    },
+    "pre_plus_post_minus_post": {
+     "point": 0.0203,
+     "ci_lo": -0.0131,
+     "ci_hi": 0.0534,
+     "n": 1157
+    },
+    "detection_acted_minus_pre_plus_post": {
+     "point": 0.0402,
+     "ci_lo": 0.0027,
+     "ci_hi": 0.0782,
+     "n": 1157
+    }
+   },
+   "post_hoc_untied_not_precommitted": {
+    "detection_untied": {
+     "point": 0.5284,
+     "ci_lo": 0.4585,
+     "ci_hi": 0.5951,
+     "n": 603,
+     "pos_rate": 0.1393
+    },
+    "direction_untied": {
+     "point": 0.5721,
+     "ci_lo": 0.5239,
+     "ci_hi": 0.6198,
+     "n": 603,
+     "pos_rate": 0.3665
+    },
+    "difference_untied": {
+     "point": -0.0437,
+     "ci_lo": -0.1266,
+     "ci_hi": 0.0386,
+     "n": 603
+    }
+   }
+  },
+  "nq_bm25": {
+   "A1": {
+    "detection_full_population": {
+     "point": 0.6801,
+     "ci_lo": 0.6579,
+     "ci_hi": 0.7031,
+     "n": 2052,
+     "pos_rate": 0.4907
+    },
+    "detection_acted": {
+     "point": 0.6749,
+     "ci_lo": 0.6516,
+     "ci_hi": 0.6982,
+     "n": 2013,
+     "pos_rate": 0.4968
+    },
+    "action_utility_acted": {
+     "point": 0.5563,
+     "ci_lo": 0.5173,
+     "ci_hi": 0.594,
+     "n": 2013,
+     "pos_rate": 0.1714
+    },
+    "difference_acted": {
+     "point": 0.1186,
+     "ci_lo": 0.0756,
+     "ci_hi": 0.1618,
+     "n": 2013
+    }
+   },
+   "A2_A3": {
+    "label_rates": {
+     "n": 2013,
+     "tied": 0.694,
+     "helped": 0.1346,
+     "harmed": 0.1714
+    },
+    "rule_a_harmed_vs_rest": {
+     "point": 0.5563,
+     "ci_lo": 0.5173,
+     "ci_hi": 0.594,
+     "n": 2013,
+     "pos_rate": 0.1714
+    },
+    "rule_b_helped_vs_rest": {
+     "point": 0.5986,
+     "ci_lo": 0.5607,
+     "ci_hi": 0.6347,
+     "n": 2013,
+     "pos_rate": 0.1346
+    },
+    "rule_c_helped_vs_harmed": {
+     "point": 0.6244,
+     "ci_lo": 0.5814,
+     "ci_hi": 0.6673,
+     "n": 616,
+     "pos_rate": 0.4399
+    },
+    "noise_large_effects_rule_c": {
+     "point": 0.7109,
+     "ci_lo": 0.6551,
+     "ci_hi": 0.7642,
+     "n": 322,
+     "pos_rate": 0.4037,
+     "abs_delta_threshold": 0.3155
+    },
+    "harm_possible_only_rule_a": {
+     "point": 0.5819,
+     "ci_lo": 0.5404,
+     "ci_hi": 0.624,
+     "n": 1013,
+     "pos_rate": 0.3406
+    },
+    "blp_slope": {
+     "point": 1.205,
+     "ci_lo": 0.9638,
+     "ci_hi": 1.4443
+    },
+    "gates_top_minus_bottom_quartile": {
+     "point": 0.1196,
+     "ci_lo": 0.0856,
+     "ci_hi": 0.154
+    }
+   },
+   "A5": {
+    "alignment": {
+     "aligned": false,
+     "reason": "post-action features were not stored for the NQ BM25 test episodes (scripts/25 kept only the frozen prediction)"
+    }
+   },
+   "post_hoc_untied_not_precommitted": {
+    "detection_untied": {
+     "point": 0.5835,
+     "ci_lo": 0.5147,
+     "ci_hi": 0.65,
+     "n": 616,
+     "pos_rate": 0.112
+    },
+    "direction_untied": {
+     "point": 0.6244,
+     "ci_lo": 0.5814,
+     "ci_hi": 0.6673,
+     "n": 616,
+     "pos_rate": 0.4399
+    },
+    "difference_untied": {
+     "point": -0.0409,
+     "ci_lo": -0.1217,
+     "ci_hi": 0.0356,
+     "n": 616
+    }
+   }
+  },
+  "tripclick_dense": {
+   "A1": {
+    "detection_full_population": {
+     "point": 0.6377,
+     "ci_lo": 0.6056,
+     "ci_hi": 0.6693,
+     "n": 1175,
+     "pos_rate": 0.5855
+    },
+    "detection_acted": {
+     "point": 0.6209,
+     "ci_lo": 0.5866,
+     "ci_hi": 0.6547,
+     "n": 1050,
+     "pos_rate": 0.6019
+    },
+    "action_utility_acted": {
+     "point": 0.5987,
+     "ci_lo": 0.555,
+     "ci_hi": 0.6416,
+     "n": 1050,
+     "pos_rate": 0.1876
+    },
+    "difference_acted": {
+     "point": 0.0223,
+     "ci_lo": -0.0279,
+     "ci_hi": 0.0722,
+     "n": 1050
+    }
+   },
+   "A2_A3": {
+    "label_rates": {
+     "n": 1050,
+     "tied": 0.6581,
+     "helped": 0.1543,
+     "harmed": 0.1876
+    },
+    "rule_a_harmed_vs_rest": {
+     "point": 0.5987,
+     "ci_lo": 0.555,
+     "ci_hi": 0.6416,
+     "n": 1050,
+     "pos_rate": 0.1876
+    },
+    "rule_b_helped_vs_rest": {
+     "point": 0.4643,
+     "ci_lo": 0.4192,
+     "ci_hi": 0.5096,
+     "n": 1050,
+     "pos_rate": 0.1543
+    },
+    "rule_c_helped_vs_harmed": {
+     "point": 0.5578,
+     "ci_lo": 0.4973,
+     "ci_hi": 0.6167,
+     "n": 359,
+     "pos_rate": 0.4513
+    },
+    "noise_large_effects_rule_c": {
+     "point": 0.5506,
+     "ci_lo": 0.4664,
+     "ci_hi": 0.6331,
+     "n": 184,
+     "pos_rate": 0.3804,
+     "abs_delta_threshold": 0.2044
+    },
+    "harm_possible_only_rule_a": {
+     "point": 0.6267,
+     "ci_lo": 0.5717,
+     "ci_hi": 0.6795,
+     "n": 418,
+     "pos_rate": 0.4713
+    },
+    "blp_slope": {
+     "point": 0.4233,
+     "ci_lo": 0.1441,
+     "ci_hi": 0.7097
+    },
+    "gates_top_minus_bottom_quartile": {
+     "point": 0.0314,
+     "ci_lo": 0.0006,
+     "ci_hi": 0.0628
+    }
+   },
+   "A5": {
+    "alignment": {
+     "aligned": true,
+     "reason": "records carry both feature sets per query"
+    },
+    "n_pre_features": 6,
+    "n_post_features": 9,
+    "pre_only": {
+     "point": 0.591,
+     "ci_lo": 0.5483,
+     "ci_hi": 0.6341,
+     "n": 1050,
+     "pos_rate": 0.1876
+    },
+    "post_only": {
+     "point": 0.601,
+     "ci_lo": 0.5571,
+     "ci_hi": 0.6444,
+     "n": 1050,
+     "pos_rate": 0.1876
+    },
+    "pre_plus_post": {
+     "point": 0.6089,
+     "ci_lo": 0.5654,
+     "ci_hi": 0.6512,
+     "n": 1050,
+     "pos_rate": 0.1876
+    },
+    "pre_plus_post_minus_post": {
+     "point": 0.0079,
+     "ci_lo": -0.0243,
+     "ci_hi": 0.04,
+     "n": 1050
+    },
+    "detection_acted_minus_pre_plus_post": {
+     "point": 0.012,
+     "ci_lo": -0.0339,
+     "ci_hi": 0.0575,
+     "n": 1050
+    }
+   },
+   "post_hoc_untied_not_precommitted": {
+    "detection_untied": {
+     "point": 0.6005,
+     "ci_lo": 0.509,
+     "ci_hi": 0.6894,
+     "n": 359,
+     "pos_rate": 0.1114
+    },
+    "direction_untied": {
+     "point": 0.5578,
+     "ci_lo": 0.4973,
+     "ci_hi": 0.6167,
+     "n": 359,
+     "pos_rate": 0.4513
+    },
+    "difference_untied": {
+     "point": 0.0427,
+     "ci_lo": -0.0627,
+     "ci_hi": 0.145,
+     "n": 359
+    }
+   }
+  },
+  "nq_dense": {
+   "A1": {
+    "detection_full_population": {
+     "point": 0.6878,
+     "ci_lo": 0.6623,
+     "ci_hi": 0.7128,
+     "n": 2052,
+     "pos_rate": 0.2632
+    },
+    "detection_acted": {
+     "point": 0.6949,
+     "ci_lo": 0.669,
+     "ci_hi": 0.7199,
+     "n": 1932,
+     "pos_rate": 0.2635
+    },
+    "action_utility_acted": {
+     "point": 0.6106,
+     "ci_lo": 0.5828,
+     "ci_hi": 0.6385,
+     "n": 1932,
+     "pos_rate": 0.2231
+    },
+    "difference_acted": {
+     "point": 0.0842,
+     "ci_lo": 0.0448,
+     "ci_hi": 0.1233,
+     "n": 1932
+    }
+   },
+   "A2_A3": {
+    "label_rates": {
+     "n": 1932,
+     "tied": 0.5844,
+     "helped": 0.1925,
+     "harmed": 0.2231
+    },
+    "rule_a_harmed_vs_rest": {
+     "point": 0.6106,
+     "ci_lo": 0.5828,
+     "ci_hi": 0.6385,
+     "n": 1932,
+     "pos_rate": 0.2231
+    },
+    "rule_b_helped_vs_rest": {
+     "point": 0.4061,
+     "ci_lo": 0.3776,
+     "ci_hi": 0.4352,
+     "n": 1932,
+     "pos_rate": 0.1925
+    },
+    "rule_c_helped_vs_harmed": {
+     "point": 0.5119,
+     "ci_lo": 0.4707,
+     "ci_hi": 0.5519,
+     "n": 803,
+     "pos_rate": 0.4633
+    },
+    "noise_large_effects_rule_c": {
+     "point": 0.5256,
+     "ci_lo": 0.469,
+     "ci_hi": 0.5814,
+     "n": 408,
+     "pos_rate": 0.4485,
+     "abs_delta_threshold": 0.2891
+    },
+    "harm_possible_only_rule_a": {
+     "point": 0.6552,
+     "ci_lo": 0.626,
+     "ci_hi": 0.684,
+     "n": 1423,
+     "pos_rate": 0.3029
+    },
+    "blp_slope": {
+     "point": 0.1141,
+     "ci_lo": -0.0123,
+     "ci_hi": 0.244
+    },
+    "gates_top_minus_bottom_quartile": {
+     "point": 0.0219,
+     "ci_lo": -0.0068,
+     "ci_hi": 0.0508
+    }
+   },
+   "A5": {
+    "alignment": {
+     "aligned": true,
+     "reason": "records carry both feature sets per query"
+    },
+    "n_pre_features": 6,
+    "n_post_features": 9,
+    "pre_only": {
+     "point": 0.5383,
+     "ci_lo": 0.5082,
+     "ci_hi": 0.5686,
+     "n": 1932,
+     "pos_rate": 0.2231
+    },
+    "post_only": {
+     "point": 0.5975,
+     "ci_lo": 0.5695,
+     "ci_hi": 0.6254,
+     "n": 1932,
+     "pos_rate": 0.2231
+    },
+    "pre_plus_post": {
+     "point": 0.6251,
+     "ci_lo": 0.5975,
+     "ci_hi": 0.653,
+     "n": 1932,
+     "pos_rate": 0.2231
+    },
+    "pre_plus_post_minus_post": {
+     "point": 0.0276,
+     "ci_lo": 0.0097,
+     "ci_hi": 0.0454,
+     "n": 1932
+    },
+    "detection_acted_minus_pre_plus_post": {
+     "point": 0.0698,
+     "ci_lo": 0.0326,
+     "ci_hi": 0.1067,
+     "n": 1932
+    }
+   },
+   "post_hoc_untied_not_precommitted": {
+    "detection_untied": {
+     "point": 0.6337,
+     "ci_lo": 0.5735,
+     "ci_hi": 0.6941,
+     "n": 803,
+     "pos_rate": 0.1021
+    },
+    "direction_untied": {
+     "point": 0.5119,
+     "ci_lo": 0.4707,
+     "ci_hi": 0.5519,
+     "n": 803,
+     "pos_rate": 0.4633
+    },
+    "difference_untied": {
+     "point": 0.1219,
+     "ci_lo": 0.0474,
+     "ci_hi": 0.1971,
+     "n": 803
+    }
+   }
+  }
+ },
+ "A4": {
+  "tripclick_bm25": {
+   "routed_fraction": 0.4868,
+   "pairwise": {
+    "static_minus_bm25": {
+     "point": 0.0007,
+     "ci_lo": -0.0066,
+     "ci_hi": 0.008,
+     "se": 0.0037,
+     "mde80": 0.0104,
+     "n": 1175
+    },
+    "failure_selective_minus_bm25": {
+     "point": 0.0027,
+     "ci_lo": -0.0024,
+     "ci_hi": 0.0078,
+     "se": 0.0026,
+     "mde80": 0.0073,
+     "n": 1175
+    },
+    "closed_loop_minus_bm25": {
+     "point": 0.0009,
+     "ci_lo": -0.007,
+     "ci_hi": 0.0089,
+     "se": 0.004,
+     "mde80": 0.0113,
+     "n": 1175
+    },
+    "failure_selective_minus_static": {
+     "point": 0.002,
+     "ci_lo": -0.0032,
+     "ci_hi": 0.0071,
+     "se": 0.0026,
+     "mde80": 0.0074,
+     "n": 1175
+    },
+    "closed_loop_minus_static": {
+     "point": 0.0002,
+     "ci_lo": -0.0027,
+     "ci_hi": 0.0031,
+     "se": 0.0015,
+     "mde80": 0.0042,
+     "n": 1175
+    },
+    "closed_loop_minus_failure_selective": {
+     "point": -0.0018,
+     "ci_lo": -0.0077,
+     "ci_hi": 0.0042,
+     "se": 0.003,
+     "mde80": 0.0085,
+     "n": 1175
+    }
+   },
+   "perfect_detector_minus_bm25": {
+    "point": 0.0103,
+    "ci_lo": 0.0072,
+    "ci_hi": 0.0137,
+    "se": 0.0017,
+    "mde80": 0.0047,
+    "n": 1175
+   },
+   "static_gain_by_true_failure": {
+    "failing": {
+     "point": 0.0228,
+     "ci_lo": 0.0158,
+     "ci_hi": 0.0304,
+     "se": 0.0038,
+     "mde80": 0.0105,
+     "n": 529
+    },
+    "healthy": {
+     "point": -0.0175,
+     "ci_lo": -0.0293,
+     "ci_hi": -0.0059,
+     "se": 0.0059,
+     "mde80": 0.0166,
+     "n": 646
+    },
+    "failing_fraction": 0.4502
+   },
+   "static_gain_by_routing": {
+    "routed": {
+     "point": 0.0055,
+     "ci_lo": -0.0049,
+     "ci_hi": 0.016,
+     "se": 0.0054,
+     "mde80": 0.0151,
+     "n": 572
+    },
+    "not_routed": {
+     "point": -0.004,
+     "ci_lo": -0.0141,
+     "ci_hi": 0.0062,
+     "se": 0.0052,
+     "mde80": 0.0145,
+     "n": 603
+    }
+   },
+   "check_static_minus_bm25_equals_action_utility_delta_on_acted": false
+  },
+  "nq_bm25": {
+   "routed_fraction": 0.5058,
+   "bm25_mean": 0.308,
+   "note": "NQ arms use the unfused rewritten ranking; accepted_ndcg is a verifier-gated policy, reported separately",
+   "static_unfused_minus_bm25": {
+    "point": -0.0217,
+    "ci_lo": -0.0318,
+    "ci_hi": -0.0117,
+    "se": 0.0052,
+    "mde80": 0.0145,
+    "n": 2052
+   },
+   "verifier_gated_minus_bm25": {
+    "point": 0.0025,
+    "ci_lo": -0.0038,
+    "ci_hi": 0.0092,
+    "se": 0.0033,
+    "mde80": 0.0093,
+    "n": 2052
+   },
+   "oracle_unfused_minus_bm25": {
+    "point": 0.0415,
+    "ci_lo": 0.0361,
+    "ci_hi": 0.0472,
+    "se": 0.0029,
+    "mde80": 0.008,
+    "n": 2052
+   },
+   "failure_selective_minus_bm25": {
+    "point": -0.0067,
+    "ci_lo": -0.0138,
+    "ci_hi": 0.0003,
+    "se": 0.0036,
+    "mde80": 0.01,
+    "n": 2052
+   },
+   "failure_selective_minus_static": {
+    "point": 0.015,
+    "ci_lo": 0.0079,
+    "ci_hi": 0.0224,
+    "se": 0.0037,
+    "mde80": 0.0104,
+    "n": 2052
+   },
+   "perfect_detector_minus_bm25": {
+    "point": 0.0135,
+    "ci_lo": 0.0102,
+    "ci_hi": 0.0171,
+    "se": 0.0018,
+    "mde80": 0.0049,
+    "n": 2052
+   },
+   "static_gain_by_true_failure": {
+    "failing": {
+     "point": 0.0275,
+     "ci_lo": 0.0206,
+     "ci_hi": 0.0348,
+     "se": 0.0036,
+     "mde80": 0.0101,
+     "n": 1007
+    },
+    "healthy": {
+     "point": -0.0691,
+     "ci_lo": -0.0873,
+     "ci_hi": -0.051,
+     "se": 0.0092,
+     "mde80": 0.0258,
+     "n": 1045
+    },
+    "failing_fraction": 0.4907
+   }
+  }
+ },
+ "A6": {
+  "tripclick_bm25": {
+   "wig": {
+    "point": 0.5883,
+    "ci_lo": 0.5558,
+    "ci_hi": 0.6208,
+    "n": 1175,
+    "pos_rate": 0.4502
+   },
+   "nqc": {
+    "point": 0.6465,
+    "ci_lo": 0.6149,
+    "ci_hi": 0.677,
+    "n": 1175,
+    "pos_rate": 0.4502
+   },
+   "detector_minus_wig": {
+    "point": 0.0611,
+    "ci_lo": 0.036,
+    "ci_hi": 0.086,
+    "n": 1175
+   },
+   "detector_minus_nqc": {
+    "point": 0.0029,
+    "ci_lo": -0.0296,
+    "ci_hi": 0.0351,
+    "n": 1175
+   }
+  },
+  "nq_bm25": {
+   "wig": {
+    "point": 0.6513,
+    "ci_lo": 0.6274,
+    "ci_hi": 0.675,
+    "n": 2052,
+    "pos_rate": 0.4907
+   },
+   "nqc": {
+    "point": 0.7206,
+    "ci_lo": 0.6984,
+    "ci_hi": 0.7421,
+    "n": 2052,
+    "pos_rate": 0.4907
+   },
+   "detector_minus_wig": {
+    "point": 0.0288,
+    "ci_lo": 0.012,
+    "ci_hi": 0.0457,
+    "n": 2052
+   },
+   "detector_minus_nqc": {
+    "point": -0.0405,
+    "ci_lo": -0.0638,
+    "ci_hi": -0.0168,
+    "n": 2052
+   }
+  }
+ },
+ "A7": {
+  "tripclick_bm25": {
+   "nrel_distribution": {
+    "min": 1,
+    "median": 1.0,
+    "max": 5
+   },
+   "count_alone_auc": {
+    "point": 0.5697,
+    "ci_lo": 0.5418,
+    "ci_hi": 0.5974,
+    "n": 1175,
+    "pos_rate": 0.4502
+   },
+   "within_stratum": {
+    "1": {
+     "point": 0.6437,
+     "ci_lo": 0.6044,
+     "ci_hi": 0.6831,
+     "n": 752,
+     "pos_rate": 0.4973
+    },
+    "2-4": {
+     "point": 0.6773,
+     "ci_lo": 0.6224,
+     "ci_hi": 0.729,
+     "n": 411,
+     "pos_rate": 0.3723
+    },
+    ">=5": {
+     "point": null,
+     "n": 12
+    }
+   },
+   "weighted_within_stratum_auc": 0.6556,
+   "detector_significant_controlling_log_nrel": true
+  },
+  "nq_bm25": {
+   "nrel_distribution": {
+    "min": 1,
+    "median": 1.0,
+    "max": 4
+   },
+   "count_alone_auc": {
+    "point": 0.5214,
+    "ci_lo": 0.5049,
+    "ci_hi": 0.5379,
+    "n": 2052,
+    "pos_rate": 0.4907
+   },
+   "within_stratum": {
+    "1": {
+     "point": 0.6866,
+     "ci_lo": 0.6617,
+     "ci_hi": 0.712,
+     "n": 1667,
+     "pos_rate": 0.5039
+    },
+    "2-4": {
+     "point": 0.6589,
+     "ci_lo": 0.6041,
+     "ci_hi": 0.7133,
+     "n": 385,
+     "pos_rate": 0.4338
+    },
+    ">=5": {
+     "point": null,
+     "n": 0
+    }
+   },
+   "weighted_within_stratum_auc": 0.6814,
+   "detector_significant_controlling_log_nrel": true
+  }
+ },
+ "A8": {
+  "tripclick_logistic_refit_minus_linear": {
+   "point": 0.0111,
+   "ci_lo": -0.0082,
+   "ci_hi": 0.0293,
+   "n": 1157
+  },
+  "oracle_val": {
+   "tripclick_tail_val": {
+    "n": 1147,
+    "point": 0.0533,
+    "ci_lo": 0.0452,
+    "ci_hi": 0.0617
+   },
+   "nq_val": {
+    "n": 787,
+    "point": 0.0399,
+    "ci_lo": 0.0313,
+    "ci_hi": 0.0489
+   }
+  },
+  "oracle_test": {
+   "tripclick": {
+    "mean_diff": 0.0246,
+    "ci_lo": 0.0197,
+    "ci_hi": 0.0296,
+    "significant": true
+   },
+   "nq": {
+    "point": 0.0415,
+    "ci_lo": 0.0361,
+    "ci_hi": 0.0472
+   }
+  },
+  "nq_pilot_n600": {
+   "detection": {
+    "point": 0.6378,
+    "ci_lo": 0.5932,
+    "ci_hi": 0.6811,
+    "n": 600,
+    "pos_rate": 0.5367
+   },
+   "action_utility": {
+    "point": 0.5215,
+    "ci_lo": 0.4417,
+    "ci_hi": 0.6021,
+    "n": 586,
+    "pos_rate": 0.1365
+   }
+  }
+ },
+ "_note": "Aggregate results of every analysis pre-committed in configs/revision_analyses_precommit.json (AUCs, mean differences, bootstrap CIs, label rates). No per-query outputs and no fitted model parameters; the one regression coefficient (A7) is reduced to its significance. Produced by scripts/46_revision_analyses.py."
+}

@@ -26,7 +26,8 @@ whether a specific expansion will help (\emph{action utility}). We
 measure both on the same queries from qrel-free retrieval telemetry,
 on TripClick and BEIR Natural Questions, under BM25 and a dense
 retriever. On the queries the system expands, detection AUC is
-$0.62$--$0.70$, no better than a standard unsupervised predictor (NQC), while
+$0.62$--$0.70$, and under BM25 no better than a standard unsupervised
+predictor (NQC), while
 predicting whether the expansion harms retrieval reaches only
 $0.55$--$0.61$: a paired-significant gap in three of four settings. The
 gap is largely structural. Expansion leaves $84$--$94\%$ of failing
@@ -59,7 +60,8 @@ expansion is the natural response, and it needs two predictions:
 
 Detection asks whether the current ranking is already bad. Action
 utility asks whether a \emph{specific} expansion $a$ will make it
-worse. That the two differ is not new: selective-QE work predicts
+worse; its mirror, whether $a$ will help, matters as much for a
+policy (Section~5). That the two differ is not new: selective-QE work predicts
 expansion benefit directly~\cite{selective-qe,amati-selective}, and
 uplift modelling shows that targeting high-risk cases is not the same
 as targeting cases a treatment helps~\cite{ascarza-futility,causal-classification}.
@@ -205,8 +207,9 @@ acted-upon queries, with 95\% CIs. ``Diff.'' is the paired bootstrap of
 their difference on the same queries, so it equals the difference of
 the two columns. The last two columns use only queries whose nDCG@10
 the expansion changed ($\Delta\neq0$): action utility as
-helped-vs.-harmed, and the paired difference (post hoc, not
-pre-committed).}
+helped-vs.-harmed, and the paired difference between that and
+detection (post hoc, not pre-committed; the two AUCs score different
+labels on the same queries).}
 \label{tab:headline}
 \small
 \begin{tabular}{@{}lrccccc@{}}
@@ -240,11 +243,13 @@ selective QE already has.
 pre-action \emph{plus} post-action features (18 under BM25, 15 dense)
 still trails detection on TripClick BM25 ($0.603$; difference
 $+0.040$ $[+0.003,+0.078]$) and dense NQ ($0.625$; $+0.070$
-$[+0.033,+0.107]$), and does not differ from the post-action model
-alone on TripClick ($+0.020$ $[-0.013,+0.053]$). Pre-action features
-alone predict harm about as well as post-action ones on TripClick
-($0.592$ vs.\ $0.582$). A logistic refit of the BM25 action-utility
-model gives $0.563$ ($+0.011$ $[-0.008,+0.029]$ over the linear one).
+$[+0.033,+0.107]$), and does not differ from it on dense TripClick
+($0.609$; $+0.012$ $[-0.034,+0.058]$). Adding pre-action features
+helps on dense NQ ($+0.028$ $[+0.010,+0.045]$ over post-action alone)
+but not on TripClick (BM25 $+0.020$ $[-0.013,+0.053]$; dense $+0.008$).
+NQ BM25 is missing: its test run stored no post-action features. A
+logistic refit of the BM25 action-utility model gives $0.563$
+($+0.011$ $[-0.008,+0.029]$ over the linear one).
 
 \textbf{Not label sparsity.} Most TAIL queries have one relevant
 document, so failure might track label sparsity. The relevant-document
@@ -258,7 +263,12 @@ failing query: $84\%$, $93\%$, $94\%$, and $84\%$ of acted-upon failing
 queries keep nDCG@10 $=0$ (ties). Failing queries are therefore mostly
 ``not harmed'', so the two labels are coupled, and the harm AUC
 compares a detector against a label that is itself largely a failure
-indicator. Restricted to queries whose nDCG the expansion changed (last
+indicator. Dropping the failing queries, where harm is impossible,
+gives harm AUCs of $0.553$, $0.582$, $0.627$, and $0.655$. The dense
+harm score detects change rather than direction: it ranks
+\emph{helped} queries as likely harmed (helped-vs.-rest AUC $0.464$
+and $0.406$, against $0.540$ and $0.599$ under BM25).
+Restricted to queries whose nDCG the expansion changed (last
 two columns), the BM25 gaps vanish (point estimates reverse, CIs span
 zero) because detection itself drops to $0.53$--$0.58$ there; only
 dense NQ keeps a significant gap ($+0.122$). Predicting the
@@ -275,7 +285,8 @@ changes.
 \caption{nDCG@10 gain over BM25 on the full test sets, with 95\% CIs and,
 for real policies, the minimum detectable effect at 80\% power (MDE).
 Retrospective rows use test labels and are upper bounds, not policies.
-NQ arms use the unfused expanded ranking.}
+TripClick's Static QE, perfect detector, and oracle all use the
+RRF-fused ranking; NQ's arms use the unfused expanded ranking.}
 \label{tab:policies}
 \footnotesize
 \setlength{\tabcolsep}{3pt}
@@ -301,8 +312,8 @@ These nulls are bounded: with MDEs of $0.007$--$0.011$ nDCG@10, effects
 smaller than that could exist undetected. On NQ, where the expanded
 ranking is used unfused, unconditional QE significantly harms
 ($-0.022$). Failure-selective QE recovers most of that loss
-($+0.015$ $[+0.008,+0.022]$ over Static QE) and is not distinguishable
-from BM25. Failure-selective QE routes $49\%$ (TripClick) and $51\%$
+($+0.015$ $[+0.008,+0.022]$ over Static QE); its residual $-0.007$
+against BM25 has a CI that just reaches zero. Failure-selective QE routes $49\%$ (TripClick) and $51\%$
 (NQ) of queries to the generator, halving calls relative to Static QE.
 The closed-loop agent costs $24\%$ more calls (1.22 vs.\ 0.98 per
 query; Static QE skips the $1.5\%$ of queries the planner leaves
@@ -368,8 +379,11 @@ best-linear-predictor test~\cite{gates} of $\Delta$ on the
 validation-fit score under BM25, the slope is $+1.09$ $[+0.54,+1.67]$ on
 TripClick and $+1.21$ $[+0.96,+1.44]$ on NQ, and the top score quartile's mean
 $\Delta$ exceeds the bottom quartile's by $+0.093$ and $+0.120$ (both
-CIs exclude zero). Treatment effects vary across queries, and
-post-action telemetry tracks them weakly. The oracle's magnitude is
+CIs exclude zero). Under dense retrieval the evidence is weaker:
+the slope is $+0.42$ $[+0.14,+0.71]$ on TripClick and $+0.11$
+$[-0.01,+0.24]$ on NQ, not significant. Treatment effects vary across
+queries, and post-action telemetry tracks them weakly, more so under
+BM25. The oracle's magnitude is
 split-sensitive on TripClick (validation $+0.053$ $[0.045,0.062]$ vs.\
 test $+0.025$ $[0.020,0.030]$) but not on NQ ($+0.040$ $[0.031,0.049]$
 vs.\ $+0.042$ $[0.036,0.047]$), so we read it as an order of magnitude,
@@ -392,13 +406,15 @@ results. Two corpora; under dense retrieval, retriever strength and
 domain are confounded. TripClick's relevance labels are click-derived
 and sparse, which is one reason we report NQ's human labels in
 parallel. The policy comparisons on NQ use unfused rankings and lack a
-closed-loop arm. The tie analysis in Table~\ref{tab:headline} was not
-pre-committed.
+closed-loop arm. Of the analyses above, only the paired difference on
+changed queries (Table~\ref{tab:headline}, last column) was not
+pre-committed; every pre-committed analysis, including those
+summarized here in one line, is reported in full in the repository (\texttt{docs/revision\_analyses\_summary.json}).
 
 \section{Conclusion}
 
-Detecting that retrieval has failed is ordinary QPP; our detector is
-no better than NQC. Knowing that an expansion will fix it is a separate
+Detecting that retrieval has failed is ordinary QPP; under BM25 our
+detector is no better than NQC. Knowing that an expansion will fix it is a separate
 problem. Expansion rarely rescues a failing query, so even perfect
 failure detection recovers only a third to two-fifths of selective
 QE's headroom. The rest requires predicting whether a specific rewrite
