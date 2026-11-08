@@ -1,0 +1,28 @@
+{
+  "purpose": "Pre-committed scope for the WSDM revision analyses requested by the simulated review of 2026-11-07 (roadmap items R2-R5, R6-R8, S8). Written before computing any of the quantities below on any test split.",
+  "written": "2026-11-08",
+  "test_touch_policy": "No generator (LLM) calls, no new episodes, no model, threshold or retrieval decision conditioned on a test outcome. Every model below is fit on validation only and scored once on the frozen test records. Every analysis below is reported in full in results/revision_analyses.json whatever its outcome; none is dropped or swapped for a variant after seeing a test number.",
+  "settings": ["tripclick_bm25", "nq_bm25 (n=2,052 confirmatory extension)", "tripclick_dense", "nq_dense"],
+  "inputs_frozen": [
+    "results/tripclick-tail_failure_detection.json",
+    "results/tripclick-tail_verifier_calibration.json",
+    "results/tripclick-tail-val_verifier_calibration.json",
+    "results/tripclick-tail_agent_vs_static_checkpoint.json",
+    "results/nq_test_extension.json",
+    "results/nq_extension_t0_features.json",
+    "results/nq_val_calibration.json",
+    "results/dense_retrieval_full_scale_raw.json",
+    "results/nq_dense_retrieval_raw.json"
+  ],
+  "bootstrap": {"resamples": 10000, "seed": 42, "type": "paired percentile, resampling queries"},
+  "analyses": {
+    "A1_same_population": "R3. On each setting's acted-upon subset (queries where the planner chose an expansion), report detection AUC, action-utility AUC and their paired difference, all three with 95% CIs, so the reported difference equals the difference of the reported AUCs. Full-population detection AUC is reported alongside, labeled as such.",
+    "A2_label_definition": "R2. Report per setting: n acted, fraction tied (|dNDCG| <= 1e-9), fraction helped (dNDCG > 0), fraction harmed (dNDCG < 0). Action-utility AUC under three label rules with the frozen score: (a) harmed vs. rest [the rule used so far; score = -predicted gain], (b) helped vs. rest [score = predicted gain], (c) helped vs. harmed, ties excluded [score = predicted gain].",
+    "A3_noise_ceiling": "R2. (i) Rule (c) restricted to large effects: |dNDCG| >= the median nonzero |dNDCG| of that split (label-only threshold, no predictor involved). (ii) Rule (a) restricted to queries whose pre-action nDCG@10 > 0, the only queries on which harm is possible. (iii) Cross-fitted heterogeneity on test with the frozen val-fit score: best-linear-predictor slope of dNDCG on the centred score (bootstrap CI), and mean dNDCG in the top vs. bottom quartile of the score (GATES-style) with paired-difference CI.",
+    "A4_policy_power": "R4. TripClick: pairwise paired-bootstrap CIs for all six pairs of {BM25, Static QE, Failure-selective QE, Closed-loop QE}; minimum detectable effect vs. BM25 at 80% power, two-sided alpha .05, MDE = 2.80 x bootstrap SE of the paired difference. Static QE gain stratified by true failure status and by detector routing (P(fail) > tau). Retrospective perfect-detector arm (expand iff true failure), labeled not deployable. NQ (BM25, n=2,052): BM25, Static QE, Failure-selective QE with tau = median val-predicted failure probability of the NQ val-fit detector, perfect-detector arm; same CIs and MDE. No closed-loop arm on NQ (none was run).",
+    "A5_combined_model": "R5. Per setting, logistic regression (max_iter=1000, standardized features) fit on the validation acted-upon subset for the harmed-vs-rest label using (i) pre-action features only, (ii) post-action features only, (iii) pre + post. Test AUC with CIs, and paired difference (iii) - (ii). BM25 settings require aligning validation post-action rows to validation qids; alignment is accepted only if replaying the planner's deterministic operator rule reproduces the recorded NO_EXPAND count exactly (TripClick val 28, NQ val 13); otherwise A5 is reported for the dense settings only and the failure noted.",
+    "A6_qpp_baseline": "R6. Unsupervised QPP detection baselines over the frozen first-stage BM25 ranking, no fitting: WIG-style = mean of top-5 scores / sqrt(query length in tokens); NQC-style = std / mean of top-100 scores. Corpus-score normalization is omitted (FTS5 exposes no corpus-document score); stated as such. AUC for the failure label (predictor sign: lower predicted performance = failure), with CIs, and paired difference vs. the logistic detector on the same queries. TripClick from the checkpoint's stored top-100 BM25 run; NQ by re-running the frozen BM25 config (retrieval only, no generator, no qrels used beyond scoring).",
+    "A7_label_sparsity": "R8. Per BM25 setting: number of qrels-relevant documents per test query. AUC of that count alone for the failure label; detection AUC within strata {1, 2-4, >=5} relevant documents (strata with fewer than 30 queries or one class reported as n only), and the stratum-size-weighted mean; logistic regression of failure on [detector score, log(1+count)] with bootstrap CI on the detector coefficient.",
+    "A8_auxiliary_intervals": "S8. Paired bootstrap of logistic-refit vs. linear action-utility AUC on TripClick; oracle validation vs. test intervals as already computed; NQ n=600 pilot detection and action-utility AUCs with CIs."
+  }
+}
