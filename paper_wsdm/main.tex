@@ -132,7 +132,8 @@ reported only in the ledger below.
 \textbf{Pipeline.} BM25 over SQLite FTS5 (Porter stemming, title
 weight selected on validation). From pre-action telemetry a
 deterministic rule picks one of four expansion operators or none; it
-picks none for $1.5\%$ (TripClick) and $1.9\%$ (NQ) of queries. The
+picks none for $1.5\%$ (TripClick) and $1.9\%$ (NQ) of queries under
+BM25, and $10.6\%$ and $5.8\%$ under dense retrieval. The
 rest form the \emph{acted-upon} set, on which every AUC in
 Table~\ref{tab:headline} is computed. The generator (\texttt{qwen2.5:3b},
 4-bit, greedy, $\le 2$ calls per query) writes a corpus-grounded
