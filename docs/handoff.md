@@ -72,9 +72,14 @@ hardcoded the 10 TripClick-fitted verifier coefficients in
 cited hashes in docs/configs/scripts remapped in `648cf73`. Current tree
 byte-identical to before. Local backup bundle deleted.
 
-**Still open:** GitHub still serves `.../commit/1676e2d` by direct URL
-(unreferenced, but not GC'd). Purge needs a GitHub Support "remove
-sensitive data" request — the user's to file.
+**Purge requested (2026-11-08):** GitHub still served five pre-scrub
+commits by direct URL, all with the 10 coefficients: `1676e2d`,
+`f5f82c4`, `c819cc1`, `e8aacc2`, `86681ec` (found by checking every old
+SHA in `.git/filter-repo/commit-map`). A GitHub Support ticket asks to
+remove cached views and garbage-collect them, plus all unreachable
+objects. No forks, no PRs. Once Support confirms, check that
+`gh api repos/<owner>/agentic-query-expansion/commits/1676e2d`
+returns 404.
 
 Rule going forward: never commit anything fit on TripClick (weights,
 coefficients, joblib, per-query outputs). Aggregate metrics and scalar
