@@ -265,8 +265,8 @@ queries keep nDCG@10 $=0$ (ties). Failing queries are therefore mostly
 ``not harmed'', so the two labels are coupled, and the harm AUC
 compares a detector against a label that is itself largely a failure
 indicator. Dropping the failing queries, where harm is impossible,
-gives harm AUCs of $0.553$, $0.582$, $0.627$, and $0.655$, above the
-full-set values in three of four settings: the tied failing queries
+gives harm AUCs of $0.553$, $0.582$, $0.627$, and $0.655$, equal to the
+full-set value on TripClick BM25 and higher on the other three: the tied failing queries
 pull the harm AUC down. The dense
 harm score detects change rather than direction: it ranks
 \emph{helped} queries as likely harmed (helped-vs.-rest AUC $0.464$
