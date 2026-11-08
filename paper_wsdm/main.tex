@@ -22,7 +22,8 @@
 LLM query expansion (QE) helps some queries and harms others, which
 motivates applying it selectively. A selective controller needs two
 predictions: whether retrieval is failing (\emph{detection}) and
-whether a specific expansion will help (\emph{action utility}). We
+whether a specific expansion will help or harm it (\emph{action
+utility}). We
 measure both on the same queries from qrel-free retrieval telemetry,
 on TripClick and BEIR Natural Questions, under BM25 and a dense
 retriever. On the queries the system expands, detection AUC is
@@ -61,7 +62,7 @@ expansion is the natural response, and it needs two predictions:
 Detection asks whether the current ranking is already bad. Action
 utility asks whether a \emph{specific} expansion $a$ will make it
 worse; its mirror, whether $a$ will help, matters as much for a
-policy (Section~5). That the two differ is not new: selective-QE work predicts
+policy (Section~\ref{sec:worth}). That the two differ is not new: selective-QE work predicts
 expansion benefit directly~\cite{selective-qe,amati-selective}, and
 uplift modelling shows that targeting high-risk cases is not the same
 as targeting cases a treatment helps~\cite{ascarza-futility,causal-classification}.
@@ -264,7 +265,9 @@ queries keep nDCG@10 $=0$ (ties). Failing queries are therefore mostly
 ``not harmed'', so the two labels are coupled, and the harm AUC
 compares a detector against a label that is itself largely a failure
 indicator. Dropping the failing queries, where harm is impossible,
-gives harm AUCs of $0.553$, $0.582$, $0.627$, and $0.655$. The dense
+gives harm AUCs of $0.553$, $0.582$, $0.627$, and $0.655$, above the
+full-set values in three of four settings: the tied failing queries
+pull the harm AUC down. The dense
 harm score detects change rather than direction: it ranks
 \emph{helped} queries as likely harmed (helped-vs.-rest AUC $0.464$
 and $0.406$, against $0.540$ and $0.599$ under BM25).
@@ -280,6 +283,7 @@ action-utility score's errors are therefore concentrated in small
 changes.
 
 \section{Result 2: What Is Each Prediction Worth?}
+\label{sec:worth}
 
 \begin{table}[t]
 \caption{nDCG@10 gain over BM25 on the full test sets, with 95\% CIs and,
@@ -372,7 +376,7 @@ oracle's gain (mean $6\%$ across budgets).}
 \label{fig:quota}
 \end{figure}
 
-\textbf{Heterogeneity is real, and partly predictable.} Ranking queries
+\textbf{Heterogeneity is real; predicting it depends on the retriever.} Ranking queries
 by the action-utility score captures at most $12\%$ of the oracle's
 gain (Figure~\ref{fig:quota}). Yet the score is not noise. In a
 best-linear-predictor test~\cite{gates} of $\Delta$ on the
