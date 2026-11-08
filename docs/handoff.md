@@ -11,8 +11,10 @@ changed, and hashes in this doc are the post-rewrite ones.
 
 ## Paper state
 
-WSDM short paper, **"Observability-Guided LLM Query Expansion in Search:
-The Actionability Gap"** (`paper_wsdm/main.tex`, `main.pdf`). Page budget:
+WSDM short paper, **"Query Performance Prediction Is Not Benefit
+Prediction: Observability for Selective LLM Query Expansion"** (retitled
+2026-11-08 after a simulated-reviewer title poll; formerly "…: The
+Actionability Gap") (`paper_wsdm/main.tex`, `main.pdf`). Page budget:
 4 content pages, references + Ethical Considerations on page 5 (WSDM's
 limit excludes both). Holds after every edit below.
 

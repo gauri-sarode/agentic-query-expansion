@@ -13,7 +13,7 @@
 
 \begin{document}
 
-\title{Observability-Guided LLM Query Expansion in Search: The Actionability Gap}
+\title{Query Performance Prediction Is Not Benefit Prediction: Observability for Selective LLM Query Expansion}
 
 \author{Anonymous Author(s)}
 \affiliation{\institution{Affiliation withheld for double-blind review}}
@@ -21,11 +21,12 @@
 \begin{abstract}
 LLM query expansion (QE) helps some queries and harms others, which
 motivates applying it selectively. A selective controller needs two
-predictions: whether retrieval is failing (\emph{detection}) and
-whether a specific expansion will help or harm it (\emph{action
-utility}). We
-measure both on the same queries from qrel-free retrieval telemetry,
-on TripClick and BEIR Natural Questions, under BM25 and a dense
+predictions: whether retrieval is failing (\emph{detection}, a query
+performance prediction task) and whether a specific expansion will
+help or harm it (\emph{action utility}, a benefit prediction). We
+measure both on the same queries from the system's own
+\emph{observability}, the qrel-free telemetry it records about its
+retrieval (score distributions, coverage, ranking stability), on TripClick and BEIR Natural Questions, under BM25 and a dense
 retriever. On the queries the system expands, detection AUC is
 $0.62$--$0.70$, and under BM25 no better than a standard unsupervised
 predictor (NQC), while
@@ -56,7 +57,7 @@ expansion is the natural response, and it needs two predictions:
 \[
 \underbrace{P(\text{failure} \mid x)}_{\text{detection}}
 \qquad\text{vs.}\qquad
-\underbrace{P(\Delta\text{nDCG@10} < 0 \mid x, a)}_{\text{action utility (harm)}}
+\underbrace{P(\Delta\text{nDCG@10} < 0 \mid x, a)}_{\text{action utility (benefit prediction, as harm)}}
 \]
 
 Detection asks whether the current ranking is already bad. Action
