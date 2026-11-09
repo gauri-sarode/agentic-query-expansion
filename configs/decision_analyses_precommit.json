@@ -1,0 +1,38 @@
+{
+  "name": "decision_analyses",
+  "written": "2026-11-09",
+  "status": "Written before any of the analyses below was computed. All are POST HOC analyses of frozen test traces that were already inspected (TripClick TAIL test and NQ 2,052 test, every intervention). No new retrieval run, generator call, query, or relevance judgment. They are not independent confirmation and must be labelled as such. Every quantity listed is reported regardless of outcome (paper: summary; repository: full).",
+  "settings": {
+    "bm25_six": "LLM QE, reranking and PRF on TripClick TAIL test (n=1175) and NQ test (n=2052), BM25 first stage.",
+    "dense_two": "LLM QE under dense retrieval on both corpora (decomposition and AUC statistics only; no NQC, no budget curves).",
+    "delta_definitions": "Per query Delta = nDCG@10(intervened) - nDCG@10(BM25 or dense original), 0 where the planner did not act. TripClick LLM QE: the deployed RRF-fused Static QE ranking (as Section 5 of the paper); NQ LLM QE: the unfused expanded ranking (as Section 5); dense: candidate_ndcg - orig_ndcg; reranking and PRF: as configs/intervention_scope_precommit.json."
+  },
+  "D1_headroom_decomposition": {
+    "identity": "With F = 1[nDCG@10(original) = 0] and Delta_+ = max(Delta, 0): G_oracle = E[Delta_+] = E[Delta_+ F] + E[Delta_+ (1-F)], and since Delta >= 0 whenever F = 1, the perfect failure gate earns G_fail = E[Delta F] = E[Delta_+ F]; the failure-only ceiling gap is E[Delta_+ (1-F)]. Cost-aware: with a per-intervention cost kappa (nDCG@10 units), G_oracle(kappa) = E[(Delta-kappa)_+], G_fail(kappa) = E[(Delta-kappa) F], and G_oracle(kappa) - G_fail(kappa) = E[(Delta-kappa)_+ (1-F)] + E[(kappa-Delta)_+ F].",
+    "report": "For all eight settings: failing fraction P(F); rescue rate P(Delta>0 | F); P(Delta>0 | not F), P(Delta<0 | not F), P(Delta=0 | not F); E[Delta_+ F], E[Delta_+ (1-F)], their sum, and share = E[Delta_+ F] / E[Delta_+] with paired-bootstrap 95% CI; cost-aware terms at kappa in {0, 0.01, 0.02}."
+  },
+  "D2_budget_matched_routing": {
+    "settings": "bm25_six",
+    "information": "Pre-action routing only: every scorer uses information available before the intervention is computed.",
+    "scorers": {
+      "failure": "the paper's frozen detectors (TripClick LR refit on validation exactly as scripts/46; NQ frozen poor_proba), route highest P(fail) first",
+      "nqc": "NQC over the BM25 top-100 scores (std/mean, as scripts/46 qpp), route lowest first",
+      "benefit_pre": "StandardScaler + LinearRegression on Delta over the 8 pre-action features, fit on validation only; route highest predicted Delta first. Validation Delta: reranking/PRF as scripts/49 (PRF at the selected setting); TripClick LLM QE the validation action-utility label (expanded vs. original; no fused validation ranking exists), aligned by replaying the planner rule as scripts/46 A5; NQ LLM QE the validation y_delta_ndcg aligned by the same replay, reported unavailable if the replay does not reproduce the recorded 13 skipped queries",
+      "random": "expected gain of a uniformly random subset of the budget size (budget x mean Delta), exact",
+      "oracle": "highest true Delta first (retrospective bound, not a policy)"
+    },
+    "budgets": [0.10, 0.25, 0.50, 0.75, 1.00],
+    "ties": "stable sort on the score, ties in query order",
+    "metric": "mean nDCG@10 gain over the original ranking when exactly round(budget x n) queries receive the intervention.",
+    "primary_per_setting": "budget-averaged gain (mean over the five budgets) for benefit_pre minus failure and for nqc minus failure, paired bootstrap 95% CI (10^4, seed 42) and two-sided bootstrap p; Holm across the six settings within each comparison.",
+    "secondary": "per-budget gains with CIs for every scorer."
+  },
+  "D3_post_action_verification": "Reported separately from D2 because its cost is fully incurred: the existing benefit-selective (g > 0, pre+post features) results of scripts/49 for reranking and PRF, relabelled as verification with 100% intervention compute and the retained fraction. No new model.",
+  "D4_statistics": {
+    "holm_primary": "Holm adjustment (alpha 0.05) over the eight primary detection-minus-harm AUC differences (four LLM QE settings as Table 1 on acted-upon queries; four reranking/PRF settings as scripts/49), two-sided bootstrap p from the same 10^4 resamples.",
+    "label_sensitivity": "For the four reranking/PRF settings, the Table 1 untied columns: detection AUC on queries with Delta != 0, direction AUC (helped vs harmed), and their paired difference.",
+    "effect_threshold": "For all eight settings, harm AUC and detection-minus-harm with harmed redefined as Delta < -t for t in {0, 0.05, 0.10}."
+  },
+  "not_done": "No dense reranker-matched rerun (it would be a new test-time retrieval run); no independent held-out confirmation is possible (all NQ queries and TripClick TAIL test are used).",
+  "bootstrap": {"resamples": 10000, "seed": 42}
+}
