@@ -12,8 +12,9 @@ changed, and hashes in this doc are the post-rewrite ones.
 ## Paper state
 
 WSDM short paper, **"Query Performance Prediction Is Not Benefit
-Prediction: Observability for Selective LLM Query Expansion"** (retitled
-2026-11-08 after a simulated-reviewer title poll; formerly "…: The
+Prediction: Observability for Selective Retrieval Interventions"**
+(retitled 2026-11-09 when reranking and PRF were added; before that
+"…for Selective LLM Query Expansion", and originally "…: The
 Actionability Gap") (`paper_wsdm/main.tex`, `main.pdf`). Page budget:
 4 content pages, references + Ethical Considerations on page 5 (WSDM's
 limit excludes both). Holds after every edit below.
@@ -149,6 +150,37 @@ vs unfused policies, TripClick test history, missing CODS self-citation.
   per-corpus policy comparisons; operators named.
 - Not changed: BEIR "Heterogenous" is the original paper's spelling.
 - Content still 4 pages; references now spill to page 5.
+
+## Scope extension: reranking and PRF (2026-11-09)
+
+Added to reduce overlap with the CODS paper (no citation, per the author).
+- Pre-commit `configs/intervention_scope_precommit.json` (`57107ea`),
+  amended twice: PRF grid widened to 3x4x9 = 108 settings before any PRF
+  run; the failed rerank check (below) recorded in `8f54afe` before any
+  test label was read.
+- `scripts/48_intervention_runs.py` (rankings, no labels) and
+  `scripts/49_intervention_analysis.py` (`select` on validation, then one
+  test pass). Rankings live in `results/interventions/` (gitignored).
+  Aggregates: `docs/intervention_summary.json`.
+- `data/tripclick_bm25.sqlite3` had become a 0-byte file; rebuilt from
+  `data/tripclick_raw` (17 min). BM25 reproduces stored nDCG exactly (max
+  diff 0.0) on val and test of both corpora.
+- PRF selected on validation: TripClick (d=20, t=10, lam=0.9), where no
+  setting beat BM25 on val; NQ (20, 30, 0.6).
+- Rerank check FAILED: 17/1175 TripClick test top-10 identical to the
+  stored arm. Cause: the stored arm (2026-09-03) predates `8831fbf`
+  (2026-09-14), which removed the literal `<eot>` from reranker input;
+  re-scoring 50 queries with the old text matched 50/50. The current text
+  is primary; the paper discloses 0.285 (old) vs 0.287 (new).
+- Results (test): detection beats harm AUC in all four new settings
+  (+0.075 to +0.179, CIs exclude 0); perfect-detector share rerank 52%/57%,
+  PRF 8%/32%; NQ rerank always +0.225 vs failure-gated +0.114 vs
+  benefit-gated +0.223; TripClick rerank always -0.028, failure-gated
+  -0.010 (CI excludes 0), benefit-gated -0.001.
+- Paper: retitled, abstract/C1-C3/conclusion rewritten, new Setup
+  paragraph, Section 6 "Result 3: Beyond LLM QE" with Table 3; the Qini
+  figure was dropped for space (its 12% number is inline). Still 4
+  content pages.
 
 ## Possible next steps
 

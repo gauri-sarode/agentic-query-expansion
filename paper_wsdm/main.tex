@@ -13,36 +13,37 @@
 
 \begin{document}
 
-\title{Query Performance Prediction Is Not Benefit Prediction: Observability for Selective LLM Query Expansion}
+\title{Query Performance Prediction Is Not Benefit Prediction: Observability for Selective Retrieval Interventions}
 
 \author{Anonymous Author(s)}
 \affiliation{\institution{Affiliation withheld for double-blind review}}
 
 \begin{abstract}
-LLM query expansion (QE) helps some queries and harms others, which
-motivates applying it selectively. A selective controller needs two
-predictions: whether retrieval is failing (\emph{detection}, a query
-performance prediction task) and whether a specific expansion will
-help or harm it (\emph{action utility}, a benefit prediction). We
-measure both on the same queries from the system's own
-\emph{observability}, the qrel-free telemetry it records about its
-retrieval (score distributions, coverage, ranking stability), on TripClick and BEIR Natural Questions, under BM25 and a dense
-retriever. On the queries the system expands, detection AUC is
-$0.62$--$0.70$, and under BM25 no better than a standard unsupervised
-predictor (NQC), while
-predicting whether the expansion harms retrieval reaches only
-$0.55$--$0.61$, and whether it helps $0.41$--$0.60$: a failure detector is
-not a substitute for a benefit predictor. The harm gap is
-paired-significant in three of four settings, but largely structural.
-Expansion leaves $84$--$94\%$ of failing queries still failing, and
-among queries whose nDCG the expansion changed, the gap persists only
-on dense NQ. The policy picture
-matches. A perfect failure detector would recover only $42\%$
-(TripClick) and $33\%$ (NQ) of an oracle selector's gain; the rest lies
-in healthy queries that expansion sometimes helps and sometimes harms.
-Our failure-selective controller halves generator calls, and on NQ it
-significantly reduces the harm of unconditional expansion, but no
-policy measurably beats BM25 alone.
+LLM query expansion (QE), cross-encoder reranking, and
+pseudo-relevance feedback (PRF) each help some queries and harm
+others, which motivates applying them selectively. A selective
+controller needs two predictions: whether retrieval is failing
+(\emph{detection}, a query performance prediction task) and whether a
+specific intervention will help or harm the query (\emph{action
+utility}, a benefit prediction). We measure both on the same queries
+from the system's own \emph{observability}, the qrel-free telemetry it
+records about its retrieval, on TripClick and BEIR Natural Questions:
+LLM QE under BM25 and a dense retriever, and reranking and RM3-style
+PRF under BM25. Detection AUC is $0.62$--$0.70$, and under BM25 no
+better than a standard unsupervised predictor (NQC). Predicting harm
+reaches only $0.50$--$0.61$; detection beats it, paired-significantly,
+in seven of eight settings, though the gap is partly structural, since
+an intervention rarely changes a failing query: a failure detector is
+not a substitute for a benefit predictor. Failure is also the wrong
+target for a policy. A perfect failure detector would recover only
+$8$--$57\%$ of an oracle selector's gain, depending on intervention
+and corpus; the rest lies in healthy queries. On NQ, gating reranking
+on predicted failure halves its gain ($+0.114$ vs.\ $+0.225$
+nDCG@10); on TripClick, where reranking hurts on average, the
+failure gate still loses ($-0.010$) while a benefit model does not
+($-0.001$). For LLM QE, failure-selective expansion halves generator
+calls and on NQ significantly reduces unconditional QE's harm, but no
+QE policy measurably beats BM25 alone.
 \end{abstract}
 
 \maketitle
@@ -69,8 +70,11 @@ policy (Section~\ref{sec:worth}). That the two differ is not new: selective-QE w
 expansion benefit directly~\cite{selective-qe,amati-selective}, and
 uplift modelling shows that targeting high-risk cases is not the same
 as targeting cases a treatment helps~\cite{ascarza-futility,causal-classification}.
-What is missing for LLM QE is a measurement of detection and action utility on the same
-queries, and of what each one is worth to a policy. We use
+What is missing is a measurement of detection and action utility on
+the same queries, and of what each one is worth to a policy. We take
+LLM QE as the main case and repeat the measurement for two classical
+interventions, cross-encoder reranking and PRF, to see which findings
+are specific to generative expansion. We use
 \emph{observability} for qrel-free telemetry a search system records
 about its own behaviour (score distributions, coverage, ranking
 stability, reranker agreement), the signal a deployed controller can
@@ -78,15 +82,16 @@ actually see.
 
 \textbf{Contributions.}
 \textbf{(C1)} A paired, same-query measurement of detection and
-action-utility AUC on two corpora under BM25 and dense retrieval, with
-the label's tie rule, a standard QPP baseline, and a combined
-pre+post-action model reported alongside.
-\textbf{(C2)} A decomposition of selective-QE headroom: how much of an
-oracle selector's gain perfect failure detection alone would recover,
-and why the remainder needs action-utility prediction.
-\textbf{(C3)} A policy evaluation with minimum detectable effects:
-failure-selective QE halves generator calls and, on NQ, significantly
-reduces unconditional QE's harm, but no policy detectably beats BM25.
+action-utility AUC in eight settings (three interventions, two
+corpora, BM25 and dense retrieval for LLM QE), with the label's tie
+rule, a standard QPP baseline, and a combined pre+post-action model.
+\textbf{(C2)} A headroom decomposition per intervention: how much of
+an oracle selector's gain perfect failure detection alone would
+recover ($8$--$57\%$), and why the remainder needs action-utility
+prediction.
+\textbf{(C3)} A policy evaluation with minimum detectable effects,
+showing that gating on failure can halve a helpful intervention's gain
+and fail to stop a harmful one's loss.
 
 \section{Related Work}
 
@@ -184,6 +189,23 @@ $P(\text{fail}\mid x)>\tau$, $\tau$ the median validation prediction.
 ranking, roll back, or re-plan once based on the action-utility score,
 with validation-calibrated thresholds.
 
+\textbf{Two further interventions.} Under a separate pre-committed
+protocol, we apply two classical interventions to every query of the
+BM25 run. \emph{Reranking}: the MiniLM cross-encoder scores the BM25
+top 100; its top 50 lead, and the BM25 order follows.
+\emph{PRF}: RM3-style~\cite{relevance-models} term weights from the
+top $d$ documents (softmax-normalized BM25 score times term frequency)
+select $t$ expansion terms, whose BM25 ranking is interpolated with
+the original after min-max normalization, with weight $\lambda$ on
+the original. $(d,t,\lambda)$ is chosen per corpus on validation over
+a 108-setting grid: $(20,10,0.9)$ on TripClick, $(20,30,0.6)$ on NQ.
+Labels and detectors are those above; the action-utility model is a
+linear regression on $\Delta$ over the 8 pre-action features plus 6
+label-free post-action ones (top-10 overlap, top-1 change, and
+rank-biased overlap with BM25; the new ranking's top score, margin,
+and score entropy), fit on validation. Every test query receives the
+intervention, so these AUCs use the full test sets.
+
 \textbf{BM25 baseline.} Our first, unstemmed BM25 scored nDCG@10
 $0.228$ on TripClick TAIL test, below the published $0.267$~\cite{tripclick}.
 Re-selected on validation only (validation $0.235\to0.327$), BM25 alone
@@ -208,7 +230,9 @@ disjoint from the $2{,}052$ test queries
 (detection $0.638$ $[0.593,0.681]$, action utility $0.522$
 $[0.442,0.602]$), the confirmatory $2{,}052$-query run, and its dense
 rerun; two later BM25 re-runs on the same queries recomputed
-telemetry and score lists only. Scripts and pre-commitments are in the anonymized repository:
+telemetry and score lists only. The reranking and PRF runs touched
+each test set once more, with every setting frozen on validation
+beforehand. Scripts and pre-commitments are in the anonymized repository:
 \url{https://anonymous.4open.science/r/agentic-query-expansion-8939/}.
 
 \section{Result 1: Detection vs.\ Action Utility}
@@ -332,6 +356,32 @@ MDE (real policies) & $0.007$--$0.011$ & $0.010$--$0.015$ \\
 \end{tabular}
 \end{table}
 
+\begin{table*}[t]
+\caption{Detection vs.\ action utility across interventions (BM25,
+test sets). LLM QE rows repeat Table~\ref{tab:headline} (acted-upon
+queries) and Section~\ref{sec:worth}; reranking and PRF rows use every
+test query. $\bar\Delta$: mean nDCG@10 change when every query
+receives the intervention (TripClick LLM QE: fused). Harm, Helped:
+action-utility AUC for harmed-vs.-rest and helped-vs.-rest. Diff.:
+paired bootstrap of detection minus harm AUC. Share: the perfect
+detector's gain as a fraction of the oracle selector's. BLP: slope of
+$\Delta$ on the centred action-utility score.}
+\label{tab:interventions}
+\footnotesize
+\begin{tabular}{@{}llrcccccc@{}}
+\toprule
+Intervention & Corpus & $\bar\Delta$ & Detection & Harm & Helped & Diff. & Share & BLP \\
+\midrule
+LLM QE & TripClick & $+0.001$ & 0.643 & 0.552 & 0.540 & $+0.091$ [$+0.045$, $+0.136$] & $42\%$ & $+1.09$ [$+0.54$, $+1.67$] \\
+LLM QE & NQ        & $-0.022$ & 0.675 & 0.556 & 0.599 & $+0.119$ [$+0.076$, $+0.162$] & $33\%$ & $+1.21$ [$+0.96$, $+1.44$] \\
+Reranking & TripClick & $-0.028$ & 0.649 & 0.575 & 0.513 & $+0.075$ [$+0.029$, $+0.119$] & $52\%$ & $+0.55$ [$+0.18$, $+0.93$] \\
+Reranking & NQ        & $+0.225$ & 0.680 & 0.514 & 0.679 & $+0.166$ [$+0.120$, $+0.213$] & $57\%$ & $+0.96$ [$+0.86$, $+1.06$] \\
+PRF & TripClick & $-0.001$ & 0.649 & 0.572 & 0.393 & $+0.077$ [$+0.014$, $+0.140$] & $8\%$ & $-0.11$ [$-0.62$, $+0.39$] \\
+PRF & NQ        & $+0.010$ & 0.680 & 0.501 & 0.553 & $+0.179$ [$+0.131$, $+0.227$] & $32\%$ & $+0.10$ [$-0.23$, $+0.44$] \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
 \textbf{Policies.} Fusion and reranking differ between corpora, so we
 compare policies within a corpus, not across. On TripClick, no policy differs from BM25 or from
 any other; every pairwise CI spans zero (Table~\ref{tab:policies}).
@@ -363,48 +413,11 @@ which only an action-utility predictor can separate. Our detector
 captures part of the first share: its routed queries gain $+0.0055$
 $[-0.005,+0.016]$ on TripClick, against $-0.0040$ for the rest.
 
-\begin{figure}[t]
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-    width=0.95\linewidth,
-    height=0.46\linewidth,
-    xlabel={Intervention budget (fraction of queries)},
-    ylabel={nDCG@10 gain},
-    xlabel style={font=\footnotesize},
-    ylabel style={font=\footnotesize},
-    xtick={1,2,3,4},
-    xticklabels={5\%,10\%,20\%,40\%},
-    tick label style={font=\footnotesize},
-    xmin=0.7, xmax=4.3,
-    ymin=-0.001, ymax=0.031,
-    legend style={font=\footnotesize,draw=none,at={(0.5,1.05)},anchor=south,
-        legend columns=2,column sep=4pt},
-    axis line style={draw=black},
-    legend cell align=left,
-    clip=false,
-]
-\addplot[thick,mark=*,mark size=2pt,color=black]
-    coordinates {(1,0.0184) (2,0.0242) (3,0.0246) (4,0.0246)};
-\addplot[thick,mark=square*,mark size=2pt,color=gray,densely dashed]
-    coordinates {(1,0.0001) (2,0.0006) (3,0.0025) (4,0.0029)};
-\legend{Oracle,Action-utility score}
-\node[above,font=\scriptsize,yshift=2pt] at (axis cs:1,0.0001) {$0.5\%$};
-\node[above,font=\scriptsize,yshift=2pt] at (axis cs:2,0.0006) {$2.5\%$};
-\node[above,font=\scriptsize,yshift=2pt] at (axis cs:3,0.0025) {$10.2\%$};
-\node[above,font=\scriptsize,yshift=2pt] at (axis cs:4,0.0029) {$11.8\%$};
-\end{axis}
-\end{tikzpicture}
-\caption{Uplift (Qini-style~\cite{qini}) curve on TripClick test:
-gain over BM25 when expanding the top-$k$ queries ranked by the oracle
-or by the action-utility score. Labels give the score's share of the
-oracle's gain (mean $6\%$ across budgets).}
-\label{fig:quota}
-\end{figure}
 
-\textbf{Heterogeneity is real; predicting it depends on the retriever.} Ranking queries
-by the action-utility score captures at most $12\%$ of the oracle's
-gain (Figure~\ref{fig:quota}). Yet the score is not noise. A
+\textbf{Heterogeneity is real; predicting it depends on the retriever.} Expanding the
+top-$k$ queries ranked by the action-utility score captures at most
+$12\%$ of the oracle's gain on TripClick (budgets $5$--$40\%$, an
+uplift curve in the style of Qini~\cite{qini}). Yet the score is not noise. A
 best-linear-predictor test~\cite{gates} asks whether it ranks queries
 by their gain: regressing $\Delta$ on the validation-fit score under
 BM25, the slope is $+1.09$ $[+0.54,+1.67]$ on
@@ -420,6 +433,40 @@ test $+0.025$ $[0.020,0.030]$) but not on NQ ($+0.040$ $[0.031,0.049]$
 vs.\ $+0.042$ $[0.036,0.047]$), so we read it as an order of magnitude,
 not a bound to target.
 
+\section{Result 3: Beyond LLM QE}
+\label{sec:beyond}
+
+Three findings carry over from LLM QE (Table~\ref{tab:interventions}).
+
+\textbf{Detection beats harm prediction in every new setting}, by
+$+0.075$ to $+0.179$, and harm prediction is at chance on NQ for both
+interventions. Predicting help is easier where the intervention helps
+often: on NQ the reranker helps $50\%$ of queries, and helped-vs.-rest
+($0.679$) ties detection ($+0.001$ $[-0.029,+0.032]$); in the other
+three settings detection beats it too. The action-utility score ranks
+queries by their gain for reranking (both BLP CIs exclude zero) but
+not for PRF.
+
+\textbf{Failure covers part of the headroom.} A perfect failure
+detector recovers $52\%$ and $57\%$ of the oracle's gain for
+reranking and $8\%$ and $32\%$ for PRF. On TripClick PRF barely moves
+rankings ($82\%$ of queries tied; no validation setting beat BM25),
+and the little it changes is mostly in healthy queries.
+
+\textbf{Gating on failure can cost more than it saves.} On NQ,
+reranking every query gains $+0.225$ $[+0.210,+0.240]$; reranking
+only predicted failures keeps $+0.114$ $[+0.103,+0.126]$, since the
+reranker also helps healthy queries, while the benefit model reranks
+$94\%$ of queries and keeps $+0.223$. On TripClick, reranking every
+query loses $-0.028$ $[-0.042,-0.013]$; the failure gate still loses
+$-0.010$ $[-0.020,-0.000]$, and the benefit model, reranking $15\%$
+of queries, does not ($-0.001$ $[-0.005,+0.003]$). PRF follows the
+same order on NQ ($+0.010$ always, $+0.004$ failure-gated, $+0.009$
+benefit-gated); on TripClick no PRF policy moves nDCG@10 by more than
+$0.002$ (MDE $\le 0.007$). These reranking numbers use the current
+reranker input; TripClick's stored reranked arm (Section~\ref{sec:result1})
+predates a fix to that text and scores $0.285$ against $0.287$ here.
+
 \section{Discussion and Limitations}
 
 \textbf{Why action utility is harder.} Both outcomes are observed
@@ -430,10 +477,14 @@ deterministic given its input (greedy decoding) but varies sharply
 across queries, and its effect on a single relevant document's rank is
 small and discrete. That fits the evidence above: direction is
 predictable for large changes and close to chance for small ones.
+Reranking and PRF involve no generator and show the same gap, so
+generator variance is not the whole explanation; the small, discrete
+effect of any intervention on a sparse relevance label is.
 
 \textbf{Limitations.} One small (3B) generator under a two-call
 budget; a stronger one may change both the rescue rate and the policy
-results. Two corpora; under dense retrieval, retriever strength and
+results. Reranking and PRF were run under BM25 only, with one
+cross-encoder and one PRF family. Two corpora; under dense retrieval, retriever strength and
 domain are confounded. TripClick's relevance labels are click-derived
 and sparse, which is one reason we report NQ's human labels in
 parallel. The policy comparisons on NQ use unfused rankings and lack a
@@ -446,14 +497,15 @@ summarized here in one line, is reported in full in the repository (\texttt{docs
 \section{Conclusion}
 
 Detecting that retrieval has failed is ordinary QPP; under BM25 our
-detector is no better than NQC. Knowing that an expansion will fix it is a separate
-problem, and a failure detector is not a substitute for it. Expansion rarely rescues a failing query, so even perfect
-failure detection recovers only a third to two-fifths of selective
-QE's headroom. The rest requires predicting whether a specific rewrite
-helps a query that is already working, which our telemetry does only
-weakly. In practice, failure-selective QE halves generator cost and
-avoids most of unconditional QE's harm, but it does not by itself
-deliver gains over BM25. Selective-QE work should therefore report
+detector is no better than NQC. Knowing that an intervention will fix
+it is a separate problem, and a failure detector is not a substitute
+for it. This holds for LLM QE, cross-encoder reranking, and PRF alike:
+perfect failure detection recovers $8$--$57\%$ of an oracle selector's
+headroom, and gating on failure halved the reranker's gain on NQ
+without stopping its loss on TripClick. The rest requires predicting
+whether a specific intervention helps a query that is already working,
+which our telemetry does only weakly, and better for reranking than
+for expansion. Selective-intervention work should therefore report
 action utility on the same queries as detection, together with its
 tie rule, rather than treating a failure detector as a proxy for
 benefit.
