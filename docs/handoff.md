@@ -133,7 +133,7 @@ Major Revision. All must-fix items addressed in `paper_wsdm/main.tex`.
 
 An outside reviewer-style read (Borderline Accept) raised: reranker
 confound, AUC != intrinsic difficulty, benefit evaluated as harm, fused
-vs unfused policies, TripClick test history, missing CODS self-citation.
+vs unfused policies, TripClick test history, a missing related-work citation.
 - Reranker: original rankings are never reranked, expanded ones are
   (TripClick, dense). Pre-committed (`configs/reranker_matched_precommit.json`)
   then ran `scripts/47` on frozen records only: TripClick BM25 labels
@@ -142,8 +142,7 @@ vs unfused policies, TripClick test history, missing CODS self-citation.
   helped-vs-rest falls to 0.504. Static QE vs BM25+rerank +0.031.
   Aggregates in `docs/reranker_matched_summary.json`. Dense has no
   reranked-original arm (would need a new test touch).
-- CODS 2026 paper ("Not Every Expansion Helps", ~/dev/llm-query-expansion):
-  a third-person citation was added, then removed at the author's request.
+- Related-work citation: added, then removed at the author's request.
 - Text: claim reworded to "a failure detector is not a substitute for a
   benefit predictor"; helped-vs-rest range in abstract; TripClick called
   partly exploratory, NQ the confirmation; pilot stated disjoint;
@@ -153,7 +152,7 @@ vs unfused policies, TripClick test history, missing CODS self-citation.
 
 ## Scope extension: reranking and PRF (2026-11-09)
 
-Added to reduce overlap with the CODS paper (no citation, per the author).
+Added to broaden the paper beyond LLM QE.
 - Pre-commit `configs/intervention_scope_precommit.json` (`57107ea`),
   amended twice: PRF grid widened to 3x4x9 = 108 settings before any PRF
   run; the failed rerank check (below) recorded in `8f54afe` before any

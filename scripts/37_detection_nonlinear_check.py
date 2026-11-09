@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""Reviewer gap (CODS 2026 review of a sibling paper, relayed for this
-one): the action-utility model's non-linear check (scripts/08's GBDT
+"""Reviewer gap (raised in an outside review): the action-utility model's non-linear check (scripts/08's GBDT
 vs. linear comparison, r=0.045 vs 0.134, Section 4 of the WSDM draft)
 was never repeated for the failure DETECTION model -- Table 1's 0.649
 TripClick AUC comes from a LogisticRegression never compared against

@@ -19,8 +19,7 @@ plus a large local LLM is unnecessary risk — keep this lightweight:
 | Caching | Prompts, outputs, rankings, verifier features, and timing all cached |
 
 **Known local constraint:** Pyserini/Lucene BM25 has previously crashed
-the JVM natively on this machine's JDK in a related project
-(`llm-query-expansion`). Prefer a disk-backed, non-JVM BM25 implementation
+the JVM natively on this machine's JDK in a related project. Prefer a disk-backed, non-JVM BM25 implementation
 (e.g. SQLite FTS5) unless/until a working JVM setup is confirmed here —
 don't rediscover that failure mode from scratch.
 
