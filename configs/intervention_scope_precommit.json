@@ -37,6 +37,10 @@
     {
       "date": "2026-11-09",
       "change": "PRF tuning grid widened from 2 x 2 (fb_terms {10,20} x lam {0.5,0.7}, fb_docs fixed at 10) to the full 3 x 4 x 9 grid above, at the author's request. Made before any PRF run on either corpus or split; only BM25 validation rankings existed."
+    },
+    {
+      "date": "2026-11-09",
+      "change": "Pre-committed rerank check FAILED (17/1175 TripClick test queries with identical top-10). Diagnosed before reading any test label: BM25 top-100 candidates are identical for all 1175 queries; the stored arm (results/tripclick-tail_bm25_reranker_only.json, written 2026-09-03) predates commit 8831fbf (2026-09-14), which removed the literal '<eot>' title/body separator from reranker input text. Re-scoring 50 test queries with the old '<eot>' text reproduces the stored top-10 for 50/50. Decision, made before labels: the primary rerank intervention uses the current (fixed) text, the same code as the NQ runs; the paper's existing TripClick reranker numbers (0.2850 arm, scripts/47) are disclosed as computed with the pre-fix text."
     }
   ]
 }
