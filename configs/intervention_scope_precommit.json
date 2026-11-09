@@ -1,0 +1,33 @@
+{
+  "name": "intervention_scope",
+  "written": "2026-11-09",
+  "status": "Pre-committed before any reranking or PRF run on either corpus (validation or test). Every quantity listed under 'analyses' is reported regardless of outcome.",
+  "question": "Does the detection/benefit-prediction separation found for LLM QE hold for other selective retrieval interventions? Two interventions are added, each applied to every query of the BM25 run on TripClick TAIL and BEIR NQ: (1) cross-encoder reranking, (2) pseudo-relevance feedback.",
+  "populations": {
+    "tripclick": "TAIL validation (1,175) and test (1,175), qids as in results/tripclick-tail_failure_detection.json; db data/tripclick_bm25.sqlite3, title weight 10 (module default, as every frozen TripClick run).",
+    "nq": "validation 800 (results/nq_val_calibration.json val_qids) and the 2,052-query confirmatory test set (results/nq_test_extension.json record order); db and weights from configs/nq_protocol_frozen.json. The n=600 pilot is excluded."
+  },
+  "interventions": {
+    "rerank": "BM25 top-100 for the original query; MiniLM cross-encoder (CONFIG.reranker_model) scores all 100; reranked top-50 lead, the remaining BM25 order follows (the agent's composition, as in the stored TripClick rerank arm). Check, before any label is read: on TripClick test the recomputed top-10 order must equal results/tripclick-tail_bm25_reranker_only.json's reranked_run for >= 99% of queries.",
+    "prf": "RM3-style feedback with score interpolation. From the top fb_docs=10 BM25 documents, term weights p(w) proportional to sum_d softmax-normalized BM25(d) * tf(w,d)/|d|, over lowercase alphabetic tokens of length >= 3, excluding sklearn's English stop words and the query's own terms. The top fb_terms terms form an OR query (FTS5 cannot weight terms). Final score = lam * minmax(BM25 original) + (1 - lam) * minmax(BM25 expansion-terms) over the union of both top-100 lists, missing score = 0 after normalization; keep the top 100. fb_terms in {10, 20} and lam in {0.5, 0.7} are chosen per corpus by validation mean nDCG@10 only, then frozen before the test run."
+  },
+  "labels": {
+    "failure": "BM25 nDCG@10 = 0 (unchanged from the paper).",
+    "delta": "nDCG@10(intervened) - nDCG@10(BM25), every query (no acted subset).",
+    "harmed": "delta < -1e-9; ties count as not harmed (paper's rule a). helped: delta > 1e-9 (rule b)."
+  },
+  "models": {
+    "detection": "The paper's detectors unchanged: TripClick logistic regression refit on the 8 validation pre-action features exactly as scripts/46; NQ the frozen models/nq_failure_detector_val_v1.joblib and its stored test poor_proba.",
+    "benefit": "Per intervention and corpus, a standardized linear regression on delta fit on validation only, features = the 8 pre-action features + 6 post-action features computed without labels from the intervened ranking: top-10 overlap with BM25 (fraction), top-1 changed (0/1), rank-biased overlap with BM25 (p=0.9, depth 20), and the intervened ranking's top score, top1-top2 margin and top-10 score entropy (cross-encoder logits for rerank; fused scores for PRF). Score g = predicted delta."
+  },
+  "analyses": {
+    "S1_label_rates": "tied / helped / harmed fractions; fraction of queries where harm is possible (BM25 nDCG@10 > 0).",
+    "S2_auc": "On test: detection AUC (failure label), benefit AUCs rule a (harmed vs rest, score -g), rule b (helped vs rest, score g), rule a restricted to harm-possible queries; paired bootstrap of detection minus rule a and detection minus rule b.",
+    "S3_blp": "Best-linear-predictor slope of delta on centred g with bootstrap CI.",
+    "S4_policies": "nDCG@10 gain over BM25 with paired CI and MDE (2.80 x SE) for: always intervene; failure-selective (intervene iff detector probability > validation median); benefit-selective (intervene iff g > 0). Retrospective upper bounds: perfect detector (intervene iff failing) and oracle (intervene iff delta > 0); perfect-detector share = perfect / oracle gain.",
+    "S5_llm_qe_row": "The LLM QE row of the combined table reuses the paper's existing numbers, recomputed on the same footing where the stored records allow (test-set detection vs harm and helped AUCs, perfect-detector share)."
+  },
+  "data_use": "Validation: run both interventions, tune PRF's two parameters, fit the benefit models. Test: run each intervention once with frozen settings; one analysis pass. No generator calls. Per-query outputs stay in results/ (gitignored, TripClick license); only aggregates are exported to docs/.",
+  "scope_limits": "BM25 only; dense retrieval is out of scope for the new interventions.",
+  "bootstrap": {"resamples": 10000, "seed": 42}
+}
