@@ -1,0 +1,1903 @@
+{
+  "_note": "POST HOC on frozen, previously inspected test traces (configs/decision_analyses_precommit.json); not independent confirmation.",
+  "D1": {
+    "llm_qe_tripclick": {
+      "n": 1175,
+      "failing": 0.4502,
+      "rescue_rate": 0.0718,
+      "healthy_helped": 0.1517,
+      "healthy_harmed": 0.1935,
+      "healthy_tied": 0.6548,
+      "gain_failing": 0.0103,
+      "gain_healthy": 0.0143,
+      "oracle": 0.0246,
+      "share_failing": 0.4182,
+      "share_ci": [
+        0.3152,
+        0.5208
+      ],
+      "cost_aware": {
+        "0.0": {
+          "oracle": 0.0246,
+          "perfect_failure_gate": 0.0103,
+          "missed_healthy_gain": 0.0143,
+          "wasted_cost_on_unrescued_failures": 0.0
+        },
+        "0.01": {
+          "oracle": 0.0234,
+          "perfect_failure_gate": 0.0058,
+          "missed_healthy_gain": 0.0135,
+          "wasted_cost_on_unrescued_failures": 0.0042
+        },
+        "0.02": {
+          "oracle": 0.0223,
+          "perfect_failure_gate": 0.0013,
+          "missed_healthy_gain": 0.0127,
+          "wasted_cost_on_unrescued_failures": 0.0084
+        }
+      }
+    },
+    "llm_qe_nq": {
+      "n": 2052,
+      "failing": 0.4907,
+      "rescue_rate": 0.0685,
+      "healthy_helped": 0.1933,
+      "healthy_harmed": 0.3301,
+      "healthy_tied": 0.4766,
+      "gain_failing": 0.0135,
+      "gain_healthy": 0.028,
+      "oracle": 0.0415,
+      "share_failing": 0.3257,
+      "share_ci": [
+        0.2592,
+        0.3948
+      ],
+      "cost_aware": {
+        "0.0": {
+          "oracle": 0.0415,
+          "perfect_failure_gate": 0.0135,
+          "missed_healthy_gain": 0.028,
+          "wasted_cost_on_unrescued_failures": 0.0
+        },
+        "0.01": {
+          "oracle": 0.0402,
+          "perfect_failure_gate": 0.0086,
+          "missed_healthy_gain": 0.027,
+          "wasted_cost_on_unrescued_failures": 0.0046
+        },
+        "0.02": {
+          "oracle": 0.0389,
+          "perfect_failure_gate": 0.0037,
+          "missed_healthy_gain": 0.026,
+          "wasted_cost_on_unrescued_failures": 0.0091
+        }
+      }
+    },
+    "rerank_tripclick": {
+      "n": 1175,
+      "failing": 0.4502,
+      "rescue_rate": 0.1701,
+      "healthy_helped": 0.2415,
+      "healthy_harmed": 0.5635,
+      "healthy_tied": 0.195,
+      "gain_failing": 0.0323,
+      "gain_healthy": 0.0293,
+      "oracle": 0.0616,
+      "share_failing": 0.5249,
+      "share_ci": [
+        0.4439,
+        0.6013
+      ],
+      "cost_aware": {
+        "0.0": {
+          "oracle": 0.0616,
+          "perfect_failure_gate": 0.0323,
+          "missed_healthy_gain": 0.0293,
+          "wasted_cost_on_unrescued_failures": 0.0
+        },
+        "0.01": {
+          "oracle": 0.0595,
+          "perfect_failure_gate": 0.0278,
+          "missed_healthy_gain": 0.028,
+          "wasted_cost_on_unrescued_failures": 0.0037
+        },
+        "0.02": {
+          "oracle": 0.0576,
+          "perfect_failure_gate": 0.0233,
+          "missed_healthy_gain": 0.0267,
+          "wasted_cost_on_unrescued_failures": 0.0075
+        }
+      }
+    },
+    "prf_tripclick": {
+      "n": 1175,
+      "failing": 0.4502,
+      "rescue_rate": 0.0076,
+      "healthy_helped": 0.1238,
+      "healthy_harmed": 0.2012,
+      "healthy_tied": 0.6749,
+      "gain_failing": 0.0009,
+      "gain_healthy": 0.0113,
+      "oracle": 0.0123,
+      "share_failing": 0.0764,
+      "share_ci": [
+        0.0131,
+        0.1646
+      ],
+      "cost_aware": {
+        "0.0": {
+          "oracle": 0.0123,
+          "perfect_failure_gate": 0.0009,
+          "missed_healthy_gain": 0.0113,
+          "wasted_cost_on_unrescued_failures": 0.0
+        },
+        "0.01": {
+          "oracle": 0.0115,
+          "perfect_failure_gate": -0.0036,
+          "missed_healthy_gain": 0.0106,
+          "wasted_cost_on_unrescued_failures": 0.0045
+        },
+        "0.02": {
+          "oracle": 0.0109,
+          "perfect_failure_gate": -0.0081,
+          "missed_healthy_gain": 0.01,
+          "wasted_cost_on_unrescued_failures": 0.0089
+        }
+      }
+    },
+    "rerank_nq": {
+      "n": 2052,
+      "failing": 0.4907,
+      "rescue_rate": 0.4578,
+      "healthy_helped": 0.5474,
+      "healthy_harmed": 0.1923,
+      "healthy_tied": 0.2603,
+      "gain_failing": 0.1424,
+      "gain_healthy": 0.1081,
+      "oracle": 0.2505,
+      "share_failing": 0.5684,
+      "share_ci": [
+        0.5346,
+        0.6016
+      ],
+      "cost_aware": {
+        "0.0": {
+          "oracle": 0.2505,
+          "perfect_failure_gate": 0.1424,
+          "missed_healthy_gain": 0.1081,
+          "wasted_cost_on_unrescued_failures": 0.0
+        },
+        "0.01": {
+          "oracle": 0.2455,
+          "perfect_failure_gate": 0.1375,
+          "missed_healthy_gain": 0.1054,
+          "wasted_cost_on_unrescued_failures": 0.0027
+        },
+        "0.02": {
+          "oracle": 0.2405,
+          "perfect_failure_gate": 0.1326,
+          "missed_healthy_gain": 0.1026,
+          "wasted_cost_on_unrescued_failures": 0.0053
+        }
+      }
+    },
+    "prf_nq": {
+      "n": 2052,
+      "failing": 0.4907,
+      "rescue_rate": 0.0526,
+      "healthy_helped": 0.2038,
+      "healthy_harmed": 0.2239,
+      "healthy_tied": 0.5722,
+      "gain_failing": 0.0089,
+      "gain_healthy": 0.019,
+      "oracle": 0.0278,
+      "share_failing": 0.3183,
+      "share_ci": [
+        0.2475,
+        0.39
+      ],
+      "cost_aware": {
+        "0.0": {
+          "oracle": 0.0278,
+          "perfect_failure_gate": 0.0089,
+          "missed_healthy_gain": 0.019,
+          "wasted_cost_on_unrescued_failures": 0.0
+        },
+        "0.01": {
+          "oracle": 0.0265,
+          "perfect_failure_gate": 0.004,
+          "missed_healthy_gain": 0.0179,
+          "wasted_cost_on_unrescued_failures": 0.0046
+        },
+        "0.02": {
+          "oracle": 0.0253,
+          "perfect_failure_gate": -0.001,
+          "missed_healthy_gain": 0.0169,
+          "wasted_cost_on_unrescued_failures": 0.0093
+        }
+      }
+    },
+    "llm_qe_tripclick_dense": {
+      "n": 1175,
+      "failing": 0.5855,
+      "rescue_rate": 0.0581,
+      "healthy_helped": 0.2505,
+      "healthy_harmed": 0.4045,
+      "healthy_tied": 0.345,
+      "gain_failing": 0.01,
+      "gain_healthy": 0.0196,
+      "oracle": 0.0297,
+      "share_failing": 0.3383,
+      "share_ci": [
+        0.2505,
+        0.4339
+      ],
+      "cost_aware": {
+        "0.0": {
+          "oracle": 0.0297,
+          "perfect_failure_gate": 0.01,
+          "missed_healthy_gain": 0.0196,
+          "wasted_cost_on_unrescued_failures": 0.0
+        },
+        "0.01": {
+          "oracle": 0.0283,
+          "perfect_failure_gate": 0.0042,
+          "missed_healthy_gain": 0.0186,
+          "wasted_cost_on_unrescued_failures": 0.0055
+        },
+        "0.02": {
+          "oracle": 0.0269,
+          "perfect_failure_gate": -0.0017,
+          "missed_healthy_gain": 0.0176,
+          "wasted_cost_on_unrescued_failures": 0.011
+        }
+      }
+    },
+    "llm_qe_nq_dense": {
+      "n": 2052,
+      "failing": 0.2632,
+      "rescue_rate": 0.1519,
+      "healthy_helped": 0.1918,
+      "healthy_harmed": 0.2851,
+      "healthy_tied": 0.5231,
+      "gain_failing": 0.0163,
+      "gain_healthy": 0.0327,
+      "oracle": 0.049,
+      "share_failing": 0.3325,
+      "share_ci": [
+        0.2694,
+        0.3956
+      ],
+      "cost_aware": {
+        "0.0": {
+          "oracle": 0.049,
+          "perfect_failure_gate": 0.0163,
+          "missed_healthy_gain": 0.0327,
+          "wasted_cost_on_unrescued_failures": 0.0
+        },
+        "0.01": {
+          "oracle": 0.0472,
+          "perfect_failure_gate": 0.0137,
+          "missed_healthy_gain": 0.0313,
+          "wasted_cost_on_unrescued_failures": 0.0022
+        },
+        "0.02": {
+          "oracle": 0.0454,
+          "perfect_failure_gate": 0.011,
+          "missed_healthy_gain": 0.0299,
+          "wasted_cost_on_unrescued_failures": 0.0045
+        }
+      }
+    }
+  },
+  "D2": {
+    "llm_qe_tripclick": {
+      "budgets": [
+        0.1,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "curves": {
+        "failure": [
+          0.0035,
+          0.003,
+          0.003,
+          -0.0015,
+          0.0007
+        ],
+        "nqc": [
+          -0.0004,
+          0.0012,
+          -0.0023,
+          -0.0016,
+          0.0007
+        ],
+        "oracle": [
+          0.0242,
+          0.0246,
+          0.0246,
+          0.0246,
+          0.0007
+        ],
+        "benefit_pre": [
+          0.0012,
+          -0.0008,
+          0.0008,
+          0.001,
+          0.0007
+        ],
+        "random": [
+          0.0001,
+          0.0002,
+          0.0003,
+          0.0005,
+          0.0007
+        ]
+      },
+      "benefit_note": "TripClick: validation action-utility label (no fused validation ranking)",
+      "per_budget_ci": {
+        "failure": [
+          [
+            0.0007,
+            0.0063
+          ],
+          [
+            -0.0008,
+            0.0069
+          ],
+          [
+            -0.0024,
+            0.0083
+          ],
+          [
+            -0.008,
+            0.0049
+          ],
+          [
+            -0.0066,
+            0.008
+          ]
+        ],
+        "nqc": [
+          [
+            -0.0021,
+            0.0007
+          ],
+          [
+            -0.0018,
+            0.0041
+          ],
+          [
+            -0.0069,
+            0.0025
+          ],
+          [
+            -0.0072,
+            0.0057
+          ],
+          [
+            -0.0066,
+            0.008
+          ]
+        ],
+        "oracle": [
+          [
+            0.0197,
+            0.0285
+          ],
+          [
+            0.0198,
+            0.0297
+          ],
+          [
+            0.0198,
+            0.0297
+          ],
+          [
+            0.0198,
+            0.0297
+          ],
+          [
+            -0.0066,
+            0.008
+          ]
+        ],
+        "benefit_pre": [
+          [
+            -0.0023,
+            0.0052
+          ],
+          [
+            -0.0052,
+            0.0041
+          ],
+          [
+            -0.0049,
+            0.0066
+          ],
+          [
+            -0.0061,
+            0.0077
+          ],
+          [
+            -0.0066,
+            0.008
+          ]
+        ]
+      },
+      "budget_averaged": {
+        "failure": 0.0017,
+        "nqc": -0.0005,
+        "oracle": 0.0197,
+        "benefit_pre": 0.0006,
+        "random": 0.0003
+      },
+      "benefit_pre_minus_failure": {
+        "point": -0.0012,
+        "ci_lo": -0.0036,
+        "ci_hi": 0.0014,
+        "p": 0.3974
+      },
+      "nqc_minus_failure": {
+        "point": -0.0022,
+        "ci_lo": -0.0042,
+        "ci_hi": 0.0,
+        "p": 0.0518
+      }
+    },
+    "llm_qe_nq": {
+      "budgets": [
+        0.1,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "curves": {
+        "failure": [
+          0.0012,
+          -0.0022,
+          -0.0059,
+          -0.0116,
+          -0.0217
+        ],
+        "nqc": [
+          0.0015,
+          -0.0036,
+          -0.0072,
+          -0.0148,
+          -0.0217
+        ],
+        "oracle": [
+          0.0392,
+          0.0415,
+          0.0415,
+          0.0415,
+          -0.0217
+        ],
+        "benefit_pre": [
+          0.0008,
+          -0.0012,
+          -0.0028,
+          -0.0126,
+          -0.0217
+        ],
+        "random": [
+          -0.0022,
+          -0.0054,
+          -0.0108,
+          -0.0163,
+          -0.0217
+        ]
+      },
+      "benefit_note": "NQ planner replay aligned: True (13 skipped vs 13 recorded)",
+      "per_budget_ci": {
+        "failure": [
+          [
+            -0.0017,
+            0.0039
+          ],
+          [
+            -0.0069,
+            0.0024
+          ],
+          [
+            -0.0129,
+            0.0012
+          ],
+          [
+            -0.0202,
+            -0.0033
+          ],
+          [
+            -0.0318,
+            -0.0117
+          ]
+        ],
+        "nqc": [
+          [
+            -0.0016,
+            0.0038
+          ],
+          [
+            -0.0079,
+            0.0018
+          ],
+          [
+            -0.0141,
+            -0.0006
+          ],
+          [
+            -0.0237,
+            -0.0061
+          ],
+          [
+            -0.0318,
+            -0.0117
+          ]
+        ],
+        "oracle": [
+          [
+            0.035,
+            0.043
+          ],
+          [
+            0.0361,
+            0.0472
+          ],
+          [
+            0.0361,
+            0.0472
+          ],
+          [
+            0.0361,
+            0.0472
+          ],
+          [
+            -0.0318,
+            -0.0117
+          ]
+        ],
+        "benefit_pre": [
+          [
+            -0.0024,
+            0.004
+          ],
+          [
+            -0.0065,
+            0.0034
+          ],
+          [
+            -0.01,
+            0.0035
+          ],
+          [
+            -0.0214,
+            -0.0037
+          ],
+          [
+            -0.0318,
+            -0.0117
+          ]
+        ]
+      },
+      "budget_averaged": {
+        "failure": -0.0081,
+        "nqc": -0.0091,
+        "oracle": 0.0284,
+        "benefit_pre": -0.0075,
+        "random": -0.0113
+      },
+      "benefit_pre_minus_failure": {
+        "point": 0.0006,
+        "ci_lo": -0.002,
+        "ci_hi": 0.0029,
+        "p": 0.726
+      },
+      "nqc_minus_failure": {
+        "point": -0.0011,
+        "ci_lo": -0.0038,
+        "ci_hi": 0.0016,
+        "p": 0.4034
+      }
+    },
+    "rerank_tripclick": {
+      "budgets": [
+        0.1,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "curves": {
+        "failure": [
+          0.0003,
+          -0.0031,
+          -0.0101,
+          -0.0248,
+          -0.0278
+        ],
+        "nqc": [
+          -0.0021,
+          -0.0054,
+          -0.0157,
+          -0.0261,
+          -0.0278
+        ],
+        "oracle": [
+          0.0484,
+          0.0616,
+          0.0616,
+          0.0586,
+          -0.0278
+        ],
+        "benefit_pre": [
+          0.0003,
+          -0.0008,
+          -0.0086,
+          -0.0197,
+          -0.0278
+        ],
+        "random": [
+          -0.0028,
+          -0.0069,
+          -0.0139,
+          -0.0208,
+          -0.0278
+        ]
+      },
+      "benefit_note": "",
+      "per_budget_ci": {
+        "failure": [
+          [
+            -0.0047,
+            0.0058
+          ],
+          [
+            -0.0101,
+            0.0046
+          ],
+          [
+            -0.0204,
+            0.0003
+          ],
+          [
+            -0.0367,
+            -0.0108
+          ],
+          [
+            -0.0424,
+            -0.0125
+          ]
+        ],
+        "nqc": [
+          [
+            -0.0076,
+            0.0027
+          ],
+          [
+            -0.0129,
+            0.0017
+          ],
+          [
+            -0.0257,
+            -0.0057
+          ],
+          [
+            -0.0378,
+            -0.0128
+          ],
+          [
+            -0.0424,
+            -0.0125
+          ]
+        ],
+        "oracle": [
+          [
+            0.0434,
+            0.0533
+          ],
+          [
+            0.0529,
+            0.071
+          ],
+          [
+            0.0529,
+            0.071
+          ],
+          [
+            0.0488,
+            0.0687
+          ],
+          [
+            -0.0424,
+            -0.0125
+          ]
+        ],
+        "benefit_pre": [
+          [
+            -0.0041,
+            0.0049
+          ],
+          [
+            -0.008,
+            0.0072
+          ],
+          [
+            -0.0194,
+            0.0011
+          ],
+          [
+            -0.0327,
+            -0.0072
+          ],
+          [
+            -0.0424,
+            -0.0125
+          ]
+        ]
+      },
+      "budget_averaged": {
+        "failure": -0.0131,
+        "nqc": -0.0154,
+        "oracle": 0.0405,
+        "benefit_pre": -0.0113,
+        "random": -0.0144
+      },
+      "benefit_pre_minus_failure": {
+        "point": 0.0018,
+        "ci_lo": -0.0037,
+        "ci_hi": 0.0063,
+        "p": 0.5906
+      },
+      "nqc_minus_failure": {
+        "point": -0.0023,
+        "ci_lo": -0.0068,
+        "ci_hi": 0.0015,
+        "p": 0.2042
+      }
+    },
+    "prf_tripclick": {
+      "budgets": [
+        0.1,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "curves": {
+        "failure": [
+          -0.0007,
+          -0.0002,
+          0.0005,
+          -0.0005,
+          -0.0011
+        ],
+        "nqc": [
+          -0.0009,
+          -0.0008,
+          0.001,
+          -0.0001,
+          -0.0011
+        ],
+        "oracle": [
+          0.0123,
+          0.0123,
+          0.0123,
+          0.0123,
+          -0.0011
+        ],
+        "benefit_pre": [
+          0.0003,
+          0.0007,
+          -0.0002,
+          -0.0011,
+          -0.0011
+        ],
+        "random": [
+          -0.0001,
+          -0.0003,
+          -0.0006,
+          -0.0008,
+          -0.0011
+        ]
+      },
+      "benefit_note": "",
+      "per_budget_ci": {
+        "failure": [
+          [
+            -0.0019,
+            0.0008
+          ],
+          [
+            -0.0026,
+            0.0027
+          ],
+          [
+            -0.0031,
+            0.0041
+          ],
+          [
+            -0.0049,
+            0.0041
+          ],
+          [
+            -0.006,
+            0.004
+          ]
+        ],
+        "nqc": [
+          [
+            -0.002,
+            0.0004
+          ],
+          [
+            -0.0028,
+            0.0014
+          ],
+          [
+            -0.0016,
+            0.0041
+          ],
+          [
+            -0.004,
+            0.0037
+          ],
+          [
+            -0.006,
+            0.004
+          ]
+        ],
+        "oracle": [
+          [
+            0.0089,
+            0.016
+          ],
+          [
+            0.0089,
+            0.016
+          ],
+          [
+            0.0089,
+            0.016
+          ],
+          [
+            0.0089,
+            0.016
+          ],
+          [
+            -0.006,
+            0.004
+          ]
+        ],
+        "benefit_pre": [
+          [
+            -0.0011,
+            0.0014
+          ],
+          [
+            -0.0014,
+            0.0026
+          ],
+          [
+            -0.0028,
+            0.0029
+          ],
+          [
+            -0.0055,
+            0.0033
+          ],
+          [
+            -0.006,
+            0.004
+          ]
+        ]
+      },
+      "budget_averaged": {
+        "failure": -0.0004,
+        "nqc": -0.0004,
+        "oracle": 0.0096,
+        "benefit_pre": -0.0003,
+        "random": -0.0006
+      },
+      "benefit_pre_minus_failure": {
+        "point": 0.0001,
+        "ci_lo": -0.001,
+        "ci_hi": 0.001,
+        "p": 0.991
+      },
+      "nqc_minus_failure": {
+        "point": 0.0,
+        "ci_lo": -0.0013,
+        "ci_hi": 0.0013,
+        "p": 0.9948
+      }
+    },
+    "rerank_nq": {
+      "budgets": [
+        0.1,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "curves": {
+        "failure": [
+          0.0221,
+          0.0576,
+          0.1135,
+          0.1751,
+          0.2251
+        ],
+        "nqc": [
+          0.0233,
+          0.0529,
+          0.1075,
+          0.1628,
+          0.2251
+        ],
+        "oracle": [
+          0.0923,
+          0.179,
+          0.2505,
+          0.2505,
+          0.2251
+        ],
+        "benefit_pre": [
+          0.0326,
+          0.0669,
+          0.1292,
+          0.1837,
+          0.2251
+        ],
+        "random": [
+          0.0225,
+          0.0563,
+          0.1125,
+          0.1688,
+          0.2251
+        ]
+      },
+      "benefit_note": "",
+      "per_budget_ci": {
+        "failure": [
+          [
+            0.0173,
+            0.0265
+          ],
+          [
+            0.0499,
+            0.0651
+          ],
+          [
+            0.103,
+            0.1246
+          ],
+          [
+            0.1621,
+            0.1884
+          ],
+          [
+            0.2102,
+            0.2401
+          ]
+        ],
+        "nqc": [
+          [
+            0.0183,
+            0.0283
+          ],
+          [
+            0.0454,
+            0.0605
+          ],
+          [
+            0.0973,
+            0.1185
+          ],
+          [
+            0.1499,
+            0.1763
+          ],
+          [
+            0.2102,
+            0.2401
+          ]
+        ],
+        "oracle": [
+          [
+            0.0887,
+            0.0956
+          ],
+          [
+            0.1725,
+            0.1848
+          ],
+          [
+            0.2371,
+            0.2633
+          ],
+          [
+            0.2371,
+            0.2642
+          ],
+          [
+            0.2102,
+            0.2401
+          ]
+        ],
+        "benefit_pre": [
+          [
+            0.0275,
+            0.0379
+          ],
+          [
+            0.06,
+            0.0759
+          ],
+          [
+            0.1185,
+            0.1401
+          ],
+          [
+            0.1705,
+            0.1973
+          ],
+          [
+            0.2102,
+            0.2401
+          ]
+        ]
+      },
+      "budget_averaged": {
+        "failure": 0.1187,
+        "nqc": 0.1143,
+        "oracle": 0.1995,
+        "benefit_pre": 0.1275,
+        "random": 0.117
+      },
+      "benefit_pre_minus_failure": {
+        "point": 0.0088,
+        "ci_lo": 0.0033,
+        "ci_hi": 0.015,
+        "p": 0.0024
+      },
+      "nqc_minus_failure": {
+        "point": -0.0044,
+        "ci_lo": -0.0081,
+        "ci_hi": -0.0001,
+        "p": 0.0462
+      }
+    },
+    "prf_nq": {
+      "budgets": [
+        0.1,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "curves": {
+        "failure": [
+          0.0001,
+          0.0014,
+          0.0039,
+          0.0075,
+          0.0097
+        ],
+        "nqc": [
+          0.001,
+          0.0007,
+          0.0021,
+          0.0054,
+          0.0097
+        ],
+        "oracle": [
+          0.0266,
+          0.0278,
+          0.0278,
+          0.0278,
+          0.0097
+        ],
+        "benefit_pre": [
+          0.0002,
+          0.0012,
+          0.0057,
+          0.0076,
+          0.0097
+        ],
+        "random": [
+          0.001,
+          0.0024,
+          0.0049,
+          0.0073,
+          0.0097
+        ]
+      },
+      "benefit_note": "",
+      "per_budget_ci": {
+        "failure": [
+          [
+            -0.0015,
+            0.0018
+          ],
+          [
+            -0.0011,
+            0.0038
+          ],
+          [
+            0.0003,
+            0.0075
+          ],
+          [
+            0.0032,
+            0.0122
+          ],
+          [
+            0.0046,
+            0.0149
+          ]
+        ],
+        "nqc": [
+          [
+            -0.0003,
+            0.0022
+          ],
+          [
+            -0.0012,
+            0.0029
+          ],
+          [
+            -0.0009,
+            0.0054
+          ],
+          [
+            0.0012,
+            0.0094
+          ],
+          [
+            0.0046,
+            0.0149
+          ]
+        ],
+        "oracle": [
+          [
+            0.0235,
+            0.0296
+          ],
+          [
+            0.0241,
+            0.0318
+          ],
+          [
+            0.0241,
+            0.0318
+          ],
+          [
+            0.0241,
+            0.0318
+          ],
+          [
+            0.0046,
+            0.0149
+          ]
+        ],
+        "benefit_pre": [
+          [
+            -0.0016,
+            0.0021
+          ],
+          [
+            -0.0013,
+            0.004
+          ],
+          [
+            0.0022,
+            0.0093
+          ],
+          [
+            0.003,
+            0.0119
+          ],
+          [
+            0.0046,
+            0.0149
+          ]
+        ]
+      },
+      "budget_averaged": {
+        "failure": 0.0045,
+        "nqc": 0.0038,
+        "oracle": 0.024,
+        "benefit_pre": 0.0049,
+        "random": 0.005
+      },
+      "benefit_pre_minus_failure": {
+        "point": 0.0004,
+        "ci_lo": -0.0017,
+        "ci_hi": 0.0024,
+        "p": 0.7106
+      },
+      "nqc_minus_failure": {
+        "point": -0.0007,
+        "ci_lo": -0.0021,
+        "ci_hi": 0.0006,
+        "p": 0.266
+      }
+    },
+    "holm_benefit_pre_minus_failure": {
+      "rerank_nq": {
+        "p": 0.0024,
+        "p_holm": 0.0144,
+        "reject": true
+      },
+      "llm_qe_tripclick": {
+        "p": 0.3974,
+        "p_holm": 1.0,
+        "reject": false
+      },
+      "rerank_tripclick": {
+        "p": 0.5906,
+        "p_holm": 1.0,
+        "reject": false
+      },
+      "prf_nq": {
+        "p": 0.7106,
+        "p_holm": 1.0,
+        "reject": false
+      },
+      "llm_qe_nq": {
+        "p": 0.726,
+        "p_holm": 1.0,
+        "reject": false
+      },
+      "prf_tripclick": {
+        "p": 0.991,
+        "p_holm": 1.0,
+        "reject": false
+      }
+    },
+    "holm_nqc_minus_failure": {
+      "rerank_nq": {
+        "p": 0.0462,
+        "p_holm": 0.2772,
+        "reject": false
+      },
+      "llm_qe_tripclick": {
+        "p": 0.0518,
+        "p_holm": 0.2772,
+        "reject": false
+      },
+      "rerank_tripclick": {
+        "p": 0.2042,
+        "p_holm": 0.8168,
+        "reject": false
+      },
+      "prf_nq": {
+        "p": 0.266,
+        "p_holm": 0.8168,
+        "reject": false
+      },
+      "llm_qe_nq": {
+        "p": 0.4034,
+        "p_holm": 0.8168,
+        "reject": false
+      },
+      "prf_tripclick": {
+        "p": 0.9948,
+        "p_holm": 0.9948,
+        "reject": false
+      }
+    }
+  },
+  "D3": {
+    "rerank_tripclick": {
+      "compute_fraction": 1.0,
+      "retained_fraction": 0.1506,
+      "gain": {
+        "point": -0.0011,
+        "ci_lo": -0.0055,
+        "ci_hi": 0.0032
+      }
+    },
+    "prf_tripclick": {
+      "compute_fraction": 1.0,
+      "retained_fraction": 0.4077,
+      "gain": {
+        "point": -0.0018,
+        "ci_lo": -0.0037,
+        "ci_hi": 0.0002
+      }
+    },
+    "rerank_nq": {
+      "compute_fraction": 1.0,
+      "retained_fraction": 0.943,
+      "gain": {
+        "point": 0.2225,
+        "ci_lo": 0.2077,
+        "ci_hi": 0.2375
+      }
+    },
+    "prf_nq": {
+      "compute_fraction": 1.0,
+      "retained_fraction": 0.6676,
+      "gain": {
+        "point": 0.0085,
+        "ci_lo": 0.0043,
+        "ci_hi": 0.0128
+      }
+    }
+  },
+  "D4": {
+    "llm_qe_tripclick": {
+      "primary": {
+        "point": 0.0905,
+        "ci_lo": 0.0446,
+        "ci_hi": 0.1361,
+        "p": 0.0002
+      },
+      "effect_threshold": {
+        "0.05": {
+          "harm_auc": {
+            "point": 0.55,
+            "ci_lo": 0.5153,
+            "ci_hi": 0.5844,
+            "n": 1157,
+            "pos_rate": 0.3129
+          },
+          "detection_minus_harm": {
+            "point": 0.0928,
+            "ci_lo": 0.046,
+            "ci_hi": 0.1392,
+            "n": 1157
+          }
+        },
+        "0.1": {
+          "harm_auc": {
+            "point": 0.5491,
+            "ci_lo": 0.5142,
+            "ci_hi": 0.584,
+            "n": 1157,
+            "pos_rate": 0.2973
+          },
+          "detection_minus_harm": {
+            "point": 0.0938,
+            "ci_lo": 0.0477,
+            "ci_hi": 0.1402,
+            "n": 1157
+          }
+        },
+        "0.0": {
+          "harm_auc": {
+            "point": 0.5524,
+            "ci_lo": 0.5181,
+            "ci_hi": 0.5863,
+            "n": 1157,
+            "pos_rate": 0.3302
+          },
+          "detection_minus_harm": {
+            "point": 0.0905,
+            "ci_lo": 0.0446,
+            "ci_hi": 0.1361
+          }
+        }
+      }
+    },
+    "llm_qe_nq": {
+      "primary": {
+        "point": 0.1186,
+        "ci_lo": 0.0756,
+        "ci_hi": 0.1618,
+        "p": 0.0
+      },
+      "effect_threshold": {
+        "0.05": {
+          "harm_auc": {
+            "point": 0.5687,
+            "ci_lo": 0.5277,
+            "ci_hi": 0.6093,
+            "n": 2013,
+            "pos_rate": 0.1515
+          },
+          "detection_minus_harm": {
+            "point": 0.1062,
+            "ci_lo": 0.0609,
+            "ci_hi": 0.1524,
+            "n": 2013
+          }
+        },
+        "0.1": {
+          "harm_auc": {
+            "point": 0.5793,
+            "ci_lo": 0.5367,
+            "ci_hi": 0.6207,
+            "n": 2013,
+            "pos_rate": 0.1426
+          },
+          "detection_minus_harm": {
+            "point": 0.0956,
+            "ci_lo": 0.0496,
+            "ci_hi": 0.1428,
+            "n": 2013
+          }
+        },
+        "0.0": {
+          "harm_auc": {
+            "point": 0.5563,
+            "ci_lo": 0.5173,
+            "ci_hi": 0.594,
+            "n": 2013,
+            "pos_rate": 0.1714
+          },
+          "detection_minus_harm": {
+            "point": 0.1186,
+            "ci_lo": 0.0756,
+            "ci_hi": 0.1618
+          }
+        }
+      }
+    },
+    "rerank_tripclick": {
+      "primary": {
+        "point": 0.0745,
+        "ci_lo": 0.0288,
+        "ci_hi": 0.1194,
+        "p": 0.001
+      },
+      "effect_threshold": {
+        "0.05": {
+          "harm_auc": {
+            "point": 0.5844,
+            "ci_lo": 0.5481,
+            "ci_hi": 0.6199,
+            "n": 1175,
+            "pos_rate": 0.2809
+          },
+          "detection_minus_harm": {
+            "point": 0.0649,
+            "ci_lo": 0.0182,
+            "ci_hi": 0.1116,
+            "n": 1175
+          }
+        },
+        "0.1": {
+          "harm_auc": {
+            "point": 0.5929,
+            "ci_lo": 0.5546,
+            "ci_hi": 0.6302,
+            "n": 1175,
+            "pos_rate": 0.2443
+          },
+          "detection_minus_harm": {
+            "point": 0.0565,
+            "ci_lo": 0.0082,
+            "ci_hi": 0.1037,
+            "n": 1175
+          }
+        },
+        "0.0": {
+          "harm_auc": {
+            "point": 0.5748,
+            "ci_lo": 0.5394,
+            "ci_hi": 0.6093,
+            "n": 1175,
+            "pos_rate": 0.3098
+          },
+          "detection_minus_harm": {
+            "point": 0.0745,
+            "ci_lo": 0.0288,
+            "ci_hi": 0.1194
+          }
+        }
+      }
+    },
+    "prf_tripclick": {
+      "primary": {
+        "point": 0.0772,
+        "ci_lo": 0.0139,
+        "ci_hi": 0.1395,
+        "p": 0.0168
+      },
+      "effect_threshold": {
+        "0.05": {
+          "harm_auc": {
+            "point": 0.5997,
+            "ci_lo": 0.5118,
+            "ci_hi": 0.6868,
+            "n": 1175,
+            "pos_rate": 0.0562
+          },
+          "detection_minus_harm": {
+            "point": 0.0496,
+            "ci_lo": -0.0397,
+            "ci_hi": 0.1391,
+            "n": 1175
+          }
+        },
+        "0.1": {
+          "harm_auc": {
+            "point": 0.632,
+            "ci_lo": 0.5304,
+            "ci_hi": 0.7296,
+            "n": 1175,
+            "pos_rate": 0.0426
+          },
+          "detection_minus_harm": {
+            "point": 0.0173,
+            "ci_lo": -0.083,
+            "ci_hi": 0.1196,
+            "n": 1175
+          }
+        },
+        "0.0": {
+          "harm_auc": {
+            "point": 0.5722,
+            "ci_lo": 0.5121,
+            "ci_hi": 0.6319,
+            "n": 1175,
+            "pos_rate": 0.1106
+          },
+          "detection_minus_harm": {
+            "point": 0.0772,
+            "ci_lo": 0.0139,
+            "ci_hi": 0.1395
+          }
+        }
+      }
+    },
+    "rerank_nq": {
+      "primary": {
+        "point": 0.1662,
+        "ci_lo": 0.1196,
+        "ci_hi": 0.213,
+        "p": 0.0
+      },
+      "effect_threshold": {
+        "0.05": {
+          "harm_auc": {
+            "point": 0.5071,
+            "ci_lo": 0.466,
+            "ci_hi": 0.5486,
+            "n": 2052,
+            "pos_rate": 0.0863
+          },
+          "detection_minus_harm": {
+            "point": 0.173,
+            "ci_lo": 0.1254,
+            "ci_hi": 0.2215,
+            "n": 2052
+          }
+        },
+        "0.1": {
+          "harm_auc": {
+            "point": 0.4783,
+            "ci_lo": 0.4361,
+            "ci_hi": 0.5205,
+            "n": 2052,
+            "pos_rate": 0.075
+          },
+          "detection_minus_harm": {
+            "point": 0.2018,
+            "ci_lo": 0.1535,
+            "ci_hi": 0.2515,
+            "n": 2052
+          }
+        },
+        "0.0": {
+          "harm_auc": {
+            "point": 0.514,
+            "ci_lo": 0.4739,
+            "ci_hi": 0.5536,
+            "n": 2052,
+            "pos_rate": 0.098
+          },
+          "detection_minus_harm": {
+            "point": 0.1662,
+            "ci_lo": 0.1196,
+            "ci_hi": 0.213
+          }
+        }
+      }
+    },
+    "prf_nq": {
+      "primary": {
+        "point": 0.1792,
+        "ci_lo": 0.1307,
+        "ci_hi": 0.2274,
+        "p": 0.0
+      },
+      "effect_threshold": {
+        "0.05": {
+          "harm_auc": {
+            "point": 0.4746,
+            "ci_lo": 0.4226,
+            "ci_hi": 0.5263,
+            "n": 2052,
+            "pos_rate": 0.078
+          },
+          "detection_minus_harm": {
+            "point": 0.2056,
+            "ci_lo": 0.1498,
+            "ci_hi": 0.2617,
+            "n": 2052
+          }
+        },
+        "0.1": {
+          "harm_auc": {
+            "point": 0.459,
+            "ci_lo": 0.3978,
+            "ci_hi": 0.5207,
+            "n": 2052,
+            "pos_rate": 0.059
+          },
+          "detection_minus_harm": {
+            "point": 0.2211,
+            "ci_lo": 0.1556,
+            "ci_hi": 0.2857,
+            "n": 2052
+          }
+        },
+        "0.0": {
+          "harm_auc": {
+            "point": 0.5009,
+            "ci_lo": 0.4588,
+            "ci_hi": 0.5435,
+            "n": 2052,
+            "pos_rate": 0.114
+          },
+          "detection_minus_harm": {
+            "point": 0.1792,
+            "ci_lo": 0.1307,
+            "ci_hi": 0.2274
+          }
+        }
+      }
+    },
+    "llm_qe_tripclick_dense": {
+      "primary": {
+        "point": 0.0223,
+        "ci_lo": -0.0279,
+        "ci_hi": 0.0722,
+        "p": 0.3834
+      },
+      "effect_threshold": {
+        "0.05": {
+          "harm_auc": {
+            "point": 0.6033,
+            "ci_lo": 0.5572,
+            "ci_hi": 0.6485,
+            "n": 1050,
+            "pos_rate": 0.1648
+          },
+          "detection_minus_harm": {
+            "point": 0.0176,
+            "ci_lo": -0.0333,
+            "ci_hi": 0.0691,
+            "n": 1050
+          }
+        },
+        "0.1": {
+          "harm_auc": {
+            "point": 0.6022,
+            "ci_lo": 0.554,
+            "ci_hi": 0.6499,
+            "n": 1050,
+            "pos_rate": 0.1486
+          },
+          "detection_minus_harm": {
+            "point": 0.0187,
+            "ci_lo": -0.0347,
+            "ci_hi": 0.0733,
+            "n": 1050
+          }
+        },
+        "0.0": {
+          "harm_auc": {
+            "point": 0.5987,
+            "ci_lo": 0.555,
+            "ci_hi": 0.6416,
+            "n": 1050,
+            "pos_rate": 0.1876
+          },
+          "detection_minus_harm": {
+            "point": 0.0223,
+            "ci_lo": -0.0279,
+            "ci_hi": 0.0722
+          }
+        }
+      }
+    },
+    "llm_qe_nq_dense": {
+      "primary": {
+        "point": 0.0842,
+        "ci_lo": 0.0448,
+        "ci_hi": 0.1233,
+        "p": 0.0
+      },
+      "effect_threshold": {
+        "0.05": {
+          "harm_auc": {
+            "point": 0.6235,
+            "ci_lo": 0.5949,
+            "ci_hi": 0.6525,
+            "n": 1932,
+            "pos_rate": 0.1957
+          },
+          "detection_minus_harm": {
+            "point": 0.0714,
+            "ci_lo": 0.0321,
+            "ci_hi": 0.1103,
+            "n": 1932
+          }
+        },
+        "0.1": {
+          "harm_auc": {
+            "point": 0.6373,
+            "ci_lo": 0.607,
+            "ci_hi": 0.6665,
+            "n": 1932,
+            "pos_rate": 0.1713
+          },
+          "detection_minus_harm": {
+            "point": 0.0576,
+            "ci_lo": 0.0179,
+            "ci_hi": 0.097,
+            "n": 1932
+          }
+        },
+        "0.0": {
+          "harm_auc": {
+            "point": 0.6106,
+            "ci_lo": 0.5828,
+            "ci_hi": 0.6385,
+            "n": 1932,
+            "pos_rate": 0.2231
+          },
+          "detection_minus_harm": {
+            "point": 0.0842,
+            "ci_lo": 0.0448,
+            "ci_hi": 0.1233
+          }
+        }
+      }
+    },
+    "holm_primary": {
+      "llm_qe_nq": {
+        "p": 0.0,
+        "p_holm": 0.0,
+        "reject": true
+      },
+      "rerank_nq": {
+        "p": 0.0,
+        "p_holm": 0.0,
+        "reject": true
+      },
+      "prf_nq": {
+        "p": 0.0,
+        "p_holm": 0.0,
+        "reject": true
+      },
+      "llm_qe_nq_dense": {
+        "p": 0.0,
+        "p_holm": 0.0,
+        "reject": true
+      },
+      "llm_qe_tripclick": {
+        "p": 0.0002,
+        "p_holm": 0.0008,
+        "reject": true
+      },
+      "rerank_tripclick": {
+        "p": 0.001,
+        "p_holm": 0.003,
+        "reject": true
+      },
+      "prf_tripclick": {
+        "p": 0.0168,
+        "p_holm": 0.0336,
+        "reject": true
+      },
+      "llm_qe_tripclick_dense": {
+        "p": 0.3834,
+        "p_holm": 0.3834,
+        "reject": false
+      }
+    }
+  },
+  "D4_untied": {
+    "rerank_tripclick": {
+      "n": 610,
+      "detection_untied": {
+        "point": 0.5757,
+        "ci_lo": 0.5118,
+        "ci_hi": 0.6387,
+        "n": 610,
+        "pos_rate": 0.1475
+      },
+      "direction_untied": {
+        "point": 0.5634,
+        "ci_lo": 0.5169,
+        "ci_hi": 0.6097,
+        "n": 610,
+        "pos_rate": 0.4033
+      },
+      "difference_untied": {
+        "point": 0.0123,
+        "ci_lo": -0.066,
+        "ci_hi": 0.0889,
+        "n": 610
+      }
+    },
+    "prf_tripclick": {
+      "n": 214,
+      "detection_untied": {
+        "point": 0.4738,
+        "ci_lo": 0.1959,
+        "ci_hi": 0.9242,
+        "n": 214,
+        "pos_rate": 0.0187
+      },
+      "direction_untied": {
+        "point": 0.4725,
+        "ci_lo": 0.3925,
+        "ci_hi": 0.5517,
+        "n": 214,
+        "pos_rate": 0.3925
+      },
+      "difference_untied": {
+        "point": 0.0013,
+        "ci_lo": -0.2787,
+        "ci_hi": 0.4333,
+        "n": 214
+      }
+    },
+    "rerank_nq": {
+      "n": 1234,
+      "detection_untied": {
+        "point": 0.5811,
+        "ci_lo": 0.5471,
+        "ci_hi": 0.6144,
+        "n": 1234,
+        "pos_rate": 0.3736
+      },
+      "direction_untied": {
+        "point": 0.6061,
+        "ci_lo": 0.5641,
+        "ci_hi": 0.6464,
+        "n": 1234,
+        "pos_rate": 0.8371
+      },
+      "difference_untied": {
+        "point": -0.025,
+        "ci_lo": -0.0787,
+        "ci_hi": 0.0273,
+        "n": 1234
+      }
+    },
+    "prf_nq": {
+      "n": 500,
+      "detection_untied": {
+        "point": 0.4963,
+        "ci_lo": 0.4208,
+        "ci_hi": 0.5714,
+        "n": 500,
+        "pos_rate": 0.106
+      },
+      "direction_untied": {
+        "point": 0.5416,
+        "ci_lo": 0.4914,
+        "ci_hi": 0.5923,
+        "n": 500,
+        "pos_rate": 0.532
+      },
+      "difference_untied": {
+        "point": -0.0453,
+        "ci_lo": -0.1397,
+        "ci_hi": 0.0477,
+        "n": 500
+      }
+    }
+  }
+}

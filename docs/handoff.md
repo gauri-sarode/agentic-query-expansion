@@ -181,6 +181,34 @@ Added to broaden the paper beyond LLM QE.
   figure was dropped for space (its 12% number is inline). Still 4
   content pages.
 
+## Decision analyses after the second external review (2026-11-09)
+
+Pre-commit `configs/decision_analyses_precommit.json` (`0d98fb3`), written
+before computing; `scripts/50_decision_analyses.py`; aggregates in
+`docs/decision_analyses_summary.json`. All POST HOC on already-inspected
+test traces; no new runs (the dense reranker-matched rerun was dropped
+to avoid another test touch).
+- D1 failure-only ceiling (identity + cost term): share 8% (PRF TC) to
+  57% (rerank NQ); tracks rescue rate (0.8-46%) vs healthy-help rate.
+  At kappa=0.02 the perfect failure gate goes negative for PRF (both)
+  and dense TC QE.
+- D2 budget-matched pre-action routing: failure/NQC/benefit all near
+  random, far below oracle; benefit beats failure only on rerank NQ
+  (+0.0088 [+0.0033, +0.0150], Holm-significant). NQ LLM QE planner
+  replay aligned (13/13).
+- D3 post-action verification reported separately (100% compute).
+- D4 Holm: 7/8 detection-minus-harm gaps survive (dense TC does not);
+  6/8 persist at |Delta| thresholds 0.05/0.10; changed-only gaps vanish
+  in all four new settings.
+- Paper restructured: Framework section (pi*(Z), identity), Section 5
+  ceiling table, merged 8-row AUC table, routing table + budget figure,
+  evidence ledger. Content ends on page 3. Same title.
+- Not done: CODS citation (author's decision: not archived yet);
+  independent held-out confirmation (no unused queries remain).
+- Mirror blocker: `paper/main.tex` (an older draft) shows the
+  author email and coauthor name on the anonymized mirror; add those
+  as masked terms or remove `paper/` before submission.
+
 ## Possible next steps
 
 - Re-review the revised draft (ARS re-review mode).
