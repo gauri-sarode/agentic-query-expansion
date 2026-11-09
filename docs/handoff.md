@@ -128,6 +128,28 @@ Major Revision. All must-fix items addressed in `paper_wsdm/main.tex`.
   never reranked (`use_reranker=False`); the paper now says so.
 - Pre-revision paper kept only in the session scratchpad; git has it.
 
+## External review response (2026-11-09)
+
+An outside reviewer-style read (Borderline Accept) raised: reranker
+confound, AUC != intrinsic difficulty, benefit evaluated as harm, fused
+vs unfused policies, TripClick test history, missing CODS self-citation.
+- Reranker: original rankings are never reranked, expanded ones are
+  (TripClick, dense). Pre-committed (`configs/reranker_matched_precommit.json`)
+  then ran `scripts/47` on frozen records only: TripClick BM25 labels
+  against BM25+rerank of the original. Harm AUC 0.552 -> 0.583; gap to
+  detection +0.091 -> +0.059 [+0.012, +0.107], still significant;
+  helped-vs-rest falls to 0.504. Static QE vs BM25+rerank +0.031.
+  Aggregates in `docs/reranker_matched_summary.json`. Dense has no
+  reranked-original arm (would need a new test touch).
+- CODS 2026 paper ("Not Every Expansion Helps", ~/dev/llm-query-expansion)
+  now cited in the third person in the intro.
+- Text: claim reworded to "a failure detector is not a substitute for a
+  benefit predictor"; helped-vs-rest range in abstract; TripClick called
+  partly exploratory, NQ the confirmation; pilot stated disjoint;
+  per-corpus policy comparisons; operators named.
+- Not changed: BEIR "Heterogenous" is the original paper's spelling.
+- Content still 4 pages; references now spill to page 5.
+
 ## Possible next steps
 
 - Re-review the revised draft (ARS re-review mode).

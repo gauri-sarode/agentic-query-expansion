@@ -1,0 +1,68 @@
+{
+  "_note": "Aggregate-only export of results/reranker_matched_labels.json (scripts/47, EXPLORATORY per configs/reranker_matched_precommit.json). No per-query values or fitted parameters.",
+  "M1_label_rates": {
+    "n": 1157,
+    "tied": 0.5678,
+    "helped": 0.1651,
+    "harmed": 0.2671,
+    "harm_possible": 0.5091,
+    "original_label_harm_possible": 0.5436
+  },
+  "M2_action_utility_auc": {
+    "rule_a_harmed_vs_rest": {
+      "point": 0.5834,
+      "ci_lo": 0.5467,
+      "ci_hi": 0.6197,
+      "n": 1157,
+      "pos_rate": 0.2671
+    },
+    "rule_b_helped_vs_rest": {
+      "point": 0.5036,
+      "ci_lo": 0.4596,
+      "ci_hi": 0.5482,
+      "n": 1157,
+      "pos_rate": 0.1651
+    },
+    "rule_c_helped_vs_harmed": {
+      "point": 0.5664,
+      "ci_lo": 0.5142,
+      "ci_hi": 0.6191,
+      "n": 500,
+      "pos_rate": 0.382
+    },
+    "harm_possible_only_rule_a": {
+      "point": 0.6188,
+      "ci_lo": 0.5726,
+      "ci_hi": 0.6636,
+      "n": 589,
+      "pos_rate": 0.5246
+    }
+  },
+  "M3_paired_gap": {
+    "detection": {
+      "point": 0.6429,
+      "ci_lo": 0.6119,
+      "ci_hi": 0.6735,
+      "n": 1157,
+      "pos_rate": 0.4564
+    },
+    "detection_minus_matched_rule_a": {
+      "point": 0.0595,
+      "ci_lo": 0.0116,
+      "ci_hi": 0.1069,
+      "n": 1157
+    }
+  },
+  "M4_policy_contrast": {
+    "static_qe_mean": 0.3159,
+    "bm25_rerank_mean": 0.285,
+    "static_minus_bm25_rerank": {
+      "point": 0.0308,
+      "ci_lo": 0.0174,
+      "ci_hi": 0.0443,
+      "se": 0.0068,
+      "mde80": 0.0191,
+      "n": 1175
+    }
+  }
+}

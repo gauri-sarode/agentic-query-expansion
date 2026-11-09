@@ -31,10 +31,12 @@ retriever. On the queries the system expands, detection AUC is
 $0.62$--$0.70$, and under BM25 no better than a standard unsupervised
 predictor (NQC), while
 predicting whether the expansion harms retrieval reaches only
-$0.55$--$0.61$: a paired-significant gap in three of four settings. The
-gap is largely structural. Expansion leaves $84$--$94\%$ of failing
-queries still failing, and among queries whose nDCG the expansion
-changed, the gap persists only on dense NQ. The policy picture
+$0.55$--$0.61$, and whether it helps $0.41$--$0.60$: a failure detector is
+not a substitute for a benefit predictor. The harm gap is
+paired-significant in three of four settings, but largely structural.
+Expansion leaves $84$--$94\%$ of failing queries still failing, and
+among queries whose nDCG the expansion changed, the gap persists only
+on dense NQ. The policy picture
 matches. A perfect failure detector would recover only $42\%$
 (TripClick) and $33\%$ (NQ) of an oracle selector's gain; the rest lies
 in healthy queries that expansion sometimes helps and sometimes harms.
@@ -67,8 +69,12 @@ policy (Section~\ref{sec:worth}). That the two differ is not new: selective-QE w
 expansion benefit directly~\cite{selective-qe,amati-selective}, and
 uplift modelling shows that targeting high-risk cases is not the same
 as targeting cases a treatment helps~\cite{ascarza-futility,causal-classification}.
-What is missing for LLM QE is a measurement of both predictions on
-the same queries, and of what each one is worth to a policy. We use
+For LLM QE, prior work~\cite{author-cods} found on MS MARCO, TREC DL
+and FiQA that a retrieval-state selector among candidate expansions
+recovers little of a best-of-8 oracle's headroom. We study a different
+decision, whether to expand at all, on different corpora. What is
+missing is a measurement of detection and action utility on the same
+queries, and of what each one is worth to a policy. We use
 \emph{observability} for qrel-free telemetry a search system records
 about its own behaviour (score distributions, coverage, ranking
 stability, reranker agreement), the signal a deployed controller can
@@ -132,16 +138,20 @@ reported only in the ledger below.
 
 \textbf{Pipeline.} BM25 over SQLite FTS5 (Porter stemming, title
 weight selected on validation). From pre-action telemetry a
-deterministic rule picks one of four expansion operators or none; it
+deterministic rule picks one of four expansion operators (vocabulary,
+context, disambiguation, entity normalization) or none; it
 picks none for $1.5\%$ (TripClick) and $1.9\%$ (NQ) of queries under
 BM25, and $10.6\%$ and $5.8\%$ under dense retrieval. The
 rest form the \emph{acted-upon} set, on which every AUC in
 Table~\ref{tab:headline} is computed. The generator (\texttt{qwen2.5:3b},
 4-bit, greedy, $\le 2$ calls per query) writes a corpus-grounded
 expansion from the top retrieved evidence; the expanded query is
-retrieved and, on TripClick and in both dense settings, reranked with
-a MiniLM cross-encoder~\cite{minilm-cross-encoder} (the NQ BM25 run
-does not rerank).
+retrieved and, on TripClick and in both dense settings, its top
+candidates are reranked with a MiniLM
+cross-encoder~\cite{minilm-cross-encoder}. The original ranking is
+never reranked, so outside NQ BM25 (no reranking on either side) the
+expansion effect includes the reranker's; Section~\ref{sec:result1}
+checks this.
 The dense setting replaces first-stage retrieval with
 \texttt{bge-small-en-v1.5}~\cite{bge-embedding} over the full
 collections.
@@ -194,8 +204,11 @@ refit every model and threshold on validation, checked BM25 once
 test episode used here, plus a 150-query dense pilot and one full
 dense run. All later analyses,
 including this revision's, recombine those frozen records under
-pre-specified rules without refitting on test. NQ test was touched
-three times, each under a written pre-commitment: the $n{=}600$ pilot
+pre-specified rules without refitting on test. TripClick is therefore
+partly exploratory; NQ, untouched until its scope was committed, is
+the confirmation. NQ test was touched
+three times, each under a written pre-commitment: the $n{=}600$ pilot,
+disjoint from the $2{,}052$ test queries
 (detection $0.638$ $[0.593,0.681]$, action utility $0.522$
 $[0.442,0.602]$), the confirmatory $2{,}052$-query run, and its dense
 rerun; two later BM25 re-runs on the same queries recomputed
@@ -203,6 +216,7 @@ telemetry and score lists only. Scripts and pre-commitments are in the anonymize
 \url{https://anonymous.4open.science/r/agentic-query-expansion-8939/}.
 
 \section{Result 1: Detection vs.\ Action Utility}
+\label{sec:result1}
 
 \begin{table*}[t]
 \caption{Detection vs.\ action-utility (harm) AUC on each setting's
@@ -253,6 +267,16 @@ but not on TripClick (BM25 $+0.020$ $[-0.013,+0.053]$; dense $+0.008$).
 NQ BM25 is missing: its test run stored no post-action features. A
 logistic refit of the BM25 action-utility model gives $0.563$
 ($+0.011$ $[-0.008,+0.029]$ over the linear one).
+
+\textbf{Not a reranker artifact.} On TripClick BM25 the reranker alone
+lowers nDCG@10 ($0.285$ vs.\ $0.315$), so the label mixes expansion with
+reranking. The frozen test run also holds the original query's BM25
+ranking reranked by the same model; relabelling against it
+(exploratory, \texttt{scripts/47}) isolates expansion. The harm AUC
+becomes $0.583$ $[0.547,0.620]$, and the gap to detection $+0.059$
+$[+0.012,+0.107]$ still excludes zero. Helped-vs.-rest falls to chance
+($0.504$). NQ BM25 needs no correction; the dense runs stored no
+reranked original, so their labels stay mixed.
 
 \textbf{Not label sparsity.} Most TAIL queries have one relevant
 document, so failure might track label sparsity. The relevant-document
@@ -312,8 +336,12 @@ MDE (real policies) & $0.007$--$0.011$ & $0.010$--$0.015$ \\
 \end{tabular}
 \end{table}
 
-\textbf{Policies.} On TripClick, no policy differs from BM25 or from
+\textbf{Policies.} Fusion and reranking differ between corpora, so we
+compare policies within a corpus, not across. On TripClick, no policy differs from BM25 or from
 any other; every pairwise CI spans zero (Table~\ref{tab:policies}).
+BM25 alone is the strongest unexpanded arm: against BM25 with the same
+reranker, Static QE gains $+0.031$ $[+0.017,+0.044]$, a gain that
+only offsets the reranker's own loss.
 These nulls are bounded: with MDEs of $0.007$--$0.011$ nDCG@10, effects
 smaller than that could exist undetected. On NQ, where the expanded
 ranking is used unfused, unconditional QE significantly harms
@@ -380,9 +408,10 @@ oracle's gain (mean $6\%$ across budgets).}
 
 \textbf{Heterogeneity is real; predicting it depends on the retriever.} Ranking queries
 by the action-utility score captures at most $12\%$ of the oracle's
-gain (Figure~\ref{fig:quota}). Yet the score is not noise. In a
-best-linear-predictor test~\cite{gates} of $\Delta$ on the
-validation-fit score under BM25, the slope is $+1.09$ $[+0.54,+1.67]$ on
+gain (Figure~\ref{fig:quota}). Yet the score is not noise. A
+best-linear-predictor test~\cite{gates} asks whether it ranks queries
+by their gain: regressing $\Delta$ on the validation-fit score under
+BM25, the slope is $+1.09$ $[+0.54,+1.67]$ on
 TripClick and $+1.21$ $[+0.96,+1.44]$ on NQ, and the top score quartile's mean
 $\Delta$ exceeds the bottom quartile's by $+0.093$ and $+0.120$ (both
 CIs exclude zero). Under dense retrieval the evidence is weaker:
@@ -412,16 +441,17 @@ results. Two corpora; under dense retrieval, retriever strength and
 domain are confounded. TripClick's relevance labels are click-derived
 and sparse, which is one reason we report NQ's human labels in
 parallel. The policy comparisons on NQ use unfused rankings and lack a
-closed-loop arm. Of the analyses above, only the paired difference on
-changed queries (Table~\ref{tab:headline}, last column) was not
-pre-committed; every pre-committed analysis, including those
+closed-loop arm. Of the analyses above, two were not pre-committed with the others: the
+paired difference on changed queries (Table~\ref{tab:headline}, last
+column) and the reranker-matched relabelling (committed before it was
+computed, but after review); every pre-committed analysis, including those
 summarized here in one line, is reported in full in the repository (\texttt{docs/revision\_analyses\_summary.json}).
 
 \section{Conclusion}
 
 Detecting that retrieval has failed is ordinary QPP; under BM25 our
 detector is no better than NQC. Knowing that an expansion will fix it is a separate
-problem. Expansion rarely rescues a failing query, so even perfect
+problem, and a failure detector is not a substitute for it. Expansion rarely rescues a failing query, so even perfect
 failure detection recovers only a third to two-fifths of selective
 QE's headroom. The rest requires predicting whether a specific rewrite
 helps a query that is already working, which our telemetry does only
