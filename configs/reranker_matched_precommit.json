@@ -1,0 +1,16 @@
+{
+  "name": "reranker_matched_labels",
+  "written": "2026-11-09",
+  "status": "EXPLORATORY. Written after an external review raised the issue, before any quantity below was computed. Not part of the original pre-commitments.",
+  "reason": "On TripClick BM25 the action-utility label is nDCG@10(expanded candidate, cross-encoder reranked) - nDCG@10(original query, BM25, not reranked), so it mixes the effect of expansion with the effect of reranking. The frozen TripClick test already holds a BM25+rerank arm for the original query (results/tripclick-tail_bm25_reranker_only.json, same reranker and top-k composition as the agent's candidate). Re-labelling against it isolates expansion under a common reranker.",
+  "data_use": "Recombines frozen per-query records only. No generator calls, no retrieval, no reranking, no refitting: the detection model and the action-utility score are the same frozen validation-fit predictions scripts/46 uses.",
+  "setting": "TripClick TAIL test, BM25, the 1,157 acted-upon queries. NQ BM25 needs no correction (neither arm is reranked). Dense settings have no stored reranked-original arm and are not re-labelled; producing one would be a new test touch.",
+  "analyses": {
+    "M1_label_rates": "Matched delta = nDCG@10(candidate) - nDCG@10(BM25+rerank of the original). Report tied/helped/harmed rates, and the fraction of acted queries where harm is possible (reranked-original nDCG@10 > 0).",
+    "M2_action_utility_auc": "Frozen action-utility score against the matched label: rule (a) harmed vs rest, (b) helped vs rest, (c) helped vs harmed with ties excluded, and (a) restricted to harm-possible queries. AUC with 95% bootstrap CI.",
+    "M3_paired_gap": "Paired bootstrap of detection AUC (unchanged failure label) minus matched rule-(a) AUC on the same 1,157 queries.",
+    "M4_policy_contrast": "Mean nDCG@10 difference, paired bootstrap: Static QE (fused, reranked) vs BM25+rerank of the original."
+  },
+  "bootstrap": {"resamples": 10000, "seed": 42},
+  "reporting": "Every quantity above is reported regardless of outcome and labelled exploratory in the paper."
+}
