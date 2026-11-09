@@ -9,7 +9,7 @@
   },
   "interventions": {
     "rerank": "BM25 top-100 for the original query; MiniLM cross-encoder (CONFIG.reranker_model) scores all 100; reranked top-50 lead, the remaining BM25 order follows (the agent's composition, as in the stored TripClick rerank arm). Check, before any label is read: on TripClick test the recomputed top-10 order must equal results/tripclick-tail_bm25_reranker_only.json's reranked_run for >= 99% of queries.",
-    "prf": "RM3-style feedback with score interpolation. From the top fb_docs=10 BM25 documents, term weights p(w) proportional to sum_d softmax-normalized BM25(d) * tf(w,d)/|d|, over lowercase alphabetic tokens of length >= 3, excluding sklearn's English stop words and the query's own terms. The top fb_terms terms form an OR query (FTS5 cannot weight terms). Final score = lam * minmax(BM25 original) + (1 - lam) * minmax(BM25 expansion-terms) over the union of both top-100 lists, missing score = 0 after normalization; keep the top 100. fb_terms in {10, 20} and lam in {0.5, 0.7} are chosen per corpus by validation mean nDCG@10 only, then frozen before the test run."
+    "prf": "RM3-style feedback with score interpolation. From the top fb_docs BM25 documents, term weights p(w) proportional to sum_d softmax-normalized BM25(d) * tf(w,d)/|d|, over lowercase alphabetic tokens of length >= 3, excluding sklearn's English stop words and the query's own terms. The top fb_terms terms form an OR query (FTS5 cannot weight terms). Final score = lam * minmax(BM25 original) + (1 - lam) * minmax(BM25 expansion-terms) over the union of both top-100 lists, missing score = 0 after normalization; keep the top 100. fb_docs in {5, 10, 20}, fb_terms in {5, 10, 20, 30} and lam in {0.1, 0.2, ..., 0.9} (108 settings, full grid, every validation query) are chosen per corpus by validation mean nDCG@10 only, then frozen; test runs only the selected setting."
   },
   "labels": {
     "failure": "BM25 nDCG@10 = 0 (unchanged from the paper).",
@@ -29,5 +29,14 @@
   },
   "data_use": "Validation: run both interventions, tune PRF's two parameters, fit the benefit models. Test: run each intervention once with frozen settings; one analysis pass. No generator calls. Per-query outputs stay in results/ (gitignored, TripClick license); only aggregates are exported to docs/.",
   "scope_limits": "BM25 only; dense retrieval is out of scope for the new interventions.",
-  "bootstrap": {"resamples": 10000, "seed": 42}
+  "bootstrap": {
+    "resamples": 10000,
+    "seed": 42
+  },
+  "amendments": [
+    {
+      "date": "2026-11-09",
+      "change": "PRF tuning grid widened from 2 x 2 (fb_terms {10,20} x lam {0.5,0.7}, fb_docs fixed at 10) to the full 3 x 4 x 9 grid above, at the author's request. Made before any PRF run on either corpus or split; only BM25 validation rankings existed."
+    }
+  ]
 }
