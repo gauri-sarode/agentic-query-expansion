@@ -141,8 +141,8 @@ vs unfused policies, TripClick test history, missing CODS self-citation.
   helped-vs-rest falls to 0.504. Static QE vs BM25+rerank +0.031.
   Aggregates in `docs/reranker_matched_summary.json`. Dense has no
   reranked-original arm (would need a new test touch).
-- CODS 2026 paper ("Not Every Expansion Helps", ~/dev/llm-query-expansion)
-  now cited in the third person in the intro.
+- CODS 2026 paper ("Not Every Expansion Helps", ~/dev/llm-query-expansion):
+  a third-person citation was added, then removed at the author's request.
 - Text: claim reworded to "a failure detector is not a substitute for a
   benefit predictor"; helped-vs-rest range in abstract; TripClick called
   partly exploratory, NQ the confirmation; pilot stated disjoint;
