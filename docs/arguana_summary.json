@@ -1,0 +1,1278 @@
+{
+  "_note": "configs/arguana_precommit.json; test scored once with train+val-fit, validation-selected scorers.",
+  "n": {
+    "train": 701,
+    "val": 275,
+    "test": 430
+  },
+  "split_sha256": "d844419ef021a78d10aff656d3ecbb1c0ce5e922697cbc312c0910e2f0ac1c33",
+  "bm25_test_mean": 0.5033,
+  "prf_selected": {
+    "fb_docs": 5,
+    "fb_terms": 10,
+    "lam": 0.9
+  },
+  "selection": {
+    "rerank": {
+      "benefit_linear": null,
+      "B1_gbdt": [
+        0.03,
+        2,
+        100,
+        20
+      ],
+      "B2_semantic_knn": 5,
+      "B3_quantile": [
+        0.03,
+        2,
+        100,
+        20
+      ],
+      "verify_gbdt": [
+        0.03,
+        2,
+        100,
+        20
+      ]
+    },
+    "prf": {
+      "benefit_linear": null,
+      "B1_gbdt": [
+        0.03,
+        3,
+        300,
+        50
+      ],
+      "B2_semantic_knn": 50,
+      "B3_quantile": [
+        0.03,
+        2,
+        100,
+        20
+      ],
+      "verify_gbdt": [
+        0.1,
+        null,
+        100,
+        50
+      ]
+    },
+    "qe": {
+      "benefit_linear": null,
+      "B1_gbdt": [
+        0.1,
+        null,
+        300,
+        50
+      ],
+      "B2_semantic_knn": 10,
+      "B3_quantile": [
+        0.03,
+        2,
+        100,
+        20
+      ],
+      "verify_gbdt": [
+        0.03,
+        2,
+        100,
+        50
+      ]
+    }
+  },
+  "holm_family_A_H1": {
+    "prf": {
+      "p": 0.0002,
+      "p_holm": 0.0006000000000000001,
+      "reject": true
+    },
+    "rerank": {
+      "p": 0.0884,
+      "p_holm": 0.1768,
+      "reject": false
+    },
+    "qe": {
+      "p": 0.4486,
+      "p_holm": 0.4486,
+      "reject": false
+    }
+  },
+  "holm_family_B_H3": {
+    "rerank:B3_quantile": {
+      "p": 0.1412,
+      "p_holm": 1.0,
+      "reject": false
+    },
+    "rerank:B1_gbdt": {
+      "p": 0.1488,
+      "p_holm": 1.0,
+      "reject": false
+    },
+    "rerank:B2_semantic_knn": {
+      "p": 0.4714,
+      "p_holm": 1.0,
+      "reject": false
+    },
+    "qe:B1_gbdt": {
+      "p": 0.5346,
+      "p_holm": 1.0,
+      "reject": false
+    },
+    "qe:B2_semantic_knn": {
+      "p": 0.6546,
+      "p_holm": 1.0,
+      "reject": false
+    },
+    "prf:B2_semantic_knn": {
+      "p": 0.707,
+      "p_holm": 1.0,
+      "reject": false
+    },
+    "prf:B3_quantile": {
+      "p": 0.7118,
+      "p_holm": 1.0,
+      "reject": false
+    },
+    "prf:B1_gbdt": {
+      "p": 0.7212,
+      "p_holm": 1.0,
+      "reject": false
+    },
+    "qe:B3_quantile": {
+      "p": 0.7296,
+      "p_holm": 1.0,
+      "reject": false
+    }
+  },
+  "rerank": {
+    "label_rates": {
+      "n": 430,
+      "acted": 1.0,
+      "mean_delta": -0.0711,
+      "helped": 0.2721,
+      "harmed": 0.4186,
+      "tied": 0.3093,
+      "failing": 0.214
+    },
+    "always_ci": [
+      -0.1081,
+      -0.034
+    ],
+    "latency_ms": {
+      "median": 1138.0905,
+      "p95": 1233.2563,
+      "mean": 1112.4356,
+      "calls": 430
+    },
+    "H1": {
+      "detection_auc": {
+        "point": 0.6464,
+        "ci_lo": 0.5781,
+        "ci_hi": 0.7112
+      },
+      "harm_auc": {
+        "point": 0.5696,
+        "ci_lo": 0.515,
+        "ci_hi": 0.6246
+      },
+      "primary": {
+        "point": 0.0767,
+        "ci_lo": -0.012,
+        "ci_hi": 0.1621,
+        "p": 0.0884
+      }
+    },
+    "H1_effect_threshold": {
+      "0.05": {
+        "point": 0.0804,
+        "ci_lo": -0.0081,
+        "ci_hi": 0.1663
+      },
+      "0.1": {
+        "point": 0.0459,
+        "ci_lo": -0.0439,
+        "ci_hi": 0.1317
+      }
+    },
+    "H1_untied_difference": {
+      "point": 0.0454,
+      "ci_lo": -0.0778,
+      "ci_hi": 0.1699,
+      "n": 297
+    },
+    "H2": {
+      "failing": 0.214,
+      "rescue_rate": 0.3587,
+      "healthy_helped": 0.2485,
+      "healthy_harmed": 0.5325,
+      "healthy_tied": 0.2189,
+      "oracle": 0.1014,
+      "share_failing": 0.3774,
+      "share_ci": [
+        0.2701,
+        0.4869
+      ]
+    },
+    "H2_cost_aware": {
+      "0.0": {
+        "oracle": 0.1014,
+        "perfect_failure_gate": 0.0383,
+        "missed_healthy_gain": 0.0631,
+        "wasted_cost_on_unrescued_failures": 0.0
+      },
+      "0.01": {
+        "oracle": 0.0986,
+        "perfect_failure_gate": 0.0361,
+        "missed_healthy_gain": 0.0612,
+        "wasted_cost_on_unrescued_failures": 0.0014
+      },
+      "0.02": {
+        "oracle": 0.0959,
+        "perfect_failure_gate": 0.034,
+        "missed_healthy_gain": 0.0592,
+        "wasted_cost_on_unrescued_failures": 0.0027
+      }
+    },
+    "H3_budget_averaged": {
+      "failure": -0.0369,
+      "nqc": -0.0351,
+      "oracle": 0.0529,
+      "benefit_linear": -0.0311,
+      "B1_gbdt": -0.0272,
+      "B2_semantic_knn": -0.0416,
+      "B3_quantile": -0.026,
+      "random": -0.037
+    },
+    "H3_curves": {
+      "failure": [
+        -0.0066,
+        -0.0138,
+        -0.0385,
+        -0.0542,
+        -0.0711
+      ],
+      "nqc": [
+        0.0031,
+        -0.0109,
+        -0.0371,
+        -0.0594,
+        -0.0711
+      ],
+      "oracle": [
+        0.0614,
+        0.1006,
+        0.1014,
+        0.0722,
+        -0.0711
+      ],
+      "benefit_linear": [
+        -0.003,
+        -0.0125,
+        -0.0198,
+        -0.049,
+        -0.0711
+      ],
+      "B1_gbdt": [
+        0.0001,
+        -0.0043,
+        -0.0258,
+        -0.035,
+        -0.0711
+      ],
+      "B2_semantic_knn": [
+        -0.0106,
+        -0.0239,
+        -0.0423,
+        -0.0598,
+        -0.0711
+      ],
+      "B3_quantile": [
+        0.0001,
+        -0.0016,
+        -0.0196,
+        -0.038,
+        -0.0711
+      ],
+      "random": [
+        -0.0071,
+        -0.0178,
+        -0.0356,
+        -0.0534,
+        -0.0711
+      ]
+    },
+    "H3_vs_failure": {
+      "nqc": {
+        "point": 0.0018,
+        "ci_lo": -0.0064,
+        "ci_hi": 0.0088,
+        "p": 0.7322,
+        "share_of_oracle_minus_failure_headroom": 0.0197
+      },
+      "benefit_linear": {
+        "point": 0.0058,
+        "ci_lo": -0.0105,
+        "ci_hi": 0.0216,
+        "p": 0.4914,
+        "share_of_oracle_minus_failure_headroom": 0.0644
+      },
+      "B1_gbdt": {
+        "point": 0.0096,
+        "ci_lo": -0.0034,
+        "ci_hi": 0.0224,
+        "p": 0.1488,
+        "share_of_oracle_minus_failure_headroom": 0.1075
+      },
+      "B2_semantic_knn": {
+        "point": -0.0047,
+        "ci_lo": -0.0172,
+        "ci_hi": 0.0079,
+        "p": 0.4714,
+        "share_of_oracle_minus_failure_headroom": -0.0523
+      },
+      "B3_quantile": {
+        "point": 0.0108,
+        "ci_lo": -0.0033,
+        "ci_hi": 0.0225,
+        "p": 0.1412,
+        "share_of_oracle_minus_failure_headroom": 0.1206
+      }
+    },
+    "B3_minus_B1_per_budget": [
+      {
+        "point": -0.0,
+        "ci_lo": -0.0098,
+        "ci_hi": 0.0127
+      },
+      {
+        "point": 0.0026,
+        "ci_lo": -0.012,
+        "ci_hi": 0.0169
+      },
+      {
+        "point": 0.0062,
+        "ci_lo": -0.0159,
+        "ci_hi": 0.0191
+      },
+      {
+        "point": -0.003,
+        "ci_lo": -0.0221,
+        "ci_hi": 0.0121
+      },
+      {
+        "point": -0.0,
+        "ci_lo": -0.0,
+        "ci_hi": 0.0
+      }
+    ],
+    "harmed_among_routed": {
+      "failure": [
+        0.3256,
+        0.3611,
+        0.3953,
+        0.4255,
+        0.4186
+      ],
+      "benefit_linear": [
+        0.3721,
+        0.4259,
+        0.3907,
+        0.4068,
+        0.4186
+      ],
+      "B1_gbdt": [
+        0.3488,
+        0.3796,
+        0.4,
+        0.3913,
+        0.4186
+      ],
+      "B2_semantic_knn": [
+        0.4419,
+        0.4259,
+        0.4326,
+        0.4255,
+        0.4186
+      ],
+      "B3_quantile": [
+        0.4186,
+        0.3889,
+        0.4,
+        0.3851,
+        0.4186
+      ]
+    },
+    "abstaining": {
+      "benefit_linear": [
+        {
+          "budget_cap": 0.1,
+          "routed": 0.0605,
+          "gain": 0.009
+        },
+        {
+          "budget_cap": 0.25,
+          "routed": 0.0605,
+          "gain": 0.009
+        },
+        {
+          "budget_cap": 0.5,
+          "routed": 0.0605,
+          "gain": 0.009
+        },
+        {
+          "budget_cap": 0.75,
+          "routed": 0.0605,
+          "gain": 0.009
+        },
+        {
+          "budget_cap": 1.0,
+          "routed": 0.0605,
+          "gain": 0.009
+        }
+      ],
+      "B1_gbdt": [
+        {
+          "budget_cap": 0.1,
+          "routed": 0.0837,
+          "gain": 0.0016
+        },
+        {
+          "budget_cap": 0.25,
+          "routed": 0.0837,
+          "gain": 0.0016
+        },
+        {
+          "budget_cap": 0.5,
+          "routed": 0.0837,
+          "gain": 0.0016
+        },
+        {
+          "budget_cap": 0.75,
+          "routed": 0.0837,
+          "gain": 0.0016
+        },
+        {
+          "budget_cap": 1.0,
+          "routed": 0.0837,
+          "gain": 0.0016
+        }
+      ],
+      "B2_semantic_knn": [
+        {
+          "budget_cap": 0.1,
+          "routed": 0.1,
+          "gain": -0.0106
+        },
+        {
+          "budget_cap": 0.25,
+          "routed": 0.2512,
+          "gain": -0.0239
+        },
+        {
+          "budget_cap": 0.5,
+          "routed": 0.307,
+          "gain": -0.0333
+        },
+        {
+          "budget_cap": 0.75,
+          "routed": 0.307,
+          "gain": -0.0333
+        },
+        {
+          "budget_cap": 1.0,
+          "routed": 0.307,
+          "gain": -0.0333
+        }
+      ],
+      "B3_quantile": [
+        {
+          "budget_cap": 0.1,
+          "routed": 0.0,
+          "gain": 0.0
+        },
+        {
+          "budget_cap": 0.25,
+          "routed": 0.0,
+          "gain": 0.0
+        },
+        {
+          "budget_cap": 0.5,
+          "routed": 0.0,
+          "gain": 0.0
+        },
+        {
+          "budget_cap": 0.75,
+          "routed": 0.0,
+          "gain": 0.0
+        },
+        {
+          "budget_cap": 1.0,
+          "routed": 0.0,
+          "gain": 0.0
+        }
+      ]
+    },
+    "verification": {
+      "routed_fraction": 0.1,
+      "point": 0.0044,
+      "ci_lo": -0.0049,
+      "ci_hi": 0.0145
+    },
+    "H1_replicates": false,
+    "H3_closes_gap": false
+  },
+  "prf": {
+    "label_rates": {
+      "n": 430,
+      "acted": 1.0,
+      "mean_delta": -0.0024,
+      "helped": 0.0395,
+      "harmed": 0.0488,
+      "tied": 0.9116,
+      "failing": 0.214
+    },
+    "always_ci": [
+      -0.007,
+      0.0021
+    ],
+    "latency_ms": {
+      "median": 3.0738,
+      "p95": 3.9941,
+      "mean": 3.0831,
+      "calls": 430
+    },
+    "H1": {
+      "detection_auc": {
+        "point": 0.6464,
+        "ci_lo": 0.5781,
+        "ci_hi": 0.7112
+      },
+      "harm_auc": {
+        "point": 0.3191,
+        "ci_lo": 0.1977,
+        "ci_hi": 0.4603
+      },
+      "primary": {
+        "point": 0.3272,
+        "ci_lo": 0.1705,
+        "ci_hi": 0.4657,
+        "p": 0.0002
+      }
+    },
+    "H1_effect_threshold": {
+      "0.05": {
+        "point": 0.2654,
+        "ci_lo": 0.0092,
+        "ci_hi": 0.494
+      },
+      "0.1": {
+        "point": 0.0854,
+        "ci_lo": -0.2005,
+        "ci_hi": 0.3862
+      }
+    },
+    "H1_untied_difference": {
+      "point": 0.4579,
+      "ci_lo": 0.2398,
+      "ci_hi": 0.689,
+      "n": 38
+    },
+    "H2": {
+      "failing": 0.214,
+      "rescue_rate": 0.0109,
+      "healthy_helped": 0.0473,
+      "healthy_harmed": 0.0621,
+      "healthy_tied": 0.8905,
+      "oracle": 0.0037,
+      "share_failing": 0.1842,
+      "share_ci": [
+        0.0,
+        0.5154
+      ]
+    },
+    "H2_cost_aware": {
+      "0.0": {
+        "oracle": 0.0037,
+        "perfect_failure_gate": 0.0007,
+        "missed_healthy_gain": 0.003,
+        "wasted_cost_on_unrescued_failures": 0.0
+      },
+      "0.01": {
+        "oracle": 0.0033,
+        "perfect_failure_gate": -0.0015,
+        "missed_healthy_gain": 0.0026,
+        "wasted_cost_on_unrescued_failures": 0.0021
+      },
+      "0.02": {
+        "oracle": 0.0029,
+        "perfect_failure_gate": -0.0036,
+        "missed_healthy_gain": 0.0023,
+        "wasted_cost_on_unrescued_failures": 0.0042
+      }
+    },
+    "H3_budget_averaged": {
+      "failure": -0.001,
+      "nqc": -0.0011,
+      "oracle": 0.0024,
+      "benefit_linear": -0.0013,
+      "B1_gbdt": -0.0007,
+      "B2_semantic_knn": -0.0014,
+      "B3_quantile": -0.0004,
+      "random": -0.0012
+    },
+    "H3_curves": {
+      "failure": [
+        -0.0006,
+        0.0005,
+        -0.0004,
+        -0.0022,
+        -0.0024
+      ],
+      "nqc": [
+        -0.001,
+        -0.0012,
+        -0.0006,
+        -0.0005,
+        -0.0024
+      ],
+      "oracle": [
+        0.0037,
+        0.0037,
+        0.0037,
+        0.0037,
+        -0.0024
+      ],
+      "benefit_linear": [
+        -0.0008,
+        -0.0009,
+        -0.0009,
+        -0.0016,
+        -0.0024
+      ],
+      "B1_gbdt": [
+        -0.0,
+        -0.0006,
+        -0.0001,
+        -0.0005,
+        -0.0024
+      ],
+      "B2_semantic_knn": [
+        -0.0001,
+        -0.0013,
+        -0.0014,
+        -0.0017,
+        -0.0024
+      ],
+      "B3_quantile": [
+        0.0003,
+        0.0009,
+        0.0001,
+        -0.001,
+        -0.0024
+      ],
+      "random": [
+        -0.0002,
+        -0.0006,
+        -0.0012,
+        -0.0018,
+        -0.0024
+      ]
+    },
+    "H3_vs_failure": {
+      "nqc": {
+        "point": -0.0002,
+        "ci_lo": -0.0013,
+        "ci_hi": 0.0008,
+        "p": 0.7752,
+        "share_of_oracle_minus_failure_headroom": -0.0437
+      },
+      "benefit_linear": {
+        "point": -0.0003,
+        "ci_lo": -0.0017,
+        "ci_hi": 0.001,
+        "p": 0.642,
+        "share_of_oracle_minus_failure_headroom": -0.0906
+      },
+      "B1_gbdt": {
+        "point": 0.0003,
+        "ci_lo": -0.0011,
+        "ci_hi": 0.0017,
+        "p": 0.7212,
+        "share_of_oracle_minus_failure_headroom": 0.0789
+      },
+      "B2_semantic_knn": {
+        "point": -0.0004,
+        "ci_lo": -0.0023,
+        "ci_hi": 0.0017,
+        "p": 0.707,
+        "share_of_oracle_minus_failure_headroom": -0.1063
+      },
+      "B3_quantile": {
+        "point": 0.0006,
+        "ci_lo": -0.0018,
+        "ci_hi": 0.0013,
+        "p": 0.7118,
+        "share_of_oracle_minus_failure_headroom": 0.1647
+      }
+    },
+    "B3_minus_B1_per_budget": [
+      {
+        "point": 0.0003,
+        "ci_lo": -0.0018,
+        "ci_hi": 0.0012
+      },
+      {
+        "point": 0.0015,
+        "ci_lo": -0.003,
+        "ci_hi": 0.0029
+      },
+      {
+        "point": 0.0002,
+        "ci_lo": -0.0044,
+        "ci_hi": 0.002
+      },
+      {
+        "point": -0.0005,
+        "ci_lo": -0.0046,
+        "ci_hi": 0.0016
+      },
+      {
+        "point": 0.0,
+        "ci_lo": -0.0,
+        "ci_hi": 0.0
+      }
+    ],
+    "harmed_among_routed": {
+      "failure": [
+        0.0233,
+        0.0185,
+        0.0279,
+        0.0559,
+        0.0488
+      ],
+      "benefit_linear": [
+        0.093,
+        0.0926,
+        0.0558,
+        0.0528,
+        0.0488
+      ],
+      "B1_gbdt": [
+        0.0233,
+        0.0556,
+        0.0465,
+        0.0466,
+        0.0488
+      ],
+      "B2_semantic_knn": [
+        0.0465,
+        0.0741,
+        0.0744,
+        0.0528,
+        0.0488
+      ],
+      "B3_quantile": [
+        0.0465,
+        0.0463,
+        0.0326,
+        0.0373,
+        0.0488
+      ]
+    },
+    "abstaining": {
+      "benefit_linear": [
+        {
+          "budget_cap": 0.1,
+          "routed": 0.1,
+          "gain": -0.0008
+        },
+        {
+          "budget_cap": 0.25,
+          "routed": 0.2512,
+          "gain": -0.0009
+        },
+        {
+          "budget_cap": 0.5,
+          "routed": 0.4512,
+          "gain": -0.0008
+        },
+        {
+          "budget_cap": 0.75,
+          "routed": 0.4512,
+          "gain": -0.0008
+        },
+        {
+          "budget_cap": 1.0,
+          "routed": 0.4512,
+          "gain": -0.0008
+        }
+      ],
+      "B1_gbdt": [
+        {
+          "budget_cap": 0.1,
+          "routed": 0.1,
+          "gain": -0.0
+        },
+        {
+          "budget_cap": 0.25,
+          "routed": 0.2512,
+          "gain": -0.0006
+        },
+        {
+          "budget_cap": 0.5,
+          "routed": 0.4605,
+          "gain": -0.0
+        },
+        {
+          "budget_cap": 0.75,
+          "routed": 0.4605,
+          "gain": -0.0
+        },
+        {
+          "budget_cap": 1.0,
+          "routed": 0.4605,
+          "gain": -0.0
+        }
+      ],
+      "B2_semantic_knn": [
+        {
+          "budget_cap": 0.1,
+          "routed": 0.1,
+          "gain": -0.0001
+        },
+        {
+          "budget_cap": 0.25,
+          "routed": 0.2512,
+          "gain": -0.0013
+        },
+        {
+          "budget_cap": 0.5,
+          "routed": 0.4279,
+          "gain": -0.0014
+        },
+        {
+          "budget_cap": 0.75,
+          "routed": 0.4279,
+          "gain": -0.0014
+        },
+        {
+          "budget_cap": 1.0,
+          "routed": 0.4279,
+          "gain": -0.0014
+        }
+      ],
+      "B3_quantile": [
+        {
+          "budget_cap": 0.1,
+          "routed": 0.0,
+          "gain": 0.0
+        },
+        {
+          "budget_cap": 0.25,
+          "routed": 0.0,
+          "gain": 0.0
+        },
+        {
+          "budget_cap": 0.5,
+          "routed": 0.0,
+          "gain": 0.0
+        },
+        {
+          "budget_cap": 0.75,
+          "routed": 0.0,
+          "gain": 0.0
+        },
+        {
+          "budget_cap": 1.0,
+          "routed": 0.0,
+          "gain": 0.0
+        }
+      ]
+    },
+    "verification": {
+      "routed_fraction": 0.4814,
+      "point": 0.0001,
+      "ci_lo": -0.0029,
+      "ci_hi": 0.003
+    },
+    "H1_replicates": true,
+    "H3_closes_gap": false
+  },
+  "qe": {
+    "label_rates": {
+      "n": 430,
+      "acted": 0.9884,
+      "mean_delta": -0.1628,
+      "helped": 0.2419,
+      "harmed": 0.4628,
+      "tied": 0.2953,
+      "failing": 0.214
+    },
+    "always_ci": [
+      -0.201,
+      -0.1249
+    ],
+    "latency_ms": {
+      "median": 6364.053,
+      "p95": 10267.7045,
+      "mean": 6628.8562,
+      "calls": 425
+    },
+    "H1": {
+      "detection_auc": {
+        "point": 0.641,
+        "ci_lo": 0.5739,
+        "ci_hi": 0.7051
+      },
+      "harm_auc": {
+        "point": 0.609,
+        "ci_lo": 0.5555,
+        "ci_hi": 0.6617
+      },
+      "primary": {
+        "point": 0.0321,
+        "ci_lo": -0.0516,
+        "ci_hi": 0.1119,
+        "p": 0.4486
+      }
+    },
+    "H1_effect_threshold": {
+      "0.05": {
+        "point": 0.0408,
+        "ci_lo": -0.0428,
+        "ci_hi": 0.1198
+      },
+      "0.1": {
+        "point": 0.0448,
+        "ci_lo": -0.038,
+        "ci_hi": 0.1238
+      }
+    },
+    "H1_untied_difference": {
+      "point": -0.06,
+      "ci_lo": -0.1843,
+      "ci_hi": 0.0641,
+      "n": 303
+    },
+    "H2": {
+      "failing": 0.214,
+      "rescue_rate": 0.2717,
+      "healthy_helped": 0.2337,
+      "healthy_harmed": 0.5888,
+      "healthy_tied": 0.1775,
+      "oracle": 0.0725,
+      "share_failing": 0.3948,
+      "share_ci": [
+        0.2733,
+        0.5177
+      ]
+    },
+    "H2_cost_aware": {
+      "0.0": {
+        "oracle": 0.0725,
+        "perfect_failure_gate": 0.0286,
+        "missed_healthy_gain": 0.0439,
+        "wasted_cost_on_unrescued_failures": 0.0
+      },
+      "0.01": {
+        "oracle": 0.0701,
+        "perfect_failure_gate": 0.0265,
+        "missed_healthy_gain": 0.0421,
+        "wasted_cost_on_unrescued_failures": 0.0016
+      },
+      "0.02": {
+        "oracle": 0.0677,
+        "perfect_failure_gate": 0.0243,
+        "missed_healthy_gain": 0.0403,
+        "wasted_cost_on_unrescued_failures": 0.0031
+      }
+    },
+    "H3_budget_averaged": {
+      "failure": -0.0869,
+      "nqc": -0.0913,
+      "oracle": 0.0099,
+      "benefit_linear": -0.0802,
+      "B1_gbdt": -0.0825,
+      "B2_semantic_knn": -0.0893,
+      "B3_quantile": -0.0831,
+      "random": -0.0846
+    },
+    "H3_curves": {
+      "failure": [
+        -0.0146,
+        -0.0447,
+        -0.0917,
+        -0.121,
+        -0.1628
+      ],
+      "nqc": [
+        -0.023,
+        -0.0444,
+        -0.0946,
+        -0.1319,
+        -0.1628
+      ],
+      "oracle": [
+        0.0531,
+        0.0725,
+        0.0725,
+        0.0141,
+        -0.1628
+      ],
+      "benefit_linear": [
+        -0.0122,
+        -0.0394,
+        -0.0773,
+        -0.1095,
+        -0.1628
+      ],
+      "B1_gbdt": [
+        -0.0207,
+        -0.0398,
+        -0.0796,
+        -0.1097,
+        -0.1628
+      ],
+      "B2_semantic_knn": [
+        -0.0217,
+        -0.0537,
+        -0.0919,
+        -0.1166,
+        -0.1628
+      ],
+      "B3_quantile": [
+        -0.0177,
+        -0.0368,
+        -0.0828,
+        -0.1156,
+        -0.1628
+      ],
+      "random": [
+        -0.0163,
+        -0.0407,
+        -0.0814,
+        -0.1221,
+        -0.1628
+      ]
+    },
+    "H3_vs_failure": {
+      "nqc": {
+        "point": -0.0044,
+        "ci_lo": -0.0129,
+        "ci_hi": 0.0039,
+        "p": 0.2828,
+        "share_of_oracle_minus_failure_headroom": -0.0453
+      },
+      "benefit_linear": {
+        "point": 0.0067,
+        "ci_lo": -0.0104,
+        "ci_hi": 0.0214,
+        "p": 0.5024,
+        "share_of_oracle_minus_failure_headroom": 0.0691
+      },
+      "B1_gbdt": {
+        "point": 0.0044,
+        "ci_lo": -0.01,
+        "ci_hi": 0.0195,
+        "p": 0.5346,
+        "share_of_oracle_minus_failure_headroom": 0.0457
+      },
+      "B2_semantic_knn": {
+        "point": -0.0024,
+        "ci_lo": -0.0167,
+        "ci_hi": 0.011,
+        "p": 0.6546,
+        "share_of_oracle_minus_failure_headroom": -0.0247
+      },
+      "B3_quantile": {
+        "point": 0.0038,
+        "ci_lo": -0.0125,
+        "ci_hi": 0.0176,
+        "p": 0.7296,
+        "share_of_oracle_minus_failure_headroom": 0.0394
+      }
+    },
+    "B3_minus_B1_per_budget": [
+      {
+        "point": 0.003,
+        "ci_lo": -0.0135,
+        "ci_hi": 0.0158
+      },
+      {
+        "point": 0.0031,
+        "ci_lo": -0.0235,
+        "ci_hi": 0.023
+      },
+      {
+        "point": -0.0032,
+        "ci_lo": -0.0286,
+        "ci_hi": 0.0179
+      },
+      {
+        "point": -0.0059,
+        "ci_lo": -0.0258,
+        "ci_hi": 0.0145
+      },
+      {
+        "point": 0.0,
+        "ci_lo": -0.0,
+        "ci_hi": 0.0
+      }
+    ],
+    "harmed_among_routed": {
+      "failure": [
+        0.3023,
+        0.3889,
+        0.4651,
+        0.4658,
+        0.4628
+      ],
+      "benefit_linear": [
+        0.4186,
+        0.4444,
+        0.4558,
+        0.4503,
+        0.4628
+      ],
+      "B1_gbdt": [
+        0.5116,
+        0.4444,
+        0.4558,
+        0.4379,
+        0.4628
+      ],
+      "B2_semantic_knn": [
+        0.5581,
+        0.5185,
+        0.4698,
+        0.4503,
+        0.4628
+      ],
+      "B3_quantile": [
+        0.4419,
+        0.4167,
+        0.4512,
+        0.4596,
+        0.4628
+      ]
+    },
+    "abstaining": {
+      "benefit_linear": [
+        {
+          "budget_cap": 0.1,
+          "routed": 0.007,
+          "gain": -0.0011
+        },
+        {
+          "budget_cap": 0.25,
+          "routed": 0.007,
+          "gain": -0.0011
+        },
+        {
+          "budget_cap": 0.5,
+          "routed": 0.007,
+          "gain": -0.0011
+        },
+        {
+          "budget_cap": 0.75,
+          "routed": 0.007,
+          "gain": -0.0011
+        },
+        {
+          "budget_cap": 1.0,
+          "routed": 0.007,
+          "gain": -0.0011
+        }
+      ],
+      "B1_gbdt": [
+        {
+          "budget_cap": 0.1,
+          "routed": 0.1,
+          "gain": -0.0207
+        },
+        {
+          "budget_cap": 0.25,
+          "routed": 0.1837,
+          "gain": -0.0293
+        },
+        {
+          "budget_cap": 0.5,
+          "routed": 0.1837,
+          "gain": -0.0293
+        },
+        {
+          "budget_cap": 0.75,
+          "routed": 0.1837,
+          "gain": -0.0293
+        },
+        {
+          "budget_cap": 1.0,
+          "routed": 0.1837,
+          "gain": -0.0293
+        }
+      ],
+      "B2_semantic_knn": [
+        {
+          "budget_cap": 0.1,
+          "routed": 0.1,
+          "gain": -0.0217
+        },
+        {
+          "budget_cap": 0.25,
+          "routed": 0.2256,
+          "gain": -0.0533
+        },
+        {
+          "budget_cap": 0.5,
+          "routed": 0.2256,
+          "gain": -0.0533
+        },
+        {
+          "budget_cap": 0.75,
+          "routed": 0.2256,
+          "gain": -0.0533
+        },
+        {
+          "budget_cap": 1.0,
+          "routed": 0.2256,
+          "gain": -0.0533
+        }
+      ],
+      "B3_quantile": [
+        {
+          "budget_cap": 0.1,
+          "routed": 0.0,
+          "gain": 0.0
+        },
+        {
+          "budget_cap": 0.25,
+          "routed": 0.0,
+          "gain": 0.0
+        },
+        {
+          "budget_cap": 0.5,
+          "routed": 0.0,
+          "gain": 0.0
+        },
+        {
+          "budget_cap": 0.75,
+          "routed": 0.0,
+          "gain": 0.0
+        },
+        {
+          "budget_cap": 1.0,
+          "routed": 0.0,
+          "gain": 0.0
+        }
+      ]
+    },
+    "verification": {
+      "routed_fraction": 0.0093,
+      "point": -0.0024,
+      "ci_lo": -0.0073,
+      "ci_hi": 0.0018
+    },
+    "H1_replicates": false,
+    "H3_closes_gap": false
+  }
+}

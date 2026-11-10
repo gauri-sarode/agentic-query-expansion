@@ -1,0 +1,35 @@
+{
+  "input": "results/arguana/arguana_frozen.csv",
+  "actions": [
+    "rerank",
+    "prf",
+    "qe"
+  ],
+  "seed": 20271110,
+  "budgets": [
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    1.0
+  ],
+  "cost": 0.0,
+  "bootstrap": 10000,
+  "n_train": 701,
+  "n_val": 275,
+  "n_test": 430,
+  "pre_features": [
+    "z_entity_overlap",
+    "z_mean_rare_term_idf",
+    "z_nqc",
+    "z_qlen",
+    "z_query_term_coverage",
+    "z_ranking_stability",
+    "z_result_coherence",
+    "z_score_entropy",
+    "z_score_margin",
+    "z_top_score"
+  ],
+  "emb_features": 384,
+  "warning": "Results cannot be called confirmatory if test labels were previously inspected."
+}

@@ -1,0 +1,44 @@
+[
+  {
+    "action": "rerank",
+    "gbdt": {
+      "depth": 3,
+      "leaves": 15,
+      "l2": 1.0
+    },
+    "knn": {
+      "k": 60
+    },
+    "lcb": {
+      "quantile": 0.1
+    }
+  },
+  {
+    "action": "prf",
+    "gbdt": {
+      "depth": 3,
+      "leaves": 15,
+      "l2": 1.0
+    },
+    "knn": {
+      "k": 60
+    },
+    "lcb": {
+      "quantile": 0.3
+    }
+  },
+  {
+    "action": "qe",
+    "gbdt": {
+      "depth": 3,
+      "leaves": 15,
+      "l2": 1.0
+    },
+    "knn": {
+      "k": 60
+    },
+    "lcb": {
+      "quantile": 0.1
+    }
+  }
+]
