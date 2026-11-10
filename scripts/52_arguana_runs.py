@@ -3,10 +3,11 @@
 configs/arguana_precommit.json. Reads no relevance judgment: scripts/53
 does all labelling and analysis.
 
-Every BM25 search goes through a wrapper that asks for k+1 hits and drops
-the current query's own id (each ArguAna query is also a corpus document),
-so rankings, t0/t1 telemetry and the expansion retrieval never see the
-self-match.
+Every BM25 search goes through a wrapper that asks for k+2 hits and drops
+the query's own document: its own id and any document whose normalised
+text equals the query (each ArguAna query is a corpus document; for 108
+cross-listed arguments the identical document carries the twin's id), so
+rankings, t0/t1 telemetry and the expansion retrieval never see it.
 
 Outputs (local; results/ is gitignored):
   results/arguana/{step}.json   per query id
@@ -21,6 +22,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -36,11 +38,21 @@ K = 100
 SPLIT = json.loads(Path("configs/arguana_split.json").read_text())
 
 _search = bm25_index.search
-_exclude: list[str | None] = [None]
+_exclude: list[set[str]] = [set()]
 
 
 def _search_without_self(query: str, db_path: str, k: int = 100):
-    return [h for h in _search(query, db_path, k=k + 1) if h[0] != _exclude[0]][:k]
+    return [h for h in _search(query, db_path, k=k + 2) if h[0] not in _exclude[0]][:k]
+
+
+def self_documents(queries: dict[str, str]) -> dict[str, set[str]]:
+    import ir_datasets
+
+    norm = lambda t: re.sub(r"\W+", " ", t.lower()).strip()  # noqa: E731
+    by_text: dict[str, set[str]] = {}
+    for d in ir_datasets.load("beir/arguana").docs_iter():
+        by_text.setdefault(norm(d.text), set()).add(d.doc_id)
+    return {q: {q} | by_text.get(norm(t), set()) for q, t in queries.items()}
 
 
 bm25_index.search = _search_without_self
@@ -64,14 +76,14 @@ def step_bm25(q: str, text: str, _bm25) -> dict:
           r.mean_rare_term_idf, r.entity_overlap, r.result_coherence, r.ranking_stability]
     return {"ranking": [[d, s] for d, s in init.r0], "t0": t0,
             "nqc": nqc([s for _, s in init.r0]), "qlen": len(text.split()),
-            "self_in_ranking": any(d == q for d, _ in init.r0)}
+            "self_in_ranking": any(d in _exclude[0] for d, _ in init.r0)}
 
 
 def step_rerank(q: str, text: str, bm25) -> dict:
     t = time.time()
     ranking = iv48.rerank(text, bm25[q]["ranking"], DB)
     return {"ranking": ranking, "ms": (time.time() - t) * 1000,
-            "self_in_ranking": any(d == q for d, _ in ranking)}
+            "self_in_ranking": any(d in _exclude[0] for d, _ in ranking)}
 
 
 def step_prf(q: str, text: str, bm25, fb_docs: int, n_terms: int) -> dict:
@@ -79,7 +91,7 @@ def step_prf(q: str, text: str, bm25, fb_docs: int, n_terms: int) -> dict:
     terms = iv48.prf_terms(text, bm25[q]["ranking"], DB, fb_docs, n_terms)
     hits = bm25_index.search(" ".join(terms), DB, k=K) if terms else []
     return {"terms": terms, "ranking": [[d, s] for d, s in hits], "ms": (time.time() - t) * 1000,
-            "self_in_ranking": any(d == q for d, _ in hits)}
+            "self_in_ranking": any(d in _exclude[0] for d, _ in hits)}
 
 
 def step_qe(q: str, text: str, _bm25) -> dict:
@@ -103,7 +115,7 @@ def step_qe(q: str, text: str, _bm25) -> dict:
         return rec
     rec.update({"ranking": res.candidate.R_t, "expansion": res.generated_expansion,
                 "ms": (time.time() - t) * 1000, "llm_ms": res.llm_latency_ms,
-                "self_in_ranking": q in res.candidate.R_t})
+                "self_in_ranking": bool(_exclude[0] & set(res.candidate.R_t))})
     return rec
 
 
@@ -135,11 +147,12 @@ def main() -> None:
     else:
         fn = {"bm25": step_bm25, "rerank": step_rerank, "qe": step_qe}[step]
 
+    selfdocs = self_documents(queries)
     t_start, n_new = time.time(), 0
     for i, q in enumerate(qids, 1):
         if q in done:
             continue
-        _exclude[0] = q
+        _exclude[0] = selfdocs[q]
         done[q] = fn(q, queries[q], bm25)
         n_new += 1
         if i % 50 == 0 or i == len(qids):

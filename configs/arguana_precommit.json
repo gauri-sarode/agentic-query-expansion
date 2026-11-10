@@ -5,8 +5,8 @@
   "question": "Do the paper's conclusions hold on an unseen task (counter-argument retrieval): (H1) failure detection ranks harm worse than it ranks failure; (H2) a perfect failure gate leaves a large part of the oracle gain unrecovered; (H3) pre-action routing, including three stronger benefit predictors, stays far from the oracle at matched budgets?",
   "data": {
     "source": "ir_datasets 'beir/arguana' (BEIR ArguAna: 1,406 queries, 8,674 documents, qrels as distributed). Downloaded into ir_datasets' cache only; nothing from it is committed.",
-    "self_match": "Each ArguAna query is itself a corpus document with the same id. Every BM25 search (original query, perturbed query inside the telemetry, expansion query, PRF query) requests k+1 and drops the query's own id before anything else sees the list, so rankings, features and labels never contain the self-match. Audit before labels: count of rankings containing the query's own id must be 0.",
-    "split": "Grouped by debate: group = the query id with its final '-pro..' / '-con..' segment removed (all arguments of one debate share a group). Groups are ordered by sha256(group + ':42') and assigned greedily to train/val/test until the query counts reach 50/20/30% (703/281/422 target). The split is written to configs/arguana_split.json and committed before any retrieval run. If the id pattern does not hold for some query, that query is its own group and the count is reported.",
+    "self_match": "Each ArguAna query is itself a corpus document with the same id. Every BM25 search (original query, perturbed query inside the telemetry, expansion query, PRF query) requests k+1 and drops the query's own id before anything else sees the list, so rankings, features and labels never contain the self-match. Audit before labels: count of rankings containing the query's own id must be 0. AMENDED: own document = own id plus every document with identical normalised text (see amendments).",
+    "split": "Grouped by debate: group = the query id with its final '-pro..' / '-con..' segment removed (all arguments of one debate share a group). Groups are ordered by sha256(group + ':42') and assigned greedily to train/val/test until the query counts reach 50/20/30% (703/281/422 target). The split is written to configs/arguana_split.json and committed before any retrieval run. If the id pattern does not hold for some query, that query is its own group and the count is reported. AMENDED: debates are merged when any of their queries share identical normalised text (see amendments).",
     "metric": "nDCG@10 (ir_measures / the project's src/eval/metrics), relevance as distributed."
   },
   "retrieval": "SQLite FTS5 BM25 over title + text, the project's default weights (no tuning on ArguAna). Top-100 after self-match removal.",
@@ -85,6 +85,10 @@
     {
       "date": "2026-11-10",
       "change": "The external protocol and runner arrived after this file was committed and before any ArguAna label was read (BM25 run still in progress; no qrels opened). Its three reranking contrasts become the primary H3 family (verbatim runner, LightGBM 4.7.0, pandas 3.1.1); the original 9-test scripts/53 family is kept as secondary. Noted, not changed: the runner selects B3's quantile by comparing pinball losses at different quantiles, which are not on a common scale; it fits learned scorers on train only; its failure router uses all 10 z_* features rather than the paper's 8. H1 (family A) and H2 are unchanged."
+    },
+    {
+      "date": "2026-11-10",
+      "change": "Label-free duplicate audit (before any label was read; BM25 run stopped at ~400/1406 and discarded) found 108 pairs of identical query texts: the same argument cross-listed under two topics with different ids (e.g. environment-assgbatj / science-eassgbatj); 60 pairs crossed splits, and for the 108 copies not in the corpus the identical document carries the twin's id, so id-only self-exclusion missed it. Fixes: (1) split groups are debates merged by identical normalised query text (union-find), re-frozen as 701/275/430 with 0 text groups crossing splits; (2) the query's own document = its own id plus every corpus document whose normalised text equals the query (exactly one per query); all searches drop that set. All runs restart from scratch."
     }
   ]
 }
