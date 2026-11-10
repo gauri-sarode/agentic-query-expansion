@@ -1,0 +1,4 @@
+scripts/55_arguana_feature_latency.py, 2026-11-10, M4 16 GB, n=430 test queries
+bm25 median 464.3 ms  p95 1667.9 ms
+telemetry median 316.8 ms  p95 1076.8 ms
+embed median 33.3 ms  p95 56.3 ms
