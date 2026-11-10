@@ -261,7 +261,9 @@ for dense TripClick QE ($-0.008$, $-0.001$, $-0.002$), while the
 oracle keeps $0.011$, $0.025$, and $0.027$. At $\kappa>0$ this is the
 regret of that one policy, not a ceiling: a gate that also skipped
 failing queries the intervention would not help enough could do
-better, but only by predicting benefit, not failure.
+better, but doing so needs information beyond the binary failure label
+to identify interventions whose expected gain does not cover their
+cost.
 
 \section{Detection vs.\ Action Utility}
 \label{sec:auc}
@@ -416,19 +418,22 @@ query's own and text-identical documents, and duplicates share a
 split. These fixes, and adopting an external reviewer's three primary
 contrasts, were recorded as dated amendments before any label was read
 (\texttt{configs/arguana\_precommit.json}; split IDs in
-\texttt{configs/arguana\_split.json}). All three predictors use the 10
-pre-action features (the 8 above, NQC, query length), are fit on
-training queries, are selected on validation, and are scored once on
-test. B1 is LightGBM regression on $\Delta$ (learning rate $0.035$, 180
-trees, $\ge18$ queries per leaf; depth, leaves, and L2 of
-$(3,15,1)$ or $(5,31,5)$ by validation MSE; $(3,15,1)$ chosen). B2
-averages the $\Delta$ of the $k$ nearest training queries, weighted by
-cosine similarity of frozen \texttt{bge-small-en-v1.5} embeddings,
+\texttt{configs/arguana\_split.json}). All three predictors are fit on
+training queries, selected on validation, and scored once on test.
+B1 and B3 use the 10 pre-action features (the 8 above, NQC, query
+length); the failure router uses the same 10. B1 is LightGBM
+regression on $\Delta$ (learning rate $0.035$, 180 trees, $\ge18$
+queries per leaf; depth, leaves, and L2 of $(3,15,1)$ or $(5,31,5)$
+by validation MSE; $(3,15,1)$ chosen). B2 uses the query embedding
+alone, no telemetry: it averages the $\Delta$ of the $k$ nearest
+training queries by cosine distance between frozen
+\texttt{bge-small-en-v1.5} embeddings, weighted by inverse distance,
 $k\in\{5,15,30,60\}$ by validation MSE ($60$ chosen). B3 is LightGBM
-quantile regression (depth 3), its quantile from $\{0.1,0.2,0.3\}$
-by validation pinball loss ($0.1$ for reranking), a registered rule
-even though pinball losses at different quantiles are not on a common
-scale.
+quantile regression (depth 3), its quantile from $\{0.1,0.2,0.3\}$ by
+validation pinball loss ($0.1$ for reranking). That registered rule is
+unsound, since pinball losses at different quantiles are not
+comparable; we keep it as registered and also report the secondary
+pre-registered B3, whose quantile is fixed at $0.25$.
 
 On ArguAna every intervention loses on average (reranking $-0.071$
 $[-0.108,-0.034]$, LLM QE $-0.163$), yet the oracle could still gain
@@ -438,9 +443,11 @@ selection. Pre-action routing again stays near random
 $+0.015$ $[-0.001,+0.028]$ (Holm $p=0.13$), B2 minus failure $+0.008$
 $[-0.005,+0.020]$ ($p=0.37$), and B3 versus B1 under a budget cap
 $+0.006$ $[-0.011,+0.023]$ ($p=0.52$); the best recovers $16\%$ of the
-oracle-minus-failure headroom, below the pre-registered $25\%$ bar. A
-train-plus-validation refit with wider grids agrees (none of nine
-contrasts survives Holm). When routers may abstain, abstaining on every
+oracle-minus-failure headroom, below the pre-registered $25\%$ bar. Our
+secondary pre-registered family (train-plus-validation refit, wider
+grids, hyperparameters chosen by validation routing gain, B3 at fixed
+quantile $0.25$) agrees: none of nine contrasts survives Holm, and B3
+minus failure is $+0.011$ $[-0.003,+0.023]$ ($12\%$ of the headroom). When routers may abstain, abstaining on every
 query beats all of them, since intervening loses on average; the
 budget cap protects against harm but does not find gain. Post-action
 verification of reranking keeps $10\%$ and gains $+0.004$
@@ -452,10 +459,11 @@ queries resolve. Per query (median), reranking costs $1.1$\,s, PRF
 $3$\,ms (a ten-term second search), and LLM QE $6.4$\,s (P95
 $10.3$\,s). Pre-action telemetry is not free either: its
 perturbation-stability retrieval brings the 8 features to $0.32$\,s
-(the BM25 search itself takes $0.46$\,s on these long queries), and
-B2's embedding adds $33$\,ms. Matched budgets equalize intervention
-counts, not total runtime; for PRF the features cost more than the
-intervention.
+(the BM25 search itself takes $0.46$\,s on these long queries);
+B2 needs only its $33$\,ms embedding. Matched budgets equalize
+intervention counts, not total runtime: for PRF the features cost more
+than the intervention, so routing a cheap intervention is less
+attractive than the quality-per-intervention comparison suggests.
 
 \section{Discussion and Limitations}
 
