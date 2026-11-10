@@ -1,0 +1,16 @@
+{
+  "name": "nq_stronger_baselines",
+  "written": "2026-11-10",
+  "status": "EXPLORATORY. Written after every NQ test result in the paper had been read, at the request of a simulated review (the TripClick/NQ benefit model is linear and fit on validation only). Not pre-registered. Frozen before this script is run; every quantity below is reported regardless of outcome.",
+  "question": "Do the ArguAna runner's stronger pre-action benefit predictors (B1 gradient boosting, B2 semantic kNN) beat failure routing on NQ, where only a linear benefit model was tested?",
+  "scope": "NQ only (LLM QE under BM25, reranking, PRF). TripClick is excluded.",
+  "data": {
+    "fit_pool": "NQ validation (800 queries; LLM QE: the 787 acted-upon validation queries with a stored Delta, as the paper's linear benefit model).",
+    "split": "Fit pool ordered by sha256(qid + ':nq57'); first 70% (rounded down) = train, rest = select. Same rule for every intervention.",
+    "test": "NQ test, 2,052 queries, the same Delta as Table 3 (LLM QE: 0 where not acted upon)."
+  },
+  "features": "10 pre-action features as on ArguAna: the paper's 8 t0 features, NQC over the BM25 top-100, query length in whitespace tokens. Embedding: frozen bge-small-en-v1.5 (src/retrieval/dense_index._get_model), normalised.",
+  "models": "scripts/54_baseline_runner.py cat_gbdt (B1) and semantic_knn (B2), imported unchanged: fit on train, hyperparameters by select-split MSE, no refit.",
+  "comparison": "NQ test: B1 and B2 minus failure routing, failure = the paper's NQ failure detector score (Table 3's failure column). Runner bootstrap_pair (10^4 resamples, floor budgets) over budgets {10,25,50,75,100}% (primary of this family) and {10,25,50,75}% (secondary). Holm over the 6 primary contrasts on the sign-flip p. Also: per-budget gains of failure, B1, B2, linear benefit, random, oracle; headroom share = (B - failure) / (oracle - failure), budget-averaged, with the ArguAna 25% bar as a descriptive reference.",
+  "outputs": "docs/nq_stronger_baselines.json (rounded aggregates only). Per-query predictions stay under results/ (gitignored)."
+}
