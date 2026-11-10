@@ -1,0 +1,65 @@
+{
+  "name": "arguana_generalization",
+  "written": "2026-11-10",
+  "status": "Pre-committed before ArguAna was downloaded. ArguAna has never been used in this project (no file in the repository mentions it). No ArguAna query, document, ranking or relevance judgment had been seen when this was written. Every quantity listed under 'analyses' is reported regardless of outcome (paper: summary; repository: full aggregates).",
+  "question": "Do the paper's conclusions hold on an unseen task (counter-argument retrieval): (H1) failure detection ranks harm worse than it ranks failure; (H2) a perfect failure gate leaves a large part of the oracle gain unrecovered; (H3) pre-action routing, including three stronger benefit predictors, stays far from the oracle at matched budgets?",
+  "data": {
+    "source": "ir_datasets 'beir/arguana' (BEIR ArguAna: 1,406 queries, 8,674 documents, qrels as distributed). Downloaded into ir_datasets' cache only; nothing from it is committed.",
+    "self_match": "Each ArguAna query is itself a corpus document with the same id. Every BM25 search (original query, perturbed query inside the telemetry, expansion query, PRF query) requests k+1 and drops the query's own id before anything else sees the list, so rankings, features and labels never contain the self-match. Audit before labels: count of rankings containing the query's own id must be 0.",
+    "split": "Grouped by debate: group = the query id with its final '-pro..' / '-con..' segment removed (all arguments of one debate share a group). Groups are ordered by sha256(group + ':42') and assigned greedily to train/val/test until the query counts reach 50/20/30% (703/281/422 target). The split is written to configs/arguana_split.json and committed before any retrieval run. If the id pattern does not hold for some query, that query is its own group and the count is reported.",
+    "metric": "nDCG@10 (ir_measures / the project's src/eval/metrics), relevance as distributed."
+  },
+  "retrieval": "SQLite FTS5 BM25 over title + text, the project's default weights (no tuning on ArguAna). Top-100 after self-match removal.",
+  "interventions": {
+    "priority": "Reranking first, then PRF, then LLM QE. A later one is dropped only if it cannot finish before 2026-11-14; any drop is recorded as an amendment before test labels are read.",
+    "rerank": "Identical to configs/intervention_scope_precommit.json (MiniLM cross-encoder CONFIG.reranker_model over the BM25 top-100, reranked top-50 lead, remaining BM25 order follows, current input text). No tuning.",
+    "prf": "Identical RM3-style procedure and 108-setting grid as configs/intervention_scope_precommit.json; the setting is chosen by validation mean nDCG@10 only, then frozen for test.",
+    "llm_qe": "The NQ protocol (scripts/22, 25): the frozen ActionSelector picks one expansion operator or NO_EXPAND from the t0 telemetry; for an expansion, CONFIG.expansion_model (Ollama qwen2.5:3b, temperature 0) generates one expansion from the top-5 evidence passages; the unfused expanded BM25 ranking, no reranker. Delta = 0 where NO_EXPAND or the generator fails (failures counted). No verifier gate.",
+    "cost": "Per-query wall-clock latency of each intervention (cross-encoder scoring, PRF second retrieval, LLM generation + retrieval) is logged and reported as median and mean, separately from quality."
+  },
+  "labels": {
+    "delta": "Delta_a(q) = nDCG@10(intervened) - nDCG@10(BM25 original).",
+    "failure": "F = 1[nDCG@10(original) = 0].",
+    "harm": "harmed = Delta < -1e-9; ties are not harmed (as in the paper). Effect-threshold variants Delta < -t, t in {0.05, 0.10}."
+  },
+  "features": {
+    "pre_action": "The paper's 8 t0 features (top_score, score_margin, score_entropy, query_term_coverage, mean_rare_term_idf, entity_overlap, result_coherence, ranking_stability) from compute_retrieval_telemetry on the self-match-free BM25 top-100, plus NQC (std/mean of the top-100 BM25 scores) and query length in tokens: 10 features.",
+    "semantic": "Frozen BAAI/bge-small-en-v1.5 query embeddings (the project's dense encoder, src/retrieval/dense_index.py), L2-normalised. No fine-tuning."
+  },
+  "scorers": {
+    "failure": "StandardScaler + LogisticRegression(C=1.0, max_iter=1000) predicting F from the 8 t0 features (the paper's detector form). Route highest P(F) first.",
+    "nqc": "Route lowest NQC first (no fitting).",
+    "benefit_linear": "StandardScaler + LinearRegression on Delta over the 10 pre-action features (the paper's benefit_pre, with NQC and length added).",
+    "B1_gbdt": "sklearn HistGradientBoostingRegressor (squared error) on Delta over the 10 pre-action features. Grid: learning_rate {0.03, 0.1} x max_depth {2, 3, None} x max_iter {100, 300} x min_samples_leaf {20, 50}; random_state 42.",
+    "B2_semantic_knn": "Predicted Delta = mean Delta of the k nearest training queries by cosine similarity of the frozen embeddings; k in {5, 10, 20, 50}.",
+    "B3_quantile": "HistGradientBoostingRegressor(loss='quantile', quantile=0.25) on Delta over the 10 pre-action features; same grid as B1. Route highest predicted lower quartile first.",
+    "random": "Exact expectation: budget x mean Delta.",
+    "oracle": "Highest true Delta first. Retrospective reference, not a policy."
+  },
+  "data_use": {
+    "train": "Fit every learned scorer for hyperparameter selection.",
+    "val": "Select PRF setting (mean nDCG@10) and each learned scorer's hyperparameters (validation budget-averaged routing gain, per intervention). Allowed to be inspected freely.",
+    "final_fit": "Refit each learned scorer on train + val with its selected hyperparameters (and the failure detector on train + val).",
+    "test": "Run each intervention once with frozen settings; one analysis pass by scripts/53; no change to any setting, scorer or analysis after test labels are read. Results reported regardless of outcome."
+  },
+  "analyses": {
+    "budgets": [0.10, 0.25, 0.50, 0.75, 1.00],
+    "routing_metric": "Mean nDCG@10 gain over the original when exactly round(budget x n) queries receive the intervention; stable sort, ties in query order. Budget-averaged gain = mean over the five budgets.",
+    "H1_primary": "Per intervention: failure-detector AUC for F minus its AUC for harmed (on all test queries; for LLM QE on acted-upon queries, as the paper), paired bootstrap 95% CI and two-sided bootstrap p. Family A = 3 tests, Holm at 0.05. Replicates if Holm-significant and positive.",
+    "H2_report": "Per intervention: rescue rate, healthy helped/harmed/tied rates, share = E[Delta_+ F] / E[Delta_+] with bootstrap 95% CI, cost-aware gate gains at kappa in {0, 0.01, 0.02}. Descriptive; no test.",
+    "H3_primary": "Per intervention: budget-averaged gain of B1, B2 and B3 minus the failure scorer, paired bootstrap 95% CI and two-sided p. Family B = 9 tests, Holm at 0.05.",
+    "H3_interpretation": "Fixed before test: pre-action benefit routing is said to 'close the gap' for an intervention only if some B is Holm-significantly above failure routing AND recovers at least 25% of the budget-averaged oracle-minus-failure headroom. Otherwise the paper reports that the observability limit replicates on ArguAna for that intervention.",
+    "secondary": [
+      "benefit_linear and nqc minus failure (budget-averaged, CI, unadjusted p, labelled secondary)",
+      "per-budget gains with CIs for every scorer",
+      "RQ3: B3 vs B1 at each budget: gain difference and the harmed fraction among routed queries",
+      "abstaining policies: for B1, B2, B3 and benefit_linear, route queries with predicted Delta > 0 up to each budget cap; report gain and fraction routed",
+      "post-action verification (reported separately, full intervention compute): route by sign of B1-form GBDT fit on pre + post-action features (t1 telemetry of the intervened ranking), same grid and selection",
+      "H1 under effect thresholds t in {0.05, 0.10} and on Delta != 0 only",
+      "per-intervention latency (median, mean)"
+    ]
+  },
+  "bootstrap": {"resamples": 10000, "seed": 42, "unit": "test query (paired)"},
+  "scope_limits": "One new corpus with ~422 test queries; one reranker, one generator. ArguAna's single-relevant-document qrels make F common and Delta coarse; that is a property of the task and is reported, not adjusted.",
+  "amendments": []
+}
