@@ -43,9 +43,15 @@
     "test": "Run each intervention once with frozen settings; one analysis pass by scripts/53; no change to any setting, scorer or analysis after test labels are read. Results reported regardless of outcome."
   },
   "analyses": {
-    "budgets": [0.10, 0.25, 0.50, 0.75, 1.00],
+    "budgets": [
+      0.1,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
     "routing_metric": "Mean nDCG@10 gain over the original when exactly round(budget x n) queries receive the intervention; stable sort, ties in query order. Budget-averaged gain = mean over the five budgets.",
-    "H1_primary": "Per intervention: failure-detector AUC for F minus its AUC for harmed (on all test queries; for LLM QE on acted-upon queries, as the paper), paired bootstrap 95% CI and two-sided bootstrap p. Family A = 3 tests, Holm at 0.05. Replicates if Holm-significant and positive.",
+    "H1_primary": "Per intervention, as the paper (scripts/49 S2, scripts/50 d4): failure-detector AUC for F minus the harm AUC of the action-utility model g, i.e. AUC(harmed, -g), where g = StandardScaler + LinearRegression on Delta over the 10 pre-action features plus scripts/49 post_features of the intervened ranking, fit on train + val (LLM QE: acted-upon queries only, for fitting and evaluation). Paired bootstrap 95% CI and two-sided bootstrap p. Family A = 3 tests, Holm at 0.05. Replicates if Holm-significant and positive.",
     "H2_report": "Per intervention: rescue rate, healthy helped/harmed/tied rates, share = E[Delta_+ F] / E[Delta_+] with bootstrap 95% CI, cost-aware gate gains at kappa in {0, 0.01, 0.02}. Descriptive; no test.",
     "H3_primary": "Per intervention: budget-averaged gain of B1, B2 and B3 minus the failure scorer, paired bootstrap 95% CI and two-sided p. Family B = 9 tests, Holm at 0.05.",
     "H3_interpretation": "Fixed before test: pre-action benefit routing is said to 'close the gap' for an intervention only if some B is Holm-significantly above failure routing AND recovers at least 25% of the budget-averaged oracle-minus-failure headroom. Otherwise the paper reports that the observability limit replicates on ArguAna for that intervention.",
@@ -59,7 +65,16 @@
       "per-intervention latency (median, mean)"
     ]
   },
-  "bootstrap": {"resamples": 10000, "seed": 42, "unit": "test query (paired)"},
+  "bootstrap": {
+    "resamples": 10000,
+    "seed": 42,
+    "unit": "test query (paired)"
+  },
   "scope_limits": "One new corpus with ~422 test queries; one reranker, one generator. ArguAna's single-relevant-document qrels make F common and Delta coarse; that is a property of the task and is reported, not adjusted.",
-  "amendments": []
+  "amendments": [
+    {
+      "date": "2026-11-10",
+      "change": "H1 corrected to the paper's quantity before any ArguAna label was read (only the BM25 run was in progress; no qrels opened): the harm AUC is that of the action-utility model g on pre + post-action features, not of the failure detector. The original wording ('its AUC for harmed') did not match scripts/49 and scripts/50. LLM QE post_features use ranking overlap and RBO only; the expanded ranking carries no scores, so the three score features are 0."
+    }
+  ]
 }
