@@ -35,12 +35,13 @@ ceiling ranges from $8\%$ to $57\%$ of the oracle's gain, tracking how
 often an intervention rescues a failing query ($1$--$46\%$) relative
 to how often it helps a healthy one; a pre-registered run on an
 untouched benchmark (ArguAna) gives $18$--$39\%$. Detection itself is ordinary QPP
-(AUC $0.62$--$0.70$, no better than NQC under BM25), and it beats
-predicting harm in seven of eight settings after Holm correction,
-though the gap largely vanishes on queries the intervention changes
-and is not significant for reranking or QE on ArguAna.
-Budget-matched routing confirms the limit: with pre-action telemetry,
-failure-, NQC-, and learned benefit-based routing all stay close to
+(AUC $0.62$--$0.70$, no better than NQC under BM25). It beats
+predicting harm in seven of eight settings after Holm correction, but
+largely because failing queries cannot be harmed: on queries the
+intervention changes, every BM25 gap vanishes, and on ArguAna the gap
+is not significant for reranking or QE.
+Budget-matched routing is consistent with this: with the pre-action
+features and models we test, failure-, NQC-, and benefit-based routing stay close to
 random routing and far below the oracle; benefit routing beats failure
 routing only for reranking on NQ, and on ArguAna, where every
 intervention loses on average, none of three stronger pre-registered
@@ -105,8 +106,10 @@ generative expansions often hurt strong retrievers~\cite{weller-qe-fails}
 and fail on unfamiliar or ambiguous queries~\cite{qe-fails-unfamiliar}.
 Kotte~\cite{not-all-queries-need-rewriting} gates prompt-only rewriting
 for dense retrievers (gate AUC $0.593$, no reliable gain);
-Adaptive-RAG~\cite{adaptive-rag} routes on question complexity.
-Neither separates a gate's detection accuracy from its benefit
+Adaptive-RAG~\cite{adaptive-rag} routes on question complexity and
+Mallen et al.~\cite{mallen-adaptive} retrieve only for less popular
+entities; cascade rankers~\cite{cascade-ranking} spend costly stages
+only on promising candidates. None separates a gate's detection accuracy from its benefit
 prediction. In uplift terms~\cite{causal-classification}, our setting
 is unusually clean: both outcomes are observed for every query
 offline, so the uplift label is exact up to relevance-label noise.
@@ -335,7 +338,7 @@ $+0.42$ to $+1.21$, CIs exclude zero) but not for PRF or dense NQ.
 \begin{table}[t]
 \caption{Pre-action routing: nDCG@10 gain over the original
 ($\times10^3$), averaged over budgets of $10$, $25$, $50$, $75$, and
-$100\%$ of queries intervened on. Random: expected gain. Last column:
+$100\%$ of queries intervened on (at $100\%$ all policies coincide). Random: expected gain. Last column:
 benefit minus failure routing, 95\% CI; $^*$ significant after Holm
 over the six settings.}
 \label{tab:routing}
@@ -362,9 +365,18 @@ below the oracle (Table~\ref{tab:routing}). Failure routing beats
 random by at most $3.2\times10^{-3}$ and falls below it for PRF on NQ;
 NQC is no better than the learned detector (no difference survives
 Holm). A pre-action benefit model beats failure routing only for
-reranking on NQ ($+0.009$ $[+0.003,+0.015]$). This is the framework's
-prediction: $Z_0$ describes $R_0$, and $R_0$ reveals little about
-$\Delta_a$ beyond whether $M(R_0)=0$. For LLM QE, the deployed
+reranking on NQ ($+0.009$ $[+0.003,+0.015]$), the setting where
+reranking helps most often. This benefit model is linear and fit on
+validation queries only, so these rows test a weak learner. The
+pattern fits the framework ($Z_0$ describes $R_0$, which these
+features show reveals little about $\Delta_a$ beyond whether
+$M(R_0)=0$), but it is an empirical property of these features and
+models, not a bound; richer pre-action signals may do better. At the
+$100\%$ budget every policy equals intervening on every query, which
+pulls the averages together; averaged over $10$--$75\%$ only
+(exploratory, chosen after seeing results), the same and only
+contrast survives Holm (NQ reranking, $+0.011$ $[+0.004,+0.019]$), and
+per-budget curves are in the repository. For LLM QE, the deployed
 failure-selective policy (median threshold, $49$--$51\%$ routed)
 halves generator calls; on NQ it recovers most of unconditional QE's
 loss ($+0.015$ $[+0.008,+0.022]$ over Static QE, residual $-0.007$
@@ -389,7 +401,7 @@ that text ($0.285$ vs.\ $0.287$).
 
 \begin{table}[t]
 \caption{ArguAna test ($n=430$): pre-action routing gain over BM25
-($\times10^3$), averaged over budgets of $10$--$100\%$. B1: gradient
+($\times10^3$), averaged over budgets of $10$--$100\%$ (registered). B1: gradient
 boosting on $\Delta$; B2: $k$-NN over frozen query embeddings; B3:
 lower-quantile boosting. Always: intervening on every query.}
 \label{tab:arguana}
@@ -438,12 +450,19 @@ pre-registered B3, whose quantile is fixed at $0.25$.
 On ArguAna every intervention loses on average (reranking $-0.071$
 $[-0.108,-0.034]$, LLM QE $-0.163$), yet the oracle could still gain
 $0.053$ and $0.010$ budget-averaged, so the question is purely one of
-selection. Pre-action routing again stays near random
+selection. PRF barely acts here (nDCG@10 changes for $9\%$ of queries), and its
+registered setting scored slightly below BM25 on validation ($0.4899$
+vs.\ $0.4903$), so its rows are uninformative. Pre-action routing again stays near random
 (Table~\ref{tab:arguana}). For reranking, B1 minus failure routing is
 $+0.015$ $[-0.001,+0.028]$ (Holm $p=0.13$), B2 minus failure $+0.008$
 $[-0.005,+0.020]$ ($p=0.37$), and B3 versus B1 under a budget cap
 $+0.006$ $[-0.011,+0.023]$ ($p=0.52$); the best recovers $16\%$ of the
-oracle-minus-failure headroom, below the pre-registered $25\%$ bar. A
+oracle-minus-failure headroom, below the pre-registered $25\%$ bar.
+Excluding the $100\%$ budget (exploratory) gives B1 minus failure
+$+0.019$ $[-0.001,+0.035]$; at a $10\%$ budget failure routing
+($-0.015$) is worse than random ($-0.007$), while B1 and NQC are
+slightly positive ($+0.004$, $+0.003$): $42\%$ of the queries failure
+routing picks there are harmed. A
 secondary, also pre-registered family (train-plus-validation refit, wider
 grids, hyperparameters chosen by validation routing gain, B3 at fixed
 quantile $0.25$) agrees: none of nine contrasts survives Holm, and B3
@@ -467,13 +486,16 @@ attractive than the quality-per-intervention comparison suggests.
 
 \section{Discussion and Limitations}
 
-Failure prediction is the most accurate signal a controller has, and
-it targets the wrong quantity: the gain a failure gate can reach is
-capped by how often an intervention rescues failing queries, and that
-cap differs nearly sevenfold across interventions. The
-difficulty is not counterfactual missingness, since both outcomes are
-observed offline, nor the generator alone, since reranking and PRF
-show the same gaps; a likelier common factor is that pre-action
+Failure prediction is the usual gate, and it targets the wrong
+quantity. Two kinds of result support this. One is proven: at zero
+cost, a policy that intervenes only on failing queries is capped by
+how often the intervention rescues them, a cap that differs nearly
+sevenfold across interventions. The other is empirical: the
+pre-action benefit predictors we test, up to gradient boosting and
+query embeddings, do not reliably recover the rest. The difficulty is
+not counterfactual missingness, since both outcomes are observed
+offline, nor the generator alone, since reranking shows the same
+gaps; a likelier common factor is that pre-action
 telemetry describes the original ranking, while $\Delta_a$ depends on
 what the intervention retrieves.
 
@@ -492,7 +514,8 @@ quantity is reported in full in the repository.
 \section{Conclusion}
 
 Detecting that retrieval has failed is ordinary QPP, and it bounds
-what a selective controller can gain: a perfect failure detector
+what a controller acting only on failing queries can gain at zero
+cost: a perfect failure detector
 would capture $8$--$57\%$ of an oracle's gain across LLM QE,
 reranking, and PRF, depending on how often each intervention rescues a
 failing query, a share that varies widely across tasks and
