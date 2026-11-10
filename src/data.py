@@ -15,6 +15,7 @@ DATASET_IDS = {
     "trec-dl-2019": "msmarco-passage/trec-dl-2019/judged",
     "trec-dl-2020": "msmarco-passage/trec-dl-2020/judged",
     "nq": "beir/nq",
+    "arguana": "beir/arguana",
 }
 
 # dataset name -> (tripclick slice, split). "-test" is reserved for the
