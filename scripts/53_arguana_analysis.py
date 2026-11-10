@@ -76,7 +76,7 @@ class Data:
                  "pre": np.array([bm25[q]["t0"] + [bm25[q]["nqc"], bm25[q]["qlen"]] for q in qids]),
                  "nqc": np.array([bm25[q]["nqc"] for q in qids]),
                  "emb": emb[[emb_row[q] for q in qids]], "iv": {}}
-            new = {"rerank": {q: rr[q] for q in qids}}
+            new = {"rerank": {q: rr[q]["ranking"] for q in qids}}
             if prf_exp:
                 new["prf"] = {q: iv.prf_fuse(bm25[q]["ranking"], prf_exp[q]["ranking"], prf[2]) for q in qids}
             if qe:
