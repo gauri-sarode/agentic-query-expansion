@@ -376,11 +376,13 @@ and benefit routing beats failure routing only for reranking on NQ
 ($+0.009$ $[+0.003,+0.015]$), where it leads at every budget. Since all policies coincide at
 $100\%$, averaging over $10$--$75\%$ only (exploratory, chosen after
 seeing results) widens the differences but leaves the same single
-Holm survivor ($+0.011$ $[+0.004,+0.019]$). The benefit model is linear
-and fit on validation only, a weak learner. The pattern fits the
-framework ($Z_0$ describes $R_0$, which these features show reveals
-little about $\Delta_a$ beyond whether $M(R_0)=0$), but it is an
-empirical property of these features and models, not a bound; richer
+Holm survivor ($+0.011$ $[+0.004,+0.019]$). The benefit model is linear;
+ArguAna's B1 and B2 (Section~\ref{sec:arguana}), fit on NQ validation
+(exploratory), do no better: neither beats failure routing after Holm
+for any intervention, and the best recovers $8\%$ of the
+oracle-minus-failure headroom (reranking, B2, $+0.007$
+$[+0.001,+0.013]$). This is an empirical property of these features and models, not a
+bound; richer
 pre-action signals may do better. For LLM QE, the deployed
 failure-selective policy (median threshold) halves generator calls
 and on NQ recovers most of unconditional QE's loss ($+0.015$
@@ -472,8 +474,7 @@ minus failure is $+0.011$ $[-0.003,+0.023]$ ($12\%$ of the headroom). Allowed to
 every query. Post-action
 verification of reranking keeps $10\%$ and gains $+0.004$
 $[-0.005,+0.015]$. ArguAna is thus a hard, out-of-domain selection
-problem: these predictors do not reliably recover the headroom here,
-which does not show that pre-action prediction cannot work; B1's
+problem, not proof that pre-action prediction cannot work; B1's
 $+0.015$ may be real but below what $430$ queries resolve. Median
 per-query costs: reranking $1.1$\,s, PRF $3$\,ms (a ten-term second
 search), LLM QE $6.4$\,s (P95 $10.3$\,s). Pre-action telemetry is not
