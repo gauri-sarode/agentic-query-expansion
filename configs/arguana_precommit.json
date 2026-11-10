@@ -53,16 +53,22 @@
     "routing_metric": "Mean nDCG@10 gain over the original when exactly round(budget x n) queries receive the intervention; stable sort, ties in query order. Budget-averaged gain = mean over the five budgets.",
     "H1_primary": "Per intervention, as the paper (scripts/49 S2, scripts/50 d4): failure-detector AUC for F minus the harm AUC of the action-utility model g, i.e. AUC(harmed, -g), where g = StandardScaler + LinearRegression on Delta over the 10 pre-action features plus scripts/49 post_features of the intervened ranking, fit on train + val (LLM QE: acted-upon queries only, for fitting and evaluation). Paired bootstrap 95% CI and two-sided bootstrap p. Family A = 3 tests, Holm at 0.05. Replicates if Holm-significant and positive.",
     "H2_report": "Per intervention: rescue rate, healthy helped/harmed/tied rates, share = E[Delta_+ F] / E[Delta_+] with bootstrap 95% CI, cost-aware gate gains at kappa in {0, 0.01, 0.02}. Descriptive; no test.",
-    "H3_primary": "Per intervention: budget-averaged gain of B1, B2 and B3 minus the failure scorer, paired bootstrap 95% CI and two-sided p. Family B = 9 tests, Holm at 0.05.",
-    "H3_interpretation": "Fixed before test: pre-action benefit routing is said to 'close the gap' for an intervention only if some B is Holm-significantly above failure routing AND recovers at least 25% of the budget-averaged oracle-minus-failure headroom. Otherwise the paper reports that the observability limit replicates on ArguAna for that intervention.",
+    "H3_primary": "ADOPTED FROM THE EXTERNAL PROTOCOL (configs/arguana_protocol_external.md, sha256 2e0534ba...4c4c; runner scripts/54_baseline_runner.py copied verbatim, sha256 fc2cf1ac...03612): three reranking contrasts on the test split, computed by `python scripts/54_baseline_runner.py --input results/arguana/arguana_frozen.csv --output results/arguana/runner --actions rerank,prf,qe --bootstrap 10000 --cost 0`: (1) B1_gbdt vs failure, exact budgets; (2) B2_semantic_knn vs failure, exact budgets; (3) B3_quantile_LCB vs B1_gbdt, budget cap (abstain at predicted gain <= 0). Holm over these three on the runner's sign-flip p, as the runner computes it; paired bootstrap 95% CIs reported beside them. The runner's own model definitions, grids, selection rules (validation MSE / pinball loss), train-only fitting and floor budgets are used unchanged. Input CSV: scripts/53 export (z_* = the 10 pre-action features, emb_* = frozen bge-small embedding, nqc_score = NQC).",
+    "H3_interpretation": "Pre-action benefit routing 'closes the gap' on reranking only if contrast (1) or (2) is Holm-significant and positive AND that scorer recovers at least 25% of the budget-averaged oracle-minus-failure headroom. Otherwise the paper reports that the observability limit replicates on ArguAna. Contrast (3) is reported as gain and harm-among-selected, with no directional claim beyond its Holm result.",
     "secondary": [
+      "the scripts/53 routing family (B1/B2/B3 as defined in 'scorers', validation-gain selection, train+val refit, round budgets) for all three interventions, with its 9-test Holm adjustment, labelled secondary/robustness; the runner's PRF and LLM QE contrasts, labelled secondary",
       "benefit_linear and nqc minus failure (budget-averaged, CI, unadjusted p, labelled secondary)",
       "per-budget gains with CIs for every scorer",
       "RQ3: B3 vs B1 at each budget: gain difference and the harmed fraction among routed queries",
       "abstaining policies: for B1, B2, B3 and benefit_linear, route queries with predicted Delta > 0 up to each budget cap; report gain and fraction routed",
       "post-action verification (reported separately, full intervention compute): route by sign of B1-form GBDT fit on pre + post-action features (t1 telemetry of the intervened ranking), same grid and selection",
       "H1 under effect thresholds t in {0.05, 0.10} and on Delta != 0 only",
-      "per-intervention latency (median, mean)"
+      "per-intervention latency (median, mean)",
+      "latency median, P95 and call counts; SHA256 of the split manifest, every cached run and the embedding file"
+    ],
+    "audits_before_test": [
+      "self-match count in every cached ranking = 0",
+      "exact-duplicate query texts across train/val/test (label-free), reported"
     ]
   },
   "bootstrap": {
@@ -75,6 +81,10 @@
     {
       "date": "2026-11-10",
       "change": "H1 corrected to the paper's quantity before any ArguAna label was read (only the BM25 run was in progress; no qrels opened): the harm AUC is that of the action-utility model g on pre + post-action features, not of the failure detector. The original wording ('its AUC for harmed') did not match scripts/49 and scripts/50. LLM QE post_features use ranking overlap and RBO only; the expanded ranking carries no scores, so the three score features are 0."
+    },
+    {
+      "date": "2026-11-10",
+      "change": "The external protocol and runner arrived after this file was committed and before any ArguAna label was read (BM25 run still in progress; no qrels opened). Its three reranking contrasts become the primary H3 family (verbatim runner, LightGBM 4.7.0, pandas 3.1.1); the original 9-test scripts/53 family is kept as secondary. Noted, not changed: the runner selects B3's quantile by comparing pinball losses at different quantiles, which are not on a common scale; it fits learned scorers on train only; its failure router uses all 10 z_* features rather than the paper's 8. H1 (family A) and H2 are unchanged."
     }
   ]
 }

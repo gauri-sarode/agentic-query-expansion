@@ -6,15 +6,19 @@ configs/arguana_precommit.json.
   select      train + validation only: choose each learned scorer's
               hyperparameters per intervention (validation budget-averaged gain)
   test        refit on train + val, score the untouched test split once
+  export      write results/arguana/arguana_frozen.csv in the input schema of
+              scripts/54_baseline_runner.py (the external protocol's primary
+              analysis); part of the single test pass
 
 `select-prf` and `select` never compute a test label. Outputs:
 results/arguana/{prf_selected,selection}.json, results/arguana_analysis.json
 (local), docs/arguana_summary.json (rounded aggregates).
 
-Usage: PYTHONPATH=. python3 scripts/53_arguana_analysis.py {select-prf,select,test}
+Usage: PYTHONPATH=. python3 scripts/53_arguana_analysis.py {select-prf,select,test,export}
 """
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import itertools
 import json
@@ -262,7 +266,8 @@ def test() -> None:
                             "helped": float((d > EPS).mean()), "harmed": float((d < -EPS).mean()),
                             "tied": float((np.abs(d) <= EPS).mean()), "failing": float(te["fail"].mean()),
                             "always_vs_original": ra.mean_diff(np.zeros_like(d), d)},
-            "latency_ms": {"median": float(np.median(ms)) if len(ms) else None, "mean": float(ms.mean()) if len(ms) else None},
+            "latency_ms": {"median": float(np.median(ms)) if len(ms) else None, "p95": float(np.percentile(ms, 95)) if len(ms) else None,
+                           "mean": float(ms.mean()) if len(ms) else None, "calls": int(len(ms))},
             "H1": h1(te["fail"][acted], det[acted], d[acted], g[acted]),
             "H2": da.d1(S1),
             "H3": routing(d, scorers),
@@ -275,6 +280,8 @@ def test() -> None:
         for k in ("B1_gbdt", "B2_semantic_knn", "B3_quantile"):
             pB[f"{a}:{k}"] = res["H3"]["vs_failure"][k]["p"]
         out[a] = res
+    out["sha256"] = {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
+                     for p in [Path("configs/arguana_split.json"), *sorted(RUNS.glob("*.json")), RUNS / "embed.npy"]}
     out["holm_family_A_H1"] = da.holm(pA)
     out["holm_family_B_H3"] = da.holm(pB)
     for a in INTERVENTIONS:
@@ -294,7 +301,7 @@ def test() -> None:
 
 def summary(out: dict) -> dict:
     r = lambda x: None if x is None else round(x, 4)  # noqa: E731
-    s = {"_note": out["_note"], "n": out["n"], "bm25_test_mean": r(out["bm25_test_mean"]),
+    s = {"_note": out["_note"], "n": out["n"], "split_sha256": out["sha256"]["arguana_split.json"], "bm25_test_mean": r(out["bm25_test_mean"]),
          "prf_selected": out["prf_selected"], "selection": out["selection"],
          "holm_family_A_H1": out["holm_family_A_H1"], "holm_family_B_H3": out["holm_family_B_H3"]}
     for a in INTERVENTIONS:
@@ -324,5 +331,27 @@ def summary(out: dict) -> dict:
     return s
 
 
+def export() -> None:
+    """Input CSV for scripts/54_baseline_runner.py: z_* = the 10 pre-action
+    features, emb_* = the frozen embedding, nqc_score = NQC (larger = better)."""
+    import csv
+
+    D = Data(("train", "val", "test"), _prf())
+    names = ["top_score", "score_margin", "score_entropy", "query_term_coverage", "mean_rare_term_idf",
+             "entity_overlap", "result_coherence", "ranking_stability", "nqc", "qlen"]
+    dim = D.S["train"]["emb"].shape[1]
+    path = RUNS / "arguana_frozen.csv"
+    with path.open("w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["query_id", "split", "baseline_ndcg", *[f"{a}_ndcg" for a in INTERVENTIONS],
+                    *[f"z_{n}" for n in names], *[f"emb_{j:03d}" for j in range(dim)], "nqc_score"])
+        for sp in ("train", "val", "test"):
+            s = D.S[sp]
+            for i, q in enumerate(s["qids"]):
+                w.writerow([q, sp, s["b"][i], *[s["b"][i] + s["iv"][a]["delta"][i] for a in INTERVENTIONS],
+                            *s["pre"][i], *s["emb"][i], s["nqc"][i]])
+    print(path, hashlib.sha256(path.read_bytes()).hexdigest())
+
+
 if __name__ == "__main__":
-    {"select-prf": select_prf, "select": select, "test": test}[sys.argv[1]]()
+    {"select-prf": select_prf, "select": select, "test": test, "export": export}[sys.argv[1]]()
