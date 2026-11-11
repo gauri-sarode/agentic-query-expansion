@@ -23,33 +23,24 @@ Selective retrieval interventions, such as LLM query expansion (QE),
 cross-encoder reranking, and pseudo-relevance feedback (PRF), are
 often gated on a query performance predictor: intervene when retrieval
 looks like it is failing. We show why failure is the wrong target and
-measure by how much. Writing the decision as maximizing the expected
-gain of an intervention given the telemetry a system can observe, we
-decompose an oracle selector's gain exactly into gain on failing
-queries, the most a perfect failure detector can recover, and gain on
-healthy queries, which it never sees; with a per-query cost, a third
-term charges the cost spent on failing queries whose gain does not
-cover it. On TripClick and BEIR Natural Questions, across eight
-intervention, corpus, and retriever settings, this failure-only
-ceiling ranges from $8\%$ to $57\%$ of the oracle's gain, tracking how
-often an intervention rescues a failing query ($1$--$46\%$) relative
-to how often it helps a healthy one; a pre-registered run on an
-untouched benchmark (ArguAna) gives $18$--$39\%$. Detection itself is ordinary QPP
-(AUC $0.62$--$0.70$, no better than NQC under BM25). It beats
-predicting harm in seven of eight settings after Holm correction, but
-largely because failing queries cannot be harmed: on queries the
-intervention changes, every BM25 gap on TripClick and NQ vanishes, and on ArguAna the gap
-is not significant for reranking or QE.
-Budget-matched routing is consistent with this: with the pre-action
-features and models we test, failure-, NQC-, and benefit-based routing stay close to
-random routing and far below the oracle; benefit routing beats failure
-routing only for reranking on NQ. On ArguAna, where every
-intervention loses on average, failure routing of reranking is worse
-than random at every budget, and none of three stronger pre-registered
-benefit predictors (gradient boosting, semantic nearest neighbours,
-quantile regression) beats it significantly. Telemetry observed after the
-intervention does better (on TripClick it cuts reranking's loss from
-$-0.028$ to $-0.001$ nDCG@10), but only once its cost is paid.
+measure by how much. Writing the decision as maximizing an
+intervention's expected gain given observable telemetry, we decompose
+an oracle selector's gain exactly into gain on failing queries, the
+most any policy acting only on them can recover at zero cost, and gain
+on healthy queries, which it never sees. On TripClick and BEIR NQ,
+across eight intervention, corpus, and retriever settings, this
+failure-only ceiling is $8$--$57\%$ of the oracle's gain; a
+pre-registered run on an untouched benchmark (ArguAna) gives
+$18$--$39\%$. Detection is ordinary QPP (AUC $0.62$--$0.70$), and its
+lead over harm prediction vanishes on TripClick and NQ queries the
+intervention changes. At matched budgets, failure, NQC, and pre-action benefit
+routing, up to gradient boosting and query embeddings, stay near
+random, and failure routing spends most of its budget on failing
+queries the intervention leaves unchanged. Observing part of the
+intervention helps where it usually helps: on NQ, routing reranking on
+cross-encoder scores of the first ten candidates beats failure routing
+by $+0.024$ nDCG@10 at under a fifth of its cost, but not on TripClick
+or ArguAna (exploratory).
 \end{abstract}
 
 \maketitle
@@ -74,19 +65,16 @@ deployed system can observe, its \emph{observability}, can do better.
 
 \textbf{Contributions.}
 \textbf{(C1)} A decision framing of selective intervention under
-observable telemetry, with an exact decomposition of the
-\emph{failure-only ceiling}, including a cost term
-(Section~\ref{sec:framework}).
-\textbf{(C2)} Its measurement for LLM QE (BM25 and dense retrieval),
-reranking, and PRF on two corpora: the ceiling ranges from $8\%$ to
-$57\%$ of the oracle's gain and is explained by rescue and
-healthy-help rates.
-\textbf{(C3)} Paired, same-query AUCs of detection and action utility
-(benefit prediction) in all eight settings, Holm-corrected.
-\textbf{(C4)} Budget-matched routing that separates pre-action routing
-from post-action verification.
-\textbf{(C5)} A pre-registered replication on an untouched benchmark
-with three stronger benefit predictors.
+observable telemetry, with an exact decomposition of the gain no
+policy acting only on failing queries can capture, at zero and
+positive cost (Section~\ref{sec:framework}).
+\textbf{(C2)} Its measurement for LLM QE, reranking, and PRF on three
+corpora, one pre-registered and untouched: the \emph{failure-only
+ceiling} is $8$--$57\%$ of the oracle's gain, the pre-action
+predictors we test do not recover the rest, and diagnostics show why.
+\textbf{(C3)} Routing under observability and measured cost, from
+pre-action telemetry through partial probes of the intervention to
+post-action verification.
 
 \section{Related Work}
 
@@ -106,7 +94,7 @@ MuGI~\cite{mugi}, and CSQE~\cite{csqe} expand unconditionally;
 generative expansions often hurt strong retrievers~\cite{weller-qe-fails}
 and fail on unfamiliar or ambiguous queries~\cite{qe-fails-unfamiliar}.
 Kotte~\cite{not-all-queries-need-rewriting} gates prompt-only rewriting
-for dense retrievers (gate AUC $0.593$, no reliable gain);
+for dense retrievers without reliable gain;
 Adaptive-RAG~\cite{adaptive-rag} routes on question complexity and
 Mallen et al.~\cite{mallen-adaptive} retrieve only for less popular
 entities; cascade rankers~\cite{cascade-ranking} spend costly stages
@@ -128,9 +116,11 @@ it can do is $\pi^*(Z)=\arg\max_a\{\mathbb{E}[\Delta_a\mid Z]-\kappa c_a\}$.
 What matters is therefore what $Z$ reveals about $\Delta_a$, not about
 $M(R_0)$. Two information sets differ in cost: \emph{pre-action}
 telemetry $Z_0$ describes $R_0$ and costs no intervention, though
-computing it is not free (Section~\ref{sec:arguana}); \emph{post-action}
+computing it is not free; \emph{post-action}
 telemetry $Z_1$ also describes $R_a$ and exists only after $c_a$ is
-paid. A failure gate replaces $\mathbb{E}[\Delta_a\mid Z_0]$ with
+paid. A \emph{probe} observes part of the intervention, such as
+cross-encoder scores of a few candidates, at part of its cost
+(Section~\ref{sec:probe}). A failure gate replaces $\mathbb{E}[\Delta_a\mid Z_0]$ with
 $P(F\mid Z_0)$, where $F=\mathbf{1}[M(R_0,q)=0]$.
 
 \textbf{The failure-only ceiling.} Fix one intervention with $c_a=1$,
@@ -165,10 +155,8 @@ click-derived relevance labels. BEIR NQ~\cite{beir,natural-questions}:
 arguments, 1{,}406 queries whose relevant document is the
 counterargument (Section~\ref{sec:arguana}).
 
-\textbf{Interventions.} \emph{LLM QE}: BM25 over SQLite FTS5 (Porter
-stemming, title weight tuned on validation); a deterministic rule picks
-one of four expansion operators or none ($1.5\%$/$1.9\%$ of queries
-under BM25, $10.6\%$/$5.8\%$ dense), and \texttt{qwen2.5:3b} (4-bit,
+\textbf{Interventions.} \emph{LLM QE}: BM25 over SQLite FTS5; a
+deterministic rule picks one of four expansion operators or none, and \texttt{qwen2.5:3b} (4-bit,
 greedy, $\le2$ calls) writes a corpus-grounded expansion. On TripClick
 and under dense retrieval (\texttt{bge-small-en-v1.5}~\cite{bge-embedding})
 the expanded ranking's top candidates are reranked by a MiniLM
@@ -176,22 +164,18 @@ cross-encoder~\cite{minilm-cross-encoder}; the original is not, so
 those labels include the reranker's effect. TripClick's deployed QE
 fuses original and expanded rankings (RRF); NQ's uses the expanded
 ranking. \emph{Reranking}: the cross-encoder scores the BM25 top 100;
-its top 50 lead, the BM25 order follows. \emph{PRF}: RM3-style~\cite{relevance-models}
+its top 50 lead. \emph{PRF}: RM3-style~\cite{relevance-models}
 weights from the top $d$ documents select $t$ terms whose BM25 ranking
 is interpolated with the original (weight $\lambda$); $(d,t,\lambda)$
-is tuned on validation over 108 settings ($(20,10,0.9)$ TripClick,
-$(20,30,0.6)$ NQ). Reranking and PRF are applied to every BM25 query.
+is tuned on validation over 108 settings.
 
 \textbf{Labels and models.} \emph{Failure}: $F=1$ ($45\%$ of TripClick
 and $49\%$ of NQ test queries under BM25). \emph{Harmed}: $\Delta<0$,
 ties not harmed. Detection is a logistic regression on 8 pre-action
 features (score shape, term coverage, rare-term IDF, entity overlap,
 coherence, perturbation stability; 6 under dense). Action utility is
-fit on $\Delta$ from post-action features (for LLM QE: changes in
-margin, coverage, coherence, rewrite drift, reranker agreement,
-overlap; linear under BM25, a logistic harm model under dense; for
-reranking and PRF: the 8 pre-action features plus overlap, top-1
-change, rank-biased overlap, and the new ranking's score shape). For
+fit on $\Delta$ from post-action features (changes in score shape,
+coverage, and coherence, ranking overlap, rewrite drift). For
 pre-action routing, a \emph{benefit} model regresses $\Delta$ on the 8
 pre-action features alone. Every model and threshold is fit on
 validation and scored once on test; intervals are paired bootstraps
@@ -200,16 +184,14 @@ over queries ($10^4$ resamples).
 \textbf{Evidence ledger.} Only the ArguAna results
 (Section~\ref{sec:arguana}) are independent confirmation: every NQ
 query and the TripClick TAIL test set have been inspected.
-\emph{Fixed before a test run}: the NQ BM25 and dense runs, and the
-reranking and PRF runs, each under a written scope.
-\emph{Pre-committed analyses of already-inspected traces}: the AUCs and
-policies (Sections~\ref{sec:auc} and~\ref{sec:routing}), the
-reranker-matched relabelling, and all of Section~\ref{sec:ceiling},
-budget routing, and Holm correction, which recombine frozen traces
-without new runs. \emph{Exploratory}: TripClick test was used during
-development (an early verifier was calibrated and two apparatus
-defects were found on it), and the changed-query columns of
-Table~\ref{tab:auc} were added after seeing the main results.
+\emph{Fixed before a test run}: the NQ, reranking, and PRF runs.
+\emph{Pre-committed analyses of inspected traces}: the AUCs, ceiling,
+budget routing, and Holm correction. \emph{Exploratory}: TripClick test was used during
+development, the changed-query columns of
+Table~\ref{tab:auc} were added after seeing the main results, and the
+NQ B1/B2 runs, diagnostics, and probes of Section~\ref{sec:probe}
+followed protocols frozen before computing but after the test sets
+were inspected.
 Pre-commitments and scripts are in the anonymized repository:
 \url{https://anonymous.4open.science/r/agentic-query-expansion-8939/}.
 
@@ -244,93 +226,88 @@ LLM QE, ArguAna    & .21 & .27 & .23 & .59 & $39\%$ [27, 52] \\
 \end{tabular}
 \end{table}
 
-A perfect failure detector would capture between $8\%$ and $57\%$ of
-the oracle's gain (Table~\ref{tab:ceiling}; $18$--$39\%$ on ArguAna), even though, by the
-identity, it never makes a query worse. The share follows how often
-an intervention rescues a failing query relative to how often it
-helps a healthy one. Reranking rescues often ($17\%$ and $46\%$ of
-failing queries, against $24\%$ and $55\%$ of healthy ones helped), so
-half its headroom lies in failing queries. LLM QE rescues $6$--$15\%$
-of failing queries and helps $15$--$25\%$ of healthy ones (a third to
-two-fifths). PRF on TripClick almost never rescues ($0.8\%$, against
-$12\%$), so nearly all its headroom is in healthy queries. The rest of
-the oracle's gain sits in healthy queries that the same intervention
-also harms often ($19$--$56\%$), which is why separating them needs a
-benefit prediction rather than a failure one.
+A perfect failure detector would capture $8$--$57\%$ of the oracle's
+gain (Table~\ref{tab:ceiling}; $18$--$39\%$ on ArguAna), though it
+never makes a query worse. The share follows how often an
+intervention rescues a failing query relative to how often it helps a
+healthy one: reranking rescues often ($17\%$ and $46\%$ of failing
+queries), so half its headroom lies there; LLM QE rescues
+$6$--$15\%$ (a third to two-fifths); PRF on TripClick almost never
+($0.8\%$). The rest sits in healthy queries that the same intervention
+also harms often ($19$--$56\%$), which only a benefit prediction can
+separate.
 
-Costs widen the gap. At $\kappa=0.02$ nDCG@10 per intervention, the
-second term (uncovered cost on failures) reaches $0.004$--$0.011$, and
-intervening on every failing query loses for PRF on both corpora and
-for dense TripClick QE ($-0.008$, $-0.001$, $-0.002$), while the
-oracle keeps $0.011$, $0.025$, and $0.027$. At $\kappa>0$ this is the
-regret of that one policy, not a ceiling: skipping failing queries
-the intervention would not help enough could do better, but needs
+Costs widen the gap. At $\kappa=0.02$, the uncovered cost on failures
+reaches $0.004$--$0.011$, and intervening on every failing query
+loses for PRF on both corpora and dense TripClick QE, while the
+oracle still gains $0.011$--$0.027$. At $\kappa>0$ this is the regret
+of that one policy, not a ceiling: skipping failing queries the
+intervention would not help enough could do better, but needs
 information beyond the binary failure label.
+
+\textbf{Which queries a failure gate picks.} At a $25\%$ budget
+(exploratory; prespecified effect categories), $45$--$68\%$ of the
+queries failure routing selects on TripClick and NQ ($30$--$36\%$ on
+ArguAna) are failing queries the intervention leaves unchanged, and
+rescues appear among them at about their base rate. Healthy queries
+gaining at least $0.10$ hold $42$--$83\%$ of the oracle's gain and
+small gains at most $9\%$ (except ArguAna PRF), so what is missed is
+large gains, not noise around zero. Every pre-action selection we
+test (failure, NQC, linear or boosted benefit) overlaps the oracle's
+about as much as chance (Jaccard $0.09$--$0.18$; random $0.14$).
 
 \section{Detection vs.\ Action Utility}
 \label{sec:auc}
 
-\begin{table*}[t]
+\begin{table}[t]
 \caption{Detection vs.\ action-utility AUC on the same test queries
-(LLM QE: acted-upon queries; reranking, PRF: all). Harm, Helped:
-action-utility AUC for harmed-vs.-rest and helped-vs.-rest. Diff.:
-paired bootstrap of detection minus harm AUC (95\% CI); $^\dagger$ not
-significant after Holm correction over the eight; $^\ddagger$ over the
-three pre-registered ArguAna tests (helped AUC not pre-registered
-there). Last column:
-detection minus direction (helped vs.\ harmed) on queries the
-intervention changed ($\Delta\neq0$; exploratory, but pre-registered
-as secondary for ArguAna).}
+(LLM QE: acted-upon queries). Diff.: detection minus harm AUC, paired
+bootstrap; $^\dagger$ not significant after Holm over the eight,
+$^\ddagger$ over the three pre-registered ArguAna tests. $\Delta\neq0$:
+detection minus direction (helped vs.\ harmed) on changed queries
+(exploratory; secondary pre-registered for ArguAna); $^*$ CI excludes
+0. CIs in the repository.}
 \label{tab:auc}
 \footnotesize
-\begin{tabular}{@{}lllrccccc@{}}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrr@{}}
 \toprule
-Intervention & Corpus & Retriever & $n$ & Detection & Harm & Diff. & Helped & Diff., $\Delta\neq0$ \\
+Setting & Detection & Harm & Diff. & Diff., $\Delta\neq0$ \\
 \midrule
-LLM QE & TripClick & BM25 & 1157 & 0.643 & 0.552 & $+0.091$ [$+0.045$, $+0.136$] & 0.540 & $-0.044$ [$-0.127$, $+0.039$] \\
-LLM QE & NQ & BM25 & 2013 & 0.675 & 0.556 & $+0.119$ [$+0.076$, $+0.162$] & 0.599 & $-0.041$ [$-0.122$, $+0.036$] \\
-LLM QE & TripClick & dense & 1050 & 0.621 & 0.599 & $+0.022$ [$-0.028$, $+0.072$]$^\dagger$ & 0.464 & $+0.043$ [$-0.063$, $+0.145$] \\
-LLM QE & NQ & dense & 1932 & 0.695 & 0.611 & $+0.084$ [$+0.045$, $+0.123$] & 0.406 & $+0.122$ [$+0.047$, $+0.197$] \\
-Reranking & TripClick & BM25 & 1175 & 0.649 & 0.575 & $+0.075$ [$+0.029$, $+0.119$] & 0.513 & $+0.012$ [$-0.066$, $+0.089$] \\
-Reranking & NQ & BM25 & 2052 & 0.680 & 0.514 & $+0.166$ [$+0.120$, $+0.213$] & 0.679 & $-0.025$ [$-0.079$, $+0.027$] \\
-PRF & TripClick & BM25 & 1175 & 0.649 & 0.572 & $+0.077$ [$+0.014$, $+0.140$] & 0.393 & $+0.001$ [$-0.279$, $+0.433$] \\
-PRF & NQ & BM25 & 2052 & 0.680 & 0.501 & $+0.179$ [$+0.131$, $+0.227$] & 0.553 & $-0.045$ [$-0.140$, $+0.048$] \\
+LLM QE, TripClick & 0.643 & 0.552 & $+0.091$ & $-0.044$ \\
+LLM QE, NQ & 0.675 & 0.556 & $+0.119$ & $-0.041$ \\
+LLM QE, TripClick, dense & 0.621 & 0.599 & $+0.022^\dagger$ & $+0.043$ \\
+LLM QE, NQ, dense & 0.695 & 0.611 & $+0.084$ & $+0.122^*$ \\
+Reranking, TripClick & 0.649 & 0.575 & $+0.075$ & $+0.012$ \\
+Reranking, NQ & 0.680 & 0.514 & $+0.166$ & $-0.025$ \\
+PRF, TripClick & 0.649 & 0.572 & $+0.077$ & $+0.001$ \\
+PRF, NQ & 0.680 & 0.501 & $+0.179$ & $-0.045$ \\
 \midrule
-Reranking & ArguAna & BM25 & 430 & 0.646 & 0.570 & $+0.077$ [$-0.012$, $+0.162$]$^\ddagger$ & -- & $+0.045$ [$-0.078$, $+0.170$] \\
-PRF & ArguAna & BM25 & 430 & 0.646 & 0.319 & $+0.327$ [$+0.171$, $+0.466$] & -- & $+0.458$ [$+0.240$, $+0.689$] \\
-LLM QE & ArguAna & BM25 & 425 & 0.641 & 0.609 & $+0.032$ [$-0.052$, $+0.112$]$^\ddagger$ & -- & $-0.060$ [$-0.184$, $+0.064$] \\
+Reranking, ArguAna & 0.646 & 0.570 & $+0.077^\ddagger$ & $+0.045$ \\
+PRF, ArguAna & 0.646 & 0.319 & $+0.327$ & $+0.458^*$ \\
+LLM QE, ArguAna & 0.641 & 0.609 & $+0.032^\ddagger$ & $-0.060$ \\
 \bottomrule
 \end{tabular}
-\end{table*}
+\end{table}
 
-\textbf{Detection is ordinary QPP.} Detection AUC is $0.62$--$0.70$.
-NQC over the top-100 BM25 scores~\cite{nqc} matches our detector on
-TripClick ($0.647$ vs.\ $0.649$) and beats it on NQ ($0.721$ vs.\
-$0.680$); WIG~\cite{wig} is weaker. The relevant-document count alone
-predicts failure at only $0.570$ and $0.521$, and the detector stays
-significant within count strata.
+\textbf{Detection is ordinary QPP.} Detection AUC is $0.62$--$0.70$;
+NQC~\cite{nqc} matches it on TripClick ($0.647$ vs.\ $0.649$) and
+beats it on NQ ($0.721$ vs.\ $0.680$), and it stays significant within
+strata of the relevant-document count.
 
-\textbf{Detection beats harm prediction, structurally.} Detection beats
+\textbf{Its lead over harm prediction is structural.} Detection beats
 harm AUC in seven of eight settings after Holm correction
-(Table~\ref{tab:auc}). On ArguAna the gap is significant only for
-PRF, whose $21$ harmed queries are ranked below chance, too few to
-carry the argument; reranking's gap matches TripClick's in size but
-not significance. On the original settings the gaps persist when harm requires
-$\Delta<-0.05$ or $-0.10$ in six of eight. They are partly structural:
-failing queries cannot be harmed and are mostly left unchanged, so
-the harm label is itself largely a failure indicator. Restricted to
-queries the intervention changed, on TripClick and NQ detection drops
-to $0.47$--$0.58$ and every BM25 gap vanishes; only dense NQ keeps one
-(ArguAna PRF's persists, on $38$ queries). Dropping failing
-queries raises TripClick reranking's harm AUC to $0.659$, level with
-detection. Two controls
-hold: a harm model on pre- plus post-action features still trails
-detection (TripClick BM25 $+0.040$ $[+0.003,+0.078]$, dense NQ
-$+0.070$), and relabelling TripClick QE against the reranked original
-leaves a gap of $+0.059$ $[+0.012,+0.107]$ (the dense runs stored no
-reranked original). The action-utility score does rank queries by
-gain for LLM QE and reranking (best-linear-predictor slopes~\cite{gates}
-$+0.42$ to $+1.21$, CIs exclude zero) but not for PRF or dense NQ.
+(Table~\ref{tab:auc}), and in six of eight when harm requires
+$\Delta<-0.05$ or $-0.10$. But failing queries cannot be harmed and
+are mostly left unchanged, so the harm label is largely a failure
+indicator. On queries the intervention changed, detection drops to
+$0.47$--$0.58$ and every TripClick and NQ BM25 gap vanishes; only
+dense NQ keeps one, and ArguAna PRF's rests on $38$ queries ($21$
+harmed). The gap survives a harm model on pre- plus post-action
+features (TripClick BM25 $+0.040$ $[+0.003,+0.078]$) and relabelling
+TripClick QE against the reranked original ($+0.059$
+$[+0.012,+0.107]$; that stored arm predates a reranker-input fix,
+$0.285$ vs.\ $0.287$).
 
 \section{Routing at Matched Budgets}
 \label{sec:routing}
@@ -341,8 +318,7 @@ $+0.42$ to $+1.21$, CIs exclude zero) but not for PRF or dense NQ.
 failure (F), benefit (B), and random (R, expected gain) routing; at
 $100\%$ every policy intervenes on every query. Oracle and B$-$F:
 averages over all five budgets (registered), B$-$F with 95\% CI; $^*$
-significant after Holm over the six settings. ArguAna (registered,
-Section~\ref{sec:arguana}): B is B1.}
+significant after Holm over the six settings.}
 \label{tab:routing}
 \footnotesize
 \setlength{\tabcolsep}{3pt}
@@ -358,8 +334,6 @@ Rerank, TripClick & 0.3 & 0.3 & $-2.8$ & $-3.1$ & $-0.8$ & $-6.9$ & $-10.1$ & $-
 Rerank, NQ & 22.1 & 32.6 & 22.5 & 57.6 & 66.9 & 56.3 & 113.5 & 129.2 & 112.5 & 175.1 & 183.7 & 168.8 & 225.1 & 199.5 & $+8.8$ [$+3.3$, $+15.0$]$^*$ \\
 PRF, TripClick & $-0.7$ & 0.3 & $-0.1$ & $-0.2$ & 0.7 & $-0.3$ & 0.5 & $-0.2$ & $-0.6$ & $-0.5$ & $-1.1$ & $-0.8$ & $-1.1$ & 9.6 & $+0.1$ [$-1.0$, $+1.0$] \\
 PRF, NQ & 0.1 & 0.2 & 1.0 & 1.4 & 1.2 & 2.4 & 3.9 & 5.7 & 4.9 & 7.5 & 7.6 & 7.3 & 9.7 & 24.0 & $+0.4$ [$-1.7$, $+2.4$] \\
-\midrule
-Rerank, ArguAna & $-14.5$ & 3.8 & $-7.1$ & $-18.6$ & $-4.8$ & $-17.8$ & $-37.6$ & $-14.9$ & $-35.6$ & $-61.4$ & $-39.8$ & $-53.4$ & $-71.1$ & 52.8 & $+15.3$ [$-0.6$, $+27.8$] \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -370,36 +344,20 @@ decides before intervening stays close to random routing and far
 below the oracle (Table~\ref{tab:routing}). Failure routing beats
 random by at most $0.006$ at any budget, and falls below it at $75\%$
 on TripClick for QE and reranking, up to $50\%$ for PRF on NQ, and at
-every budget for reranking on ArguAna. Averaged over budgets, NQC is
-no better than the learned detector (no difference survives Holm),
-and benefit routing beats failure routing only for reranking on NQ
-($+0.009$ $[+0.003,+0.015]$), where it leads at every budget. Since all policies coincide at
-$100\%$, averaging over $10$--$75\%$ only (exploratory, chosen after
-seeing results) widens the differences but leaves the same single
-Holm survivor ($+0.011$ $[+0.004,+0.019]$). The benefit model is linear;
-ArguAna's B1 and B2 (Section~\ref{sec:arguana}), fit on NQ validation
-(exploratory), do no better: neither beats failure routing after Holm
-for any intervention, and the best recovers $8\%$ of the
-oracle-minus-failure headroom (reranking, B2, $+0.007$
-$[+0.001,+0.013]$). This is an empirical property of these features and models, not a
-bound; richer
-pre-action signals may do better. For LLM QE, the deployed
-failure-selective policy (median threshold) halves generator calls
-and on NQ recovers most of unconditional QE's loss ($+0.015$
-$[+0.008,+0.022]$, residual $-0.007$ against BM25); on TripClick no QE policy, including a closed-loop
-agent, differs from BM25 (MDEs $0.007$--$0.011$).
-
-\textbf{Post-action verification.} With $Z_1$, a controller can
-compute the intervention and keep it only if the predicted gain is
-positive; its compute is $100\%$. For reranking on TripClick, where
-reranking every query loses $-0.028$ $[-0.042,-0.013]$, verification
-keeps $15\%$ and loses only $-0.001$ $[-0.005,+0.003]$, while the
-thresholded failure gate still loses $-0.010$. On NQ it keeps $94\%$ of reranked
-results ($+0.223$ vs.\ $+0.225$) and $67\%$ of PRF results ($+0.0085$
-vs.\ $+0.0097$). Post-action telemetry carries information about
-$\Delta_a$ that pre-action telemetry lacks, at the price of paying for
-every intervention. The stored TripClick arm used for the relabelling
-predates a reranker-input fix ($0.285$ vs.\ $0.287$).
+every budget for reranking on ArguAna (Figure~\ref{fig:probe}). Averaged over budgets, NQC is
+no better than the detector, and benefit routing beats failure
+routing only for reranking on NQ ($+0.009$ $[+0.003,+0.015]$), where
+it leads at every budget; averaging over $10$--$75\%$ only
+(exploratory; all policies coincide at $100\%$) leaves the same single
+Holm survivor ($+0.011$ $[+0.004,+0.019]$). The benefit model is
+linear, but ArguAna's B1 and B2 (Section~\ref{sec:arguana}), fit on NQ
+validation (exploratory), do no better: neither beats failure routing
+after Holm for any intervention, and the best recovers $8\%$ of the
+oracle-minus-failure headroom. This is an empirical property of these
+features and models, not a bound. For LLM QE, the deployed
+failure-selective policy halves generator calls and on NQ recovers
+most of unconditional QE's loss ($+0.015$ $[+0.008,+0.022]$); on
+TripClick no QE policy differs from BM25 (MDEs $0.007$--$0.011$).
 
 \section{Pre-Registered Replication on ArguAna}
 \label{sec:arguana}
@@ -438,18 +396,16 @@ made before any label was read
 (\texttt{configs/\allowbreak arguana\_\allowbreak precommit.json}). Predictors are fit on
 training queries, selected on validation, and scored once on test.
 B1, B3, and the failure router use 10 pre-action features (the 8
-above, NQC, query length). B1 is LightGBM regression on $\Delta$
-(learning rate $0.035$, 180 trees, $\ge18$ queries per leaf; depth,
-leaves, and L2 of $(3,15,1)$ chosen over $(5,31,5)$ by validation
-MSE). B2 uses the embedding alone: the inverse-distance-weighted mean
-$\Delta$ of the $k$ nearest training queries by cosine distance
-between frozen \texttt{bge-small-en-v1.5} embeddings ($k=60$ chosen
-from $\{5,15,30,60\}$ by validation MSE). B3 is LightGBM quantile
-regression (depth 3), its quantile from $\{0.1,0.2,0.3\}$ by
-validation pinball loss ($0.1$ for reranking). That registered rule
-is unsound, since pinball losses at different quantiles are not
-comparable, so we also report the secondary pre-registered B3, whose
-quantile is fixed at $0.25$.
+above, NQC, query length). B1 is LightGBM regression on $\Delta$ (two
+depth/leaves/L2 settings, chosen by validation MSE). B2 uses the
+embedding alone: the inverse-distance-weighted mean $\Delta$ of the
+$k$ nearest training queries under frozen \texttt{bge-small-en-v1.5}
+embeddings ($k$ by validation MSE). B3 is LightGBM quantile
+regression, its quantile from $\{0.1,0.2,0.3\}$ by validation pinball
+loss; that registered rule is unsound, since pinball losses at
+different quantiles are not comparable, so we also report the
+secondary pre-registered B3 with quantile fixed at $0.25$. Exact
+grids are in \texttt{scripts/54\_baseline\_runner.py}.
 
 On ArguAna every intervention loses on average (reranking $-0.071$
 $[-0.108,-0.034]$, LLM QE $-0.163$), yet the oracle could still gain
@@ -465,23 +421,100 @@ oracle-minus-failure headroom, below the pre-registered $25\%$ bar.
 Excluding $100\%$ (exploratory), B1 minus failure is
 $+0.019$ $[-0.001,+0.035]$. Per budget, failure routing of reranking is
 below random at every budget and B1 above it
-(Table~\ref{tab:routing}); at $10\%$, $42\%$ of the queries failure
+(Figure~\ref{fig:probe}); at $10\%$, $42\%$ of the queries failure
 routing picks are harmed. A
 secondary, also pre-registered family (train-plus-validation refit, wider
 grids, hyperparameters chosen by validation routing gain, B3 at fixed
 quantile $0.25$) agrees: none of nine contrasts survives Holm, and B3
-minus failure is $+0.011$ $[-0.003,+0.023]$ ($12\%$ of the headroom). Allowed to abstain, no router beats abstaining on
-every query. Post-action
-verification of reranking keeps $10\%$ and gains $+0.004$
-$[-0.005,+0.015]$. ArguAna is thus a hard, out-of-domain selection
+minus failure is $+0.011$ $[-0.003,+0.023]$ ($12\%$ of the headroom). ArguAna is thus a hard, out-of-domain selection
 problem, not proof that pre-action prediction cannot work; B1's
-$+0.015$ may be real but below what $430$ queries resolve. Median
-per-query costs: reranking $1.1$\,s, PRF $3$\,ms (a ten-term second
-search), LLM QE $6.4$\,s (P95 $10.3$\,s). Pre-action telemetry is not
-free: the 8 features take $0.32$\,s, mostly perturbation-stability
-retrieval (BM25 itself takes $0.46$\,s on these long queries), and
-B2's embedding $33$\,ms. Matched budgets equalize intervention counts,
-not runtime: for PRF the features cost more than the intervention.
+$+0.015$ may be real but below what $430$ queries resolve. Costs
+differ widely: PRF takes $3$\,ms per query (median), LLM QE $6.4$\,s
+(P95 $10.3$\,s), and the 8 pre-action features $0.32$\,s, more than
+PRF itself.
+
+\section{Partial Observation and Cost}
+\label{sec:probe}
+
+\begin{figure*}[t]
+\centering
+\pgfplotsset{probeplot/.style={width=0.355\textwidth, height=3.3cm,
+  xlabel={seconds per query}, xlabel style={font=\footnotesize},
+  ticklabel style={font=\scriptsize}, title style={font=\footnotesize},
+  ylabel style={font=\footnotesize}, mark size=1.2pt, line width=0.7pt,
+  grid=major, grid style={gray!20}}}
+\begin{tikzpicture}
+\begin{axis}[probeplot, title={NQ}, ylabel={nDCG@10 gain ($\times10^3$)},
+  legend style={font=\tiny, at={(0.52,0.98)}, anchor=north, row sep=-3pt, inner sep=1pt}]
+\addplot[black!45, dashed, mark=none] coordinates {(0,0)(0.05,22.5)(0.12,56.3)(0.24,112.5)(0.36,168.8)(0.48,225.1)};
+\addplot[red!75!black, mark=*] coordinates {(1.58,0)(1.63,22.1)(1.70,57.6)(1.82,113.5)(1.94,175.1)(2.06,225.1)};
+\addplot[orange!85!black, mark=triangle*] coordinates {(0,0)(0.05,23.3)(0.12,52.9)(0.24,107.5)(0.36,162.8)(0.48,225.1)};
+\addplot[blue!70!black, mark=square*] coordinates {(1.58,0)(1.63,28.1)(1.70,63.7)(1.82,126.4)(1.94,180.4)(2.06,225.1)};
+\addplot[green!50!black, mark=diamond*, line width=1.1pt] coordinates {(0.05,0)(0.09,38.8)(0.15,81.8)(0.25,149.0)(0.36,195.5)(0.46,225.1)};
+\legend{Random, Failure, NQC, B1, Probe-10}
+\end{axis}
+\end{tikzpicture}\hfill
+\begin{tikzpicture}
+\begin{axis}[probeplot, title={TripClick}]
+\addplot[black!45, dashed, mark=none] coordinates {(0,0)(0.11,-2.8)(0.28,-6.9)(0.56,-13.9)(0.84,-20.8)(1.11,-27.8)};
+\addplot[red!75!black, mark=*] coordinates {(0.35,0)(0.46,0.4)(0.62,-2.9)(0.90,-10.1)(1.18,-24.8)(1.46,-27.8)};
+\addplot[orange!85!black, mark=triangle*] coordinates {(0,0)(0.11,-2.0)(0.28,-5.4)(0.56,-15.7)(0.84,-26.1)(1.11,-27.8)};
+\addplot[blue!70!black, mark=square*] coordinates {(0.35,0)(0.46,0.3)(0.62,-2.3)(0.90,-8.0)(1.18,-14.0)(1.46,-27.8)};
+\addplot[green!50!black, mark=diamond*, line width=1.1pt] coordinates {(0.11,0)(0.21,0.4)(0.36,-1.8)(0.62,-10.5)(0.87,-18.9)(1.13,-27.8)};
+\end{axis}
+\end{tikzpicture}\hfill
+\begin{tikzpicture}
+\begin{axis}[probeplot, title={ArguAna}]
+\addplot[black!45, dashed, mark=none] coordinates {(0,0)(0.13,-7.1)(0.32,-17.8)(0.63,-35.6)(0.95,-53.4)(1.26,-71.1)};
+\addplot[red!75!black, mark=*] coordinates {(0.32,0)(0.44,-14.5)(0.63,-18.6)(0.95,-37.6)(1.26,-61.4)(1.58,-71.1)};
+\addplot[orange!85!black, mark=triangle*] coordinates {(0,0)(0.13,3.1)(0.32,-11.8)(0.63,-37.1)(0.95,-59.4)(1.26,-71.1)};
+\addplot[blue!70!black, mark=square*] coordinates {(0.32,0)(0.44,3.8)(0.63,-4.8)(0.95,-14.9)(1.26,-39.8)(1.58,-71.1)};
+\addplot[green!50!black, mark=diamond*, line width=1.1pt] coordinates {(0.13,0)(0.25,-7.0)(0.42,-18.1)(0.71,-22.1)(0.99,-48.5)(1.28,-71.1)};
+\end{axis}
+\end{tikzpicture}
+\caption{Reranking gain over BM25 against measured cost per query
+(exploratory). Points: $0$, $10$, $25$, $50$, $75$, $100\%$ of queries
+fully reranked; cost is pre-action telemetry (Failure, B1) or the
+probe, plus reranking. The oracle (off scale) reaches $0.25$, $0.06$,
+$0.10$.}
+\label{fig:probe}
+\end{figure*}
+
+A probe sits between pre- and post-action telemetry. In an exploratory
+analysis (protocol frozen before any probe score was computed, on test
+sets already inspected), we score only the first $k\in\{5,10,20\}$
+BM25 candidates with the cross-encoder, regress the $\Delta$ of full
+reranking on nine probe features (score maximum, mean, and spread;
+the first candidate's score and its gap to the maximum; the argmax
+position; rank correlation with BM25; NQC; query length) with B1's
+model and selection rule, and fully rerank the top-scoring queries,
+reusing the probe's scores. Each policy is charged its median measured
+latency (50 validation queries per corpus): full reranking takes
+$0.48$, $1.11$, and $1.26$\,s on NQ, TripClick, and ArguAna, a
+ten-candidate probe $0.05$--$0.13$\,s, and pre-action telemetry
+$1.58$, $0.35$, and $0.32$\,s.
+
+On NQ, where reranking usually helps (Figure~\ref{fig:probe}), Probe-10 routing beats failure routing by
+$+0.024$ $[+0.017,+0.031]$ and B1 by $+0.017$ $[+0.011,+0.022]$ over
+$10$--$75\%$ reranked (both Holm-significant over six tests), and its
+predictions rank $\Delta$ better (Spearman $0.25$, against $0.02$ for
+the failure score and $0.10$ for B1). It is also cheaper: NQ's
+pre-action telemetry, whose perturbation search spans $2.68$M
+passages, takes longer than reranking every query, so always
+reranking dominates failure and B1 routing, while probe routing reaches
+$+0.149$ at $0.25$\,s, against $+0.108$ for NQC and $+0.113$ for
+random. On TripClick and ArguAna, where reranking loses on average,
+probes do not help: neither contrast is significant (TripClick
+$+0.002$ and $-0.002$, ArguAna $+0.009$ and $-0.010$), and B1 ranks
+$\Delta$ at least as well (Spearman $0.08$ and $0.11$ vs.\ $0.05$).
+Larger probes help on NQ ($k=20$: $+0.032$ over failure) but not
+significantly elsewhere.
+
+Post-action verification, the full-cost end, cuts TripClick's
+reranking loss from $-0.028$ to $-0.001$ $[-0.005,+0.003]$ (the
+thresholded failure gate: $-0.010$), keeps $94\%$ of NQ's reranked
+results ($+0.223$ vs.\ $+0.225$), and gains $+0.004$
+$[-0.005,+0.015]$ on ArguAna.
 
 \section{Discussion and Limitations}
 
@@ -490,13 +523,15 @@ quantity. Two kinds of result support this. One is proven: at zero
 cost, a policy that intervenes only on failing queries is capped by
 how often the intervention rescues them, a cap that differs nearly
 sevenfold across interventions. The other is empirical: the
-pre-action benefit predictors we test, up to gradient boosting and
-query embeddings, do not reliably recover the rest. The difficulty is
-not counterfactual missingness, since both outcomes are observed
-offline, nor the generator alone, since reranking shows the same
-gaps; a likelier common factor is that pre-action
-telemetry describes the original ranking, while $\Delta_a$ depends on
-what the intervention retrieves.
+pre-action predictors we test, up to gradient boosting and query
+embeddings, select queries no closer to the oracle's than chance, and
+failure routing spends most of its budget where the intervention does
+nothing. Both outcomes are observed offline, so this is not counterfactual
+missingness; pre-action telemetry describes the original ranking,
+while $\Delta_a$ depends on what the intervention retrieves. The
+probes support this only in part: a little of the intervention's own
+output locates its gains where it usually helps (NQ), not where it
+usually harms.
 
 \textbf{Limitations.} One small (3B) generator; reranking and PRF only
 under BM25, with one cross-encoder and one PRF family. Three corpora,
@@ -505,7 +540,8 @@ contrasts underpowered for differences below about $0.015$;
 under dense retrieval, retriever strength and domain are confounded,
 and the dense QE labels include the reranker. TripClick's labels are
 click-derived and sparse. The cost weight $\kappa$ is illustrative;
-measured latencies are reported for ArguAna only. The TripClick QE benefit model is fit to the unfused
+latencies are single-machine medians, and probes cover reranking
+only. The TripClick QE benefit model is fit to the unfused
 validation label, since no fused validation ranking exists. Apart from
 ArguAna, all analyses reuse inspected test sets; every pre-committed
 quantity is reported in full in the repository.
@@ -514,14 +550,13 @@ quantity is reported in full in the repository.
 
 Detecting that retrieval has failed is ordinary QPP, and at zero cost
 it bounds what a controller acting only on failing queries can gain:
-$8$--$57\%$ of an oracle's gain across LLM QE, reranking, and PRF,
-depending on how often each intervention rescues a failing query. The
-pre-action benefit predictors we test, including nonlinear, semantic,
-and conservative ones on an untouched benchmark, do not consistently
-recover the rest at any budget; post-action telemetry does better,
-but only after the intervention is paid for. Selective-intervention
-work should report the failure-only ceiling and per-budget routing
-alongside any detector's AUC.
+$8$--$57\%$ of an oracle's gain, depending on how often each
+intervention rescues a failing query. The pre-action predictors we
+test select queries no closer to the oracle's than chance; observing
+part of the intervention helps where it usually helps, at a fraction
+of the cost, but not where it usually harms. Selective-intervention
+work should report the failure-only ceiling and per-budget routing in
+measured cost alongside any detector's AUC.
 
 \section*{Ethical Considerations}
 
