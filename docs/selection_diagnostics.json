@@ -1,0 +1,897 @@
+{
+  "_note": "EXPLORATORY; prespecified categories (configs/partial_probe_protocol.json). Selection at a 25% budget; benefit = Table 3 linear model (TripClick/NQ), B1 where available.",
+  "llm_qe_tripclick": {
+    "n": 1175,
+    "population": {
+      "rescue": 0.0323,
+      "failing_unchanged": 0.4179,
+      "healthy_large_gain": 0.0426,
+      "healthy_small_gain": 0.0409,
+      "healthy_unchanged": 0.36,
+      "small_harm": 0.0289,
+      "large_harm": 0.0774
+    },
+    "oracle_gain_share": {
+      "rescue": 0.4182,
+      "failing_unchanged": 0.0,
+      "healthy_large_gain": 0.4934,
+      "healthy_small_gain": 0.0883,
+      "healthy_unchanged": 0.0,
+      "small_harm": 0.0,
+      "large_harm": 0.0
+    },
+    "budget": 0.25,
+    "selected": {
+      "failure": {
+        "composition": {
+          "rescue": 0.0374,
+          "failing_unchanged": 0.5748,
+          "healthy_large_gain": 0.0544,
+          "healthy_small_gain": 0.0374,
+          "healthy_unchanged": 0.2143,
+          "small_harm": 0.017,
+          "large_harm": 0.0646
+        },
+        "inactive_fraction": 0.7891,
+        "mean_delta": 0.0119,
+        "jaccard_with_oracle": 0.1417
+      },
+      "nqc": {
+        "composition": {
+          "rescue": 0.0306,
+          "failing_unchanged": 0.6224,
+          "healthy_large_gain": 0.0306,
+          "healthy_small_gain": 0.017,
+          "healthy_unchanged": 0.2177,
+          "small_harm": 0.0306,
+          "large_harm": 0.051
+        },
+        "inactive_fraction": 0.8401,
+        "mean_delta": 0.0049,
+        "jaccard_with_oracle": 0.1329
+      },
+      "benefit_linear": {
+        "composition": {
+          "rescue": 0.0476,
+          "failing_unchanged": 0.4762,
+          "healthy_large_gain": 0.0476,
+          "healthy_small_gain": 0.034,
+          "healthy_unchanged": 0.2585,
+          "small_harm": 0.0238,
+          "large_harm": 0.1122
+        },
+        "inactive_fraction": 0.7347,
+        "mean_delta": -0.0032,
+        "jaccard_with_oracle": 0.1484
+      },
+      "oracle": {
+        "composition": {
+          "rescue": 0.1293,
+          "failing_unchanged": 0.2925,
+          "healthy_large_gain": 0.1701,
+          "healthy_small_gain": 0.1633,
+          "healthy_unchanged": 0.2449,
+          "small_harm": 0.0,
+          "large_harm": 0.0
+        },
+        "inactive_fraction": 0.5374,
+        "mean_delta": 0.0983,
+        "jaccard_with_oracle": 1.0
+      }
+    }
+  },
+  "llm_qe_nq": {
+    "n": 2052,
+    "population": {
+      "rescue": 0.0336,
+      "failing_unchanged": 0.4571,
+      "healthy_large_gain": 0.0765,
+      "healthy_small_gain": 0.0219,
+      "healthy_unchanged": 0.2427,
+      "small_harm": 0.0283,
+      "large_harm": 0.1399
+    },
+    "oracle_gain_share": {
+      "rescue": 0.3257,
+      "failing_unchanged": 0.0,
+      "healthy_large_gain": 0.6489,
+      "healthy_small_gain": 0.0253,
+      "healthy_unchanged": 0.0,
+      "small_harm": 0.0,
+      "large_harm": 0.0
+    },
+    "budget": 0.25,
+    "selected": {
+      "failure": {
+        "composition": {
+          "rescue": 0.0351,
+          "failing_unchanged": 0.6608,
+          "healthy_large_gain": 0.0585,
+          "healthy_small_gain": 0.0175,
+          "healthy_unchanged": 0.1033,
+          "small_harm": 0.0156,
+          "large_harm": 0.1092
+        },
+        "inactive_fraction": 0.7641,
+        "mean_delta": -0.0089,
+        "jaccard_with_oracle": 0.1438
+      },
+      "nqc": {
+        "composition": {
+          "rescue": 0.0468,
+          "failing_unchanged": 0.692,
+          "healthy_large_gain": 0.0409,
+          "healthy_small_gain": 0.0117,
+          "healthy_unchanged": 0.0975,
+          "small_harm": 0.0039,
+          "large_harm": 0.1072
+        },
+        "inactive_fraction": 0.7895,
+        "mean_delta": -0.0144,
+        "jaccard_with_oracle": 0.1515
+      },
+      "benefit_linear": {
+        "composition": {
+          "rescue": 0.037,
+          "failing_unchanged": 0.5809,
+          "healthy_large_gain": 0.0741,
+          "healthy_small_gain": 0.0156,
+          "healthy_unchanged": 0.154,
+          "small_harm": 0.0214,
+          "large_harm": 0.117
+        },
+        "inactive_fraction": 0.7349,
+        "mean_delta": -0.0047,
+        "jaccard_with_oracle": 0.1451
+      },
+      "oracle": {
+        "composition": {
+          "rescue": 0.1345,
+          "failing_unchanged": 0.3314,
+          "healthy_large_gain": 0.306,
+          "healthy_small_gain": 0.0877,
+          "healthy_unchanged": 0.1404,
+          "small_harm": 0.0,
+          "large_harm": 0.0
+        },
+        "inactive_fraction": 0.4717,
+        "mean_delta": 0.166,
+        "jaccard_with_oracle": 1.0
+      },
+      "B1_gbdt": {
+        "composition": {
+          "rescue": 0.0312,
+          "failing_unchanged": 0.4678,
+          "healthy_large_gain": 0.0702,
+          "healthy_small_gain": 0.0195,
+          "healthy_unchanged": 0.23,
+          "small_harm": 0.0292,
+          "large_harm": 0.152
+        },
+        "inactive_fraction": 0.6979,
+        "mean_delta": -0.0193,
+        "jaccard_with_oracle": 0.1425
+      }
+    },
+    "examples": {
+      "failure_selected_but_inactive": [
+        {
+          "query": "what is 36 as a product of prime",
+          "delta": 0.0
+        },
+        {
+          "query": "who played the face in the a team",
+          "delta": 0.0
+        }
+      ],
+      "large_healthy_gain_missed": [
+        {
+          "query": "how much for a passport in the philippines",
+          "delta": 0.699
+        },
+        {
+          "query": "where is the hero golf challenge being played",
+          "delta": 0.667
+        }
+      ]
+    }
+  },
+  "rerank_tripclick": {
+    "n": 1175,
+    "population": {
+      "rescue": 0.0766,
+      "failing_unchanged": 0.3736,
+      "healthy_large_gain": 0.0834,
+      "healthy_small_gain": 0.0494,
+      "healthy_unchanged": 0.1072,
+      "small_harm": 0.0655,
+      "large_harm": 0.2443
+    },
+    "oracle_gain_share": {
+      "rescue": 0.5249,
+      "failing_unchanged": 0.0,
+      "healthy_large_gain": 0.4415,
+      "healthy_small_gain": 0.0336,
+      "healthy_unchanged": 0.0,
+      "small_harm": 0.0,
+      "large_harm": 0.0
+    },
+    "budget": 0.25,
+    "selected": {
+      "failure": {
+        "composition": {
+          "rescue": 0.0816,
+          "failing_unchanged": 0.5306,
+          "healthy_large_gain": 0.0748,
+          "healthy_small_gain": 0.0272,
+          "healthy_unchanged": 0.0476,
+          "small_harm": 0.034,
+          "large_harm": 0.2041
+        },
+        "inactive_fraction": 0.5782,
+        "mean_delta": -0.0123,
+        "jaccard_with_oracle": 0.1243
+      },
+      "nqc": {
+        "composition": {
+          "rescue": 0.0714,
+          "failing_unchanged": 0.5816,
+          "healthy_large_gain": 0.0476,
+          "healthy_small_gain": 0.0136,
+          "healthy_unchanged": 0.051,
+          "small_harm": 0.0442,
+          "large_harm": 0.1905
+        },
+        "inactive_fraction": 0.6327,
+        "mean_delta": -0.0214,
+        "jaccard_with_oracle": 0.1073
+      },
+      "benefit_linear": {
+        "composition": {
+          "rescue": 0.0918,
+          "failing_unchanged": 0.4558,
+          "healthy_large_gain": 0.0748,
+          "healthy_small_gain": 0.0306,
+          "healthy_unchanged": 0.1531,
+          "small_harm": 0.0204,
+          "large_harm": 0.1735
+        },
+        "inactive_fraction": 0.6088,
+        "mean_delta": -0.0031,
+        "jaccard_with_oracle": 0.1395
+      },
+      "oracle": {
+        "composition": {
+          "rescue": 0.3061,
+          "failing_unchanged": 0.1122,
+          "healthy_large_gain": 0.3333,
+          "healthy_small_gain": 0.1973,
+          "healthy_unchanged": 0.051,
+          "small_harm": 0.0,
+          "large_harm": 0.0
+        },
+        "inactive_fraction": 0.1633,
+        "mean_delta": 0.2462,
+        "jaccard_with_oracle": 1.0
+      }
+    }
+  },
+  "prf_tripclick": {
+    "n": 1175,
+    "population": {
+      "rescue": 0.0034,
+      "failing_unchanged": 0.4468,
+      "healthy_large_gain": 0.0357,
+      "healthy_small_gain": 0.0323,
+      "healthy_unchanged": 0.3711,
+      "small_harm": 0.0681,
+      "large_harm": 0.0426
+    },
+    "oracle_gain_share": {
+      "rescue": 0.0764,
+      "failing_unchanged": 0.0,
+      "healthy_large_gain": 0.8317,
+      "healthy_small_gain": 0.0919,
+      "healthy_unchanged": 0.0,
+      "small_harm": 0.0,
+      "large_harm": 0.0
+    },
+    "budget": 0.25,
+    "selected": {
+      "failure": {
+        "composition": {
+          "rescue": 0.0034,
+          "failing_unchanged": 0.6088,
+          "healthy_large_gain": 0.034,
+          "healthy_small_gain": 0.034,
+          "healthy_unchanged": 0.2109,
+          "small_harm": 0.068,
+          "large_harm": 0.0408
+        },
+        "inactive_fraction": 0.8197,
+        "mean_delta": -0.0008,
+        "jaccard_with_oracle": 0.1417
+      },
+      "nqc": {
+        "composition": {
+          "rescue": 0.0034,
+          "failing_unchanged": 0.6497,
+          "healthy_large_gain": 0.017,
+          "healthy_small_gain": 0.0238,
+          "healthy_unchanged": 0.2245,
+          "small_harm": 0.0476,
+          "large_harm": 0.034
+        },
+        "inactive_fraction": 0.8741,
+        "mean_delta": -0.0032,
+        "jaccard_with_oracle": 0.1351
+      },
+      "benefit_linear": {
+        "composition": {
+          "rescue": 0.0,
+          "failing_unchanged": 0.5306,
+          "healthy_large_gain": 0.0272,
+          "healthy_small_gain": 0.034,
+          "healthy_unchanged": 0.3367,
+          "small_harm": 0.0544,
+          "large_harm": 0.017
+        },
+        "inactive_fraction": 0.8673,
+        "mean_delta": 0.0028,
+        "jaccard_with_oracle": 0.1507
+      },
+      "oracle": {
+        "composition": {
+          "rescue": 0.0136,
+          "failing_unchanged": 0.3946,
+          "healthy_large_gain": 0.1429,
+          "healthy_small_gain": 0.1293,
+          "healthy_unchanged": 0.3197,
+          "small_harm": 0.0,
+          "large_harm": 0.0
+        },
+        "inactive_fraction": 0.7143,
+        "mean_delta": 0.049,
+        "jaccard_with_oracle": 1.0
+      }
+    }
+  },
+  "rerank_nq": {
+    "n": 2052,
+    "population": {
+      "rescue": 0.2247,
+      "failing_unchanged": 0.2661,
+      "healthy_large_gain": 0.2481,
+      "healthy_small_gain": 0.0307,
+      "healthy_unchanged": 0.1326,
+      "small_harm": 0.0229,
+      "large_harm": 0.075
+    },
+    "oracle_gain_share": {
+      "rescue": 0.5684,
+      "failing_unchanged": 0.0,
+      "healthy_large_gain": 0.4248,
+      "healthy_small_gain": 0.0068,
+      "healthy_unchanged": 0.0,
+      "small_harm": 0.0,
+      "large_harm": 0.0
+    },
+    "budget": 0.25,
+    "selected": {
+      "failure": {
+        "composition": {
+          "rescue": 0.2417,
+          "failing_unchanged": 0.4542,
+          "healthy_large_gain": 0.1832,
+          "healthy_small_gain": 0.0253,
+          "healthy_unchanged": 0.0468,
+          "small_harm": 0.0019,
+          "large_harm": 0.0468
+        },
+        "inactive_fraction": 0.501,
+        "mean_delta": 0.2304,
+        "jaccard_with_oracle": 0.1438
+      },
+      "nqc": {
+        "composition": {
+          "rescue": 0.232,
+          "failing_unchanged": 0.5068,
+          "healthy_large_gain": 0.1481,
+          "healthy_small_gain": 0.0117,
+          "healthy_unchanged": 0.0624,
+          "small_harm": 0.0039,
+          "large_harm": 0.0351
+        },
+        "inactive_fraction": 0.5692,
+        "mean_delta": 0.2118,
+        "jaccard_with_oracle": 0.1325
+      },
+      "benefit_linear": {
+        "composition": {
+          "rescue": 0.2339,
+          "failing_unchanged": 0.2066,
+          "healthy_large_gain": 0.3138,
+          "healthy_small_gain": 0.0331,
+          "healthy_unchanged": 0.1014,
+          "small_harm": 0.0234,
+          "large_harm": 0.0877
+        },
+        "inactive_fraction": 0.308,
+        "mean_delta": 0.2674,
+        "jaccard_with_oracle": 0.1807
+      },
+      "oracle": {
+        "composition": {
+          "rescue": 0.5653,
+          "failing_unchanged": 0.0,
+          "healthy_large_gain": 0.4347,
+          "healthy_small_gain": 0.0,
+          "healthy_unchanged": 0.0,
+          "small_harm": 0.0,
+          "large_harm": 0.0
+        },
+        "inactive_fraction": 0.0,
+        "mean_delta": 0.716,
+        "jaccard_with_oracle": 1.0
+      },
+      "B1_gbdt": {
+        "composition": {
+          "rescue": 0.23,
+          "failing_unchanged": 0.2183,
+          "healthy_large_gain": 0.2885,
+          "healthy_small_gain": 0.039,
+          "healthy_unchanged": 0.1209,
+          "small_harm": 0.0253,
+          "large_harm": 0.078
+        },
+        "inactive_fraction": 0.3392,
+        "mean_delta": 0.2547,
+        "jaccard_with_oracle": 0.1646
+      }
+    },
+    "examples": {
+      "failure_selected_but_inactive": [
+        {
+          "query": "what is 36 as a product of prime",
+          "delta": 0.0
+        },
+        {
+          "query": "who played the face in the a team",
+          "delta": 0.0
+        }
+      ],
+      "large_healthy_gain_missed": [
+        {
+          "query": "who was selected for the 2018 football hall of fame",
+          "delta": 0.796
+        },
+        {
+          "query": "when did india win their first cricket match",
+          "delta": 0.736
+        }
+      ]
+    }
+  },
+  "prf_nq": {
+    "n": 2052,
+    "population": {
+      "rescue": 0.0258,
+      "failing_unchanged": 0.4649,
+      "healthy_large_gain": 0.0624,
+      "healthy_small_gain": 0.0414,
+      "healthy_unchanged": 0.2914,
+      "small_harm": 0.0551,
+      "large_harm": 0.059
+    },
+    "oracle_gain_share": {
+      "rescue": 0.3183,
+      "failing_unchanged": 0.0,
+      "healthy_large_gain": 0.6017,
+      "healthy_small_gain": 0.0801,
+      "healthy_unchanged": 0.0,
+      "small_harm": 0.0,
+      "large_harm": 0.0
+    },
+    "budget": 0.25,
+    "selected": {
+      "failure": {
+        "composition": {
+          "rescue": 0.0156,
+          "failing_unchanged": 0.6803,
+          "healthy_large_gain": 0.0429,
+          "healthy_small_gain": 0.0292,
+          "healthy_unchanged": 0.154,
+          "small_harm": 0.037,
+          "large_harm": 0.0409
+        },
+        "inactive_fraction": 0.8343,
+        "mean_delta": 0.0054,
+        "jaccard_with_oracle": 0.1312
+      },
+      "nqc": {
+        "composition": {
+          "rescue": 0.0097,
+          "failing_unchanged": 0.729,
+          "healthy_large_gain": 0.0331,
+          "healthy_small_gain": 0.0195,
+          "healthy_unchanged": 0.1404,
+          "small_harm": 0.0312,
+          "large_harm": 0.037
+        },
+        "inactive_fraction": 0.8694,
+        "mean_delta": 0.003,
+        "jaccard_with_oracle": 0.1287
+      },
+      "benefit_linear": {
+        "composition": {
+          "rescue": 0.0214,
+          "failing_unchanged": 0.3236,
+          "healthy_large_gain": 0.0663,
+          "healthy_small_gain": 0.0643,
+          "healthy_unchanged": 0.3957,
+          "small_harm": 0.0468,
+          "large_harm": 0.0819
+        },
+        "inactive_fraction": 0.7193,
+        "mean_delta": 0.0048,
+        "jaccard_with_oracle": 0.1477
+      },
+      "oracle": {
+        "composition": {
+          "rescue": 0.1033,
+          "failing_unchanged": 0.3119,
+          "healthy_large_gain": 0.2495,
+          "healthy_small_gain": 0.1657,
+          "healthy_unchanged": 0.1696,
+          "small_harm": 0.0,
+          "large_harm": 0.0
+        },
+        "inactive_fraction": 0.4815,
+        "mean_delta": 0.1114,
+        "jaccard_with_oracle": 1.0
+      },
+      "B1_gbdt": {
+        "composition": {
+          "rescue": 0.039,
+          "failing_unchanged": 0.345,
+          "healthy_large_gain": 0.0897,
+          "healthy_small_gain": 0.037,
+          "healthy_unchanged": 0.3372,
+          "small_harm": 0.0741,
+          "large_harm": 0.078
+        },
+        "inactive_fraction": 0.6823,
+        "mean_delta": 0.0138,
+        "jaccard_with_oracle": 0.1477
+      }
+    },
+    "examples": {
+      "failure_selected_but_inactive": [
+        {
+          "query": "what is 36 as a product of prime",
+          "delta": 0.0
+        },
+        {
+          "query": "who played the face in the a team",
+          "delta": 0.0
+        }
+      ],
+      "large_healthy_gain_missed": [
+        {
+          "query": "who said what we got here is failure to communicate",
+          "delta": 0.569
+        },
+        {
+          "query": "where are the organ mountains in new mexico",
+          "delta": 0.569
+        }
+      ]
+    }
+  },
+  "prf_arguana": {
+    "n": 430,
+    "population": {
+      "rescue": 0.0023,
+      "failing_unchanged": 0.2116,
+      "healthy_large_gain": 0.0093,
+      "healthy_small_gain": 0.0279,
+      "healthy_unchanged": 0.7,
+      "small_harm": 0.0326,
+      "large_harm": 0.0163
+    },
+    "oracle_gain_share": {
+      "rescue": 0.1842,
+      "failing_unchanged": 0.0,
+      "healthy_large_gain": 0.5182,
+      "healthy_small_gain": 0.2977,
+      "healthy_unchanged": 0.0,
+      "small_harm": 0.0,
+      "large_harm": 0.0
+    },
+    "budget": 0.25,
+    "selected": {
+      "failure": {
+        "composition": {
+          "rescue": 0.0,
+          "failing_unchanged": 0.3611,
+          "healthy_large_gain": 0.0093,
+          "healthy_small_gain": 0.0278,
+          "healthy_unchanged": 0.5556,
+          "small_harm": 0.0278,
+          "large_harm": 0.0185
+        },
+        "inactive_fraction": 0.9167,
+        "mean_delta": -0.0053,
+        "jaccard_with_oracle": 0.1489
+      },
+      "nqc": {
+        "composition": {
+          "rescue": 0.0093,
+          "failing_unchanged": 0.3519,
+          "healthy_large_gain": 0.0093,
+          "healthy_small_gain": 0.0278,
+          "healthy_unchanged": 0.5648,
+          "small_harm": 0.0093,
+          "large_harm": 0.0278
+        },
+        "inactive_fraction": 0.9167,
+        "mean_delta": -0.0049,
+        "jaccard_with_oracle": 0.1676
+      },
+      "B1_gbdt": {
+        "composition": {
+          "rescue": 0.0,
+          "failing_unchanged": 0.2778,
+          "healthy_large_gain": 0.0093,
+          "healthy_small_gain": 0.0185,
+          "healthy_unchanged": 0.6574,
+          "small_harm": 0.0278,
+          "large_harm": 0.0093
+        },
+        "inactive_fraction": 0.9352,
+        "mean_delta": -0.0017,
+        "jaccard_with_oracle": 0.1368
+      },
+      "oracle": {
+        "composition": {
+          "rescue": 0.0093,
+          "failing_unchanged": 0.1759,
+          "healthy_large_gain": 0.037,
+          "healthy_small_gain": 0.1111,
+          "healthy_unchanged": 0.6667,
+          "small_harm": 0.0,
+          "large_harm": 0.0
+        },
+        "inactive_fraction": 0.8426,
+        "mean_delta": 0.0145,
+        "jaccard_with_oracle": 1.0
+      }
+    },
+    "examples": {
+      "failure_selected_but_inactive": [
+        {
+          "query": "Any body of values that claims to respect the rights of the individual must recognise the right of a woman to choose  Even the doctrines of the Church accepts that pregnancy is not, in and of itself, a virtue \u2013 there is no compulsion to maximise the number of pregnancies; there is simply a disagreement about how they should be avoided. The Church recommends that couples may minimise the chance without ever making it impossible through a chemical or physical barrier.  In some parts of the world a pregnancy, even one that is not planned, is seen as a time for joy \u2013 a blessing for the family that will lead to a new and happy life bringing pleasure to both parents, their society and the child. That ideal is very far from the experience of much of the world where a child is another mouth to feed on impossibly little income. For all too much of the world, that life will be cruel, nasty and short. In slums, favellas and barren wastes that life is likely to be one marked more by dysentery or diarrhea, malnutrition and misery than by the sanitised, idealised image promoted in the West. That is, of course, not to say that children everywhere cannot be a cause for joy, of course they can. Indeed even within the poorest of situations, a new child can be the focus of great joy in an otherwise hard life.  However, if that is to be the case, that child must be planned and prepared for. Overwhelmingly, the mother is likely to have paramount responsibility for the child; so that planning and preparation needs to be theirs. It is difficult to imagine the scenario that would reach the objective observer to reach the conclusion that the right group of individuals to reach that decision were a group of celibate men who had never met the parents and would take to role in the care or support of the child. Yet that, astonishingly, is what Proposition would like us to believe.",
+          "delta": 0.0
+        },
+        {
+          "query": "Because religion promotes certainty of belief, divinely inspired hatred is easy to use to justify and promote violent actions and discriminatory practices.  Free speech must come second when there is the potential for that speech to cause harm. The mantra of \u201cWith God on our side\u201d has been used, and continues to be used, to justify massacre and barbarity throughout history. Although it is rarely the prelates and preachers who do the killing the certainty they promote gives surety to those who do.  The purpose of the Act [1] used in this particular case was an entirely practical one. It\u2019s main role was to tidy up existing legislation on rioting and public disorder but one section recognised that homophobic and racist language do lead to violence. It is all well and good to talk of freedom of speech but the reality is that homophobic speeches, particularly those of a religious nature, may well lead to violence. For example in New York there were a series of homophobic attacks after anti-gay statements by republican politicians. [2] Preventing hate speech helps prevent that violence from occurring so justifying restrictions on freedom of speech.  [1] Legislation.gov.uk, \u2018Public Order Act 1986\u2019, The National Archives, 1986 c.64.  [2] Harris, Paul, \u2018US shaken by sudden surge of violence against gay people\u2019, The Observer, 17 October 2010 .",
+          "delta": 0.0
+        }
+      ],
+      "large_healthy_gain_missed": [
+        {
+          "query": "Russia as a state and Russians as a nation need strong leadership  Historically, Russia has always needed strong centralised leadership for it to make progress. This was true both in imperial times under tsars such as Peter the Great (who made Russia a European power and built St Petersburg) and Alexander II (who freed the serfs), and since 1917 under Lenin and Stalin. Russia is too big, too diverse and too thinly-populated for western systems of representative democracy to be applied. Culturally its people are temperamentally suited to following the decisive lead of a strong ruler who can unite them in the face of great challenges. Without such a ruler Russia is likely to fragment with local strongmen grabbing power in the regions, religious fundamentalism dominating much of the Caucasus and Central Asia, and economic stagnation.",
+          "delta": 0.369
+        },
+        {
+          "query": "Abuse of information and power by intelligence agencies  Even when the government does not intend harm there are still cases where direct harms can occur as a result of surveillance. The most worrying are where the state abuses the information it holds. Abuse of power and of the information held by government is perhaps the main reason why it is difficult to trust in intelligence agencies. In one historical example from the 1950s FBI agents interviewed a Brooklyn liquor importer for repeating a rumor that the FBI Director J Edgar Hoover might be a \u201cqueer\u201d. This clearly necessitated a reminder through questioning that Hoover\u2019s \u201cpersonal conduct is beyond reproach,\u201d leading to the man quickly agreeing that \u201che thinks Mr. Hoover has done a wonderful job.\u201d [1] Did this have anything to do with national security? No. Was it an abuse of power and surveillance? Yes. So far as we are aware the intelligence agencies don\u2019t do things quite like this anymore but the revelations like PRISM, or the waterboarding a decade ago, show they are still happy to abuse their position from time to time. This is hardly a good way to build trust.  [1] Gage, Beverly, \u2018It\u2019s Not About Your Cat Photos\u2019, Slate, 10 June 2013,",
+          "delta": 0.2
+        }
+      ]
+    }
+  },
+  "qe_arguana": {
+    "n": 430,
+    "population": {
+      "rescue": 0.0581,
+      "failing_unchanged": 0.1558,
+      "healthy_large_gain": 0.1186,
+      "healthy_small_gain": 0.0651,
+      "healthy_unchanged": 0.1395,
+      "small_harm": 0.0233,
+      "large_harm": 0.4395
+    },
+    "oracle_gain_share": {
+      "rescue": 0.3948,
+      "failing_unchanged": 0.0,
+      "healthy_large_gain": 0.5689,
+      "healthy_small_gain": 0.0364,
+      "healthy_unchanged": 0.0,
+      "small_harm": 0.0,
+      "large_harm": 0.0
+    },
+    "budget": 0.25,
+    "selected": {
+      "failure": {
+        "composition": {
+          "rescue": 0.0463,
+          "failing_unchanged": 0.3148,
+          "healthy_large_gain": 0.1019,
+          "healthy_small_gain": 0.0185,
+          "healthy_unchanged": 0.1296,
+          "small_harm": 0.0,
+          "large_harm": 0.3889
+        },
+        "inactive_fraction": 0.4444,
+        "mean_delta": -0.1607,
+        "jaccard_with_oracle": 0.0964
+      },
+      "nqc": {
+        "composition": {
+          "rescue": 0.0556,
+          "failing_unchanged": 0.3056,
+          "healthy_large_gain": 0.0926,
+          "healthy_small_gain": 0.0093,
+          "healthy_unchanged": 0.1111,
+          "small_harm": 0.0093,
+          "large_harm": 0.4167
+        },
+        "inactive_fraction": 0.4167,
+        "mean_delta": -0.1767,
+        "jaccard_with_oracle": 0.0854
+      },
+      "B1_gbdt": {
+        "composition": {
+          "rescue": 0.0463,
+          "failing_unchanged": 0.1852,
+          "healthy_large_gain": 0.1574,
+          "healthy_small_gain": 0.0556,
+          "healthy_unchanged": 0.1389,
+          "small_harm": 0.0185,
+          "large_harm": 0.3981
+        },
+        "inactive_fraction": 0.3241,
+        "mean_delta": -0.1302,
+        "jaccard_with_oracle": 0.1676
+      },
+      "oracle": {
+        "composition": {
+          "rescue": 0.2315,
+          "failing_unchanged": 0.0093,
+          "healthy_large_gain": 0.4722,
+          "healthy_small_gain": 0.2593,
+          "healthy_unchanged": 0.0278,
+          "small_harm": 0.0,
+          "large_harm": 0.0
+        },
+        "inactive_fraction": 0.037,
+        "mean_delta": 0.2887,
+        "jaccard_with_oracle": 1.0
+      }
+    },
+    "examples": {
+      "failure_selected_but_inactive": [
+        {
+          "query": "Any body of values that claims to respect the rights of the individual must recognise the right of a woman to choose  Even the doctrines of the Church accepts that pregnancy is not, in and of itself, a virtue \u2013 there is no compulsion to maximise the number of pregnancies; there is simply a disagreement about how they should be avoided. The Church recommends that couples may minimise the chance without ever making it impossible through a chemical or physical barrier.  In some parts of the world a pregnancy, even one that is not planned, is seen as a time for joy \u2013 a blessing for the family that will lead to a new and happy life bringing pleasure to both parents, their society and the child. That ideal is very far from the experience of much of the world where a child is another mouth to feed on impossibly little income. For all too much of the world, that life will be cruel, nasty and short. In slums, favellas and barren wastes that life is likely to be one marked more by dysentery or diarrhea, malnutrition and misery than by the sanitised, idealised image promoted in the West. That is, of course, not to say that children everywhere cannot be a cause for joy, of course they can. Indeed even within the poorest of situations, a new child can be the focus of great joy in an otherwise hard life.  However, if that is to be the case, that child must be planned and prepared for. Overwhelmingly, the mother is likely to have paramount responsibility for the child; so that planning and preparation needs to be theirs. It is difficult to imagine the scenario that would reach the objective observer to reach the conclusion that the right group of individuals to reach that decision were a group of celibate men who had never met the parents and would take to role in the care or support of the child. Yet that, astonishingly, is what Proposition would like us to believe.",
+          "delta": 0.0
+        },
+        {
+          "query": "Because religion promotes certainty of belief, divinely inspired hatred is easy to use to justify and promote violent actions and discriminatory practices.  Free speech must come second when there is the potential for that speech to cause harm. The mantra of \u201cWith God on our side\u201d has been used, and continues to be used, to justify massacre and barbarity throughout history. Although it is rarely the prelates and preachers who do the killing the certainty they promote gives surety to those who do.  The purpose of the Act [1] used in this particular case was an entirely practical one. It\u2019s main role was to tidy up existing legislation on rioting and public disorder but one section recognised that homophobic and racist language do lead to violence. It is all well and good to talk of freedom of speech but the reality is that homophobic speeches, particularly those of a religious nature, may well lead to violence. For example in New York there were a series of homophobic attacks after anti-gay statements by republican politicians. [2] Preventing hate speech helps prevent that violence from occurring so justifying restrictions on freedom of speech.  [1] Legislation.gov.uk, \u2018Public Order Act 1986\u2019, The National Archives, 1986 c.64.  [2] Harris, Paul, \u2018US shaken by sudden surge of violence against gay people\u2019, The Observer, 17 October 2010 .",
+          "delta": 0.0
+        }
+      ],
+      "large_healthy_gain_missed": [
+        {
+          "query": "Unforeseeable consequences  We do not know where arming the rebels will lead. The most obvious parallel has to be Afghanistan in the 1980s where the United States armed the mujahideen and succeeded in their objective of damaging the USSR through a war of attrition much as the US had suffered in Vietnam. Afghanistan became an albatross around the Soviet Union\u2019s neck. [1] But the US did not win the peace, Afghanistan descended into civil conflict which had a Taliban victory that sheltered Osama bin Laden; US arms in Afghanistan unintentionally lead more than a decade later to September 11. In this case we would be arming a movement that has many jihadi elements that could end up with the weaponry. Other countries such as Turkey are also worried about where powerful weapons such as anti aircraft missiles could end up if provided to the rebels. They fear they could easily find their way across the border to militant Kurds. [2] Other paths that this could lead to are just as bad; for example helping the Libyan rebels lead to the conflict in Mali. [3] In this case the short term consequences could be just as bad. Arming the Sunnis could provoke retaliation from either Iran or Hezbollah who could feel undermined by the move, in the worst case scenario they could even attack western assets in the area. [4]  [1] Hoffman, David E., The Dead Hand: Reagan, Gorbachev and the Untold Story of the Cold War Arms Race, Icon Books Ltd, 2011, p.211  [2] Hokayem, Emile, in \u2018Roundtable: arming the Syrian rebels\u2019, Foreign Policy, 21 February 2013  [3] Jones, Owen, \u2018The war in Libya was seen as a success, now here we are engaging with the blowback in Mali\u2019, The Independent, 13 January 2013  [4] Yacoubian, Mona, in \u2018Roundtable: arming the Syrian rebels\u2019, Foreign Policy, 21 February 2013",
+          "delta": 0.685
+        },
+        {
+          "query": "Compensation has the potential to reverse damaged caused by Cultural Appropriation.  Compensation is necessary in the case of cultural appropriation as it helps to provide victims with the resources they need or deserve as compensation for exploitative behaviour. Often it can be easily quantified as would be the case with the Navajo Urban Outfitters case. With stronger legislation and rulings on the provision for compensation for cultural appropriation, minority communities would be significantly better off. This would be a major step towards reversing the damage of said appropriation as it would allow the community to develop and gain recognition for traditional designs and ideas.  Compensation can bring back some justice to small, minority communities as they can gain the appropriate recognition they deserve as well as the benefits that come along with it. It was estimated in 2005 that nearly half of the US $1billion market from native American Arts and Crafts come from the sale of counterfeit goods [1]. Compensation would help protect sales from native American businesses as well as their culture.  [1] Padilla, Helen B., \u2018Padilla: Combating fake Indian Arts and Crafts: a proposal for action\u2019, Indian Country Today, 14 October 2008,",
+          "delta": 0.667
+        }
+      ]
+    }
+  },
+  "rerank_arguana": {
+    "n": 430,
+    "population": {
+      "rescue": 0.0767,
+      "failing_unchanged": 0.1372,
+      "healthy_large_gain": 0.1465,
+      "healthy_small_gain": 0.0488,
+      "healthy_unchanged": 0.1721,
+      "small_harm": 0.0535,
+      "large_harm": 0.3651
+    },
+    "oracle_gain_share": {
+      "rescue": 0.3774,
+      "failing_unchanged": 0.0,
+      "healthy_large_gain": 0.5924,
+      "healthy_small_gain": 0.0302,
+      "healthy_unchanged": 0.0,
+      "small_harm": 0.0,
+      "large_harm": 0.0
+    },
+    "budget": 0.25,
+    "selected": {
+      "failure": {
+        "composition": {
+          "rescue": 0.0648,
+          "failing_unchanged": 0.2963,
+          "healthy_large_gain": 0.1204,
+          "healthy_small_gain": 0.0185,
+          "healthy_unchanged": 0.1204,
+          "small_harm": 0.0556,
+          "large_harm": 0.3241
+        },
+        "inactive_fraction": 0.4167,
+        "mean_delta": -0.0696,
+        "jaccard_with_oracle": 0.1134
+      },
+      "nqc": {
+        "composition": {
+          "rescue": 0.0833,
+          "failing_unchanged": 0.2778,
+          "healthy_large_gain": 0.1759,
+          "healthy_small_gain": 0.037,
+          "healthy_unchanged": 0.0926,
+          "small_harm": 0.0463,
+          "large_harm": 0.287
+        },
+        "inactive_fraction": 0.3704,
+        "mean_delta": -0.0435,
+        "jaccard_with_oracle": 0.1676
+      },
+      "B1_gbdt": {
+        "composition": {
+          "rescue": 0.0741,
+          "failing_unchanged": 0.1204,
+          "healthy_large_gain": 0.1759,
+          "healthy_small_gain": 0.0556,
+          "healthy_unchanged": 0.1574,
+          "small_harm": 0.0833,
+          "large_harm": 0.3333
+        },
+        "inactive_fraction": 0.2778,
+        "mean_delta": -0.025,
+        "jaccard_with_oracle": 0.1613
+      },
+      "oracle": {
+        "composition": {
+          "rescue": 0.3056,
+          "failing_unchanged": 0.0,
+          "healthy_large_gain": 0.5833,
+          "healthy_small_gain": 0.1111,
+          "healthy_unchanged": 0.0,
+          "small_harm": 0.0,
+          "large_harm": 0.0
+        },
+        "inactive_fraction": 0.0,
+        "mean_delta": 0.4005,
+        "jaccard_with_oracle": 1.0
+      }
+    },
+    "examples": {
+      "failure_selected_but_inactive": [
+        {
+          "query": "Any body of values that claims to respect the rights of the individual must recognise the right of a woman to choose  Even the doctrines of the Church accepts that pregnancy is not, in and of itself, a virtue \u2013 there is no compulsion to maximise the number of pregnancies; there is simply a disagreement about how they should be avoided. The Church recommends that couples may minimise the chance without ever making it impossible through a chemical or physical barrier.  In some parts of the world a pregnancy, even one that is not planned, is seen as a time for joy \u2013 a blessing for the family that will lead to a new and happy life bringing pleasure to both parents, their society and the child. That ideal is very far from the experience of much of the world where a child is another mouth to feed on impossibly little income. For all too much of the world, that life will be cruel, nasty and short. In slums, favellas and barren wastes that life is likely to be one marked more by dysentery or diarrhea, malnutrition and misery than by the sanitised, idealised image promoted in the West. That is, of course, not to say that children everywhere cannot be a cause for joy, of course they can. Indeed even within the poorest of situations, a new child can be the focus of great joy in an otherwise hard life.  However, if that is to be the case, that child must be planned and prepared for. Overwhelmingly, the mother is likely to have paramount responsibility for the child; so that planning and preparation needs to be theirs. It is difficult to imagine the scenario that would reach the objective observer to reach the conclusion that the right group of individuals to reach that decision were a group of celibate men who had never met the parents and would take to role in the care or support of the child. Yet that, astonishingly, is what Proposition would like us to believe.",
+          "delta": 0.0
+        },
+        {
+          "query": "Because religion promotes certainty of belief, divinely inspired hatred is easy to use to justify and promote violent actions and discriminatory practices.  Free speech must come second when there is the potential for that speech to cause harm. The mantra of \u201cWith God on our side\u201d has been used, and continues to be used, to justify massacre and barbarity throughout history. Although it is rarely the prelates and preachers who do the killing the certainty they promote gives surety to those who do.  The purpose of the Act [1] used in this particular case was an entirely practical one. It\u2019s main role was to tidy up existing legislation on rioting and public disorder but one section recognised that homophobic and racist language do lead to violence. It is all well and good to talk of freedom of speech but the reality is that homophobic speeches, particularly those of a religious nature, may well lead to violence. For example in New York there were a series of homophobic attacks after anti-gay statements by republican politicians. [2] Preventing hate speech helps prevent that violence from occurring so justifying restrictions on freedom of speech.  [1] Legislation.gov.uk, \u2018Public Order Act 1986\u2019, The National Archives, 1986 c.64.  [2] Harris, Paul, \u2018US shaken by sudden surge of violence against gay people\u2019, The Observer, 17 October 2010 .",
+          "delta": 0.0
+        }
+      ],
+      "large_healthy_gain_missed": [
+        {
+          "query": "The freedom to move is a human right.  Mobility is a human right - which needs to be enabled across national spaces and Africa. Obstacles need to be removed. Mobility enables access to interconnected rights - such as ensuring women their right to move enables empowerment in the political, social and economic spheres.  Taking the case of migration of young people, the process reflects a right of passage, a means of exploring opportunities and identity.For example the Mourides of Senegal have established a dense network sustaining informal trading across multiple scales based on a foundation of \u2018Brotherhood\u2019 youths leaving rural areas become integrated into dynamic social networks and educated within the Mouride culture. As research in Tanzania shows although migration is not a priority for all youths, many identify the opportunity as a time to prove yourself and establish your transition into adulthood. The process empowers human identity and rights.",
+          "delta": 0.711
+        },
+        {
+          "query": "Diplomacy is not going anywhere  The best solution would be a ceasefire between the two sides in the Syrian civil war and a negotiated settlement, but it is clear we are long past the point where this approach stood a chance of success. The United Nations peace effort under Kofi Annan failed in the middle of last year [1] and there has been no progress since. Similarly all attempts to bring pressure to bear throughout the security council have failed as a result of Russia supporting Assad's regime. This leaves the unilateral initiatives to help the rebels. No state wants full intervention as France did in Mali [2] so the only alternative is simply to help the Free Syrian Army. To do so means providing what they need to win the conflict; primarily arms that can defeat the Syrian army. This need not be considered to be exclusive with diplomacy; the intervening state should continue to try to find a diplomatic solution just as before the Dayton accords NATO helped the Croats militarily while at the same time looking to diplomacy to provide an overall solution to the conflict. [3]  [1] Plett, Barbara, \u2018Syria crisis: Kofi Annan quits as UN-Arab League envoy\u2019, BBC News, 2 August 2012  [2] See the debatabase debate \u2018 This House believes France is right to intervene in Mali \u2019.  [3] Hokayem, Emile, in \u2018Roundtable: arming the Syrian rebels\u2019, Foreign Policy, 21 February 2013",
+          "delta": 0.699
+        }
+      ]
+    }
+  }
+}
