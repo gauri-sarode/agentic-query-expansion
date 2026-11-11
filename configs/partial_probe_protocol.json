@@ -1,0 +1,36 @@
+{
+  "name": "partial_probe_and_diagnostics",
+  "written": "2026-11-11",
+  "status": "EXPLORATORY. Written after every test set used here (TripClick TAIL, NQ, ArguAna) had been inspected for the paper; this is not independent confirmation. Frozen before any probe score, probe model or diagnostic category is computed on a test query. Every quantity below is reported regardless of outcome. If the probe analysis does not give reliable, interpretable results it is reported in the repository only.",
+  "question": "Does observing part of an intervention (cross-encoder scores of the first k BM25 candidates) predict the benefit of full reranking better than pre-action telemetry, and does it pay for itself in total compute?",
+  "intervention": "Cross-encoder reranking exactly as in the paper (MiniLM CONFIG.reranker_model over the BM25 top-100, reranked top-50 lead, BM25 order follows). Delta = the paper's stored reranking Delta per query.",
+  "probe": {
+    "sizes": [5, 10, 20],
+    "primary_size": 10,
+    "scores": "Cross-encoder score of each of the first k BM25 candidates, same model and document text as the stored reranking run (scripts/48 rerank; ArguAna: scripts/52 with self-match exclusion already applied to the BM25 list). Audit: where the stored run has a score for the same document, the recomputed score must match to 1e-3.",
+    "features": "For probe size k: max, mean and std of the k scores; score of BM25 rank 1; max minus score of BM25 rank 1; position of the probe argmax in BM25 order; Spearman correlation between BM25 rank and probe score within the k; plus NQC over the BM25 top-100 (free) and query length: 9 features.",
+    "on_skip": "A query not selected for full reranking keeps its BM25 ranking (the probe's scores are paid for but not used to reorder)."
+  },
+  "models": "scripts/54_baseline_runner.py cat_gbdt (the B1 form), unchanged, regressing Delta on the 9 probe features. Comparators: failure routing (TripClick/NQ: the paper's detector score; ArguAna: the registered runner failure router), NQC, B1 on the 10 pre-action features (TripClick: fit here under the same rule, local only; NQ: scripts/57 predictions; ArguAna: registered runner predictions), always, random, oracle.",
+  "data_use": {
+    "tripclick_nq": "Fit on the validation queries, ordered by sha256(qid + ':nq57'); first 70% train, rest selects hyperparameters (scripts/57 rule; for TripClick the same rule on TripClick validation). Scored once on test.",
+    "arguana": "Registered split: fit on train, select on validation, score on test."
+  },
+  "cost": {
+    "unit": "Measured wall-clock seconds per query on this machine.",
+    "measurement": "On 50 validation queries per corpus (sha256 order), time document-text fetch plus cross-encoder scoring for k pairs (k in probe sizes), for the remaining 100-k pairs, and for all 100; pipelines batched separately in alternating order, median per query. Pre-action telemetry cost for failure and B1 routing: measured likewise for the 8 t0 features on 50 validation queries (ArguAna: docs/arguana_feature_latency.txt). NQC and BM25 are charged to every policy equally and excluded.",
+    "policy_cost": "probe routing at full-rerank fraction b: probe(k) + b * remaining(100-k). Pre-action routing: telemetry (failure, B1; 0 for NQC) + b * full(100). Always: full(100)."
+  },
+  "budgets": [0.0, 0.10, 0.25, 0.50, 0.75, 1.00],
+  "analyses": {
+    "primary": "Per corpus, probe-10 routing minus failure routing and minus B1 routing in nDCG@10 gain, averaged over full-rerank fractions 10-75% (100% is shared), runner bootstrap_pair, 10^4 resamples, Holm over the 6 (3 corpora x 2).",
+    "cost_frontier": "Gain versus mean seconds per query for every policy and budget; report, at each pre-action policy's points, the probe policy's gain at equal or lower cost (linear interpolation between its budget points).",
+    "secondary": ["probe sizes 5 and 20", "benefit prediction quality on test: Spearman(predicted, Delta) and AUC for helped (Delta > 0) for probe models vs B1 vs failure score", "fraction fully reranked and oracle regret at each budget", "harm rate among fully reranked queries"]
+  },
+  "diagnostics": {
+    "settings": "All six TripClick/NQ BM25 settings of Table 3 and the three ArguAna interventions, existing traces only, no fitting.",
+    "categories": "Prespecified Delta categories: rescue (F=1, Delta>0); failing unchanged (F=1, Delta=0); healthy large gain (Delta>=0.10); healthy small gain (0<Delta<0.10); healthy unchanged (Delta=0); small harm (-0.10<Delta<0); large harm (Delta<=-0.10). Thresholds are the paper's existing 0.10 effect threshold.",
+    "reported": "Composition of the queries selected by failure routing, benefit routing (B1 where available) and the oracle at a 25% budget; share of oracle gain in each category; fraction of selected queries with Delta=0 (intervention inactive). Query examples only from public benchmarks (NQ, ArguAna), never TripClick."
+  },
+  "outputs": "docs/partial_probe_summary.json and docs/selection_diagnostics.json (rounded aggregates). Probe scores, predictions and per-query outputs stay in results/ (gitignored)."
+}
