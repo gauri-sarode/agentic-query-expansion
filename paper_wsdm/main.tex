@@ -196,7 +196,7 @@ development, the changed-query columns of
 Table~\ref{tab:auc} were added after seeing the main results, and the
 NQ B1/B2 runs, diagnostics, and probes of Section~\ref{sec:probe}
 followed protocols frozen before computing but after the test sets
-were inspected; the NQC probe contrasts, Spearman intervals, and the
+were inspected; the NQC probe contrasts, Spearman intervals, the
 positive-cost ceiling, and P95 costing were added after review.
 Pre-commitments and scripts are in the anonymized repository:
 \url{https://anonymous.4open.science/r/agentic-query-expansion-8939/}.
@@ -363,7 +363,7 @@ better: none survives Holm, and the best recovers $8\%$ of the
 oracle-minus-failure headroom. Failure routing can still save cost: for
 LLM QE, the deployed failure-selective policy halves generator calls
 and on NQ recovers most of unconditional QE's loss ($+0.015$
-$[+0.008,+0.022]$).
+$[+0.008,+0.022]$); on TripClick no QE policy differs from BM25.
 
 \section{Pre-Registered Replication on ArguAna}
 \label{sec:arguana}
@@ -417,8 +417,8 @@ $0.053$ and $0.010$ budget-averaged, so the question is purely one of
 selection. PRF barely acts here (nDCG@10 changes for $9\%$ of queries), so its
 rows are uninformative. Pre-action routing again stays near random
 (Table~\ref{tab:arguana}). For reranking, B1 minus failure routing is
-$+0.015$ $[-0.001,+0.028]$ (Holm $p=0.13$), B2 and B3 do no better
-($p\ge0.37$), and the best recovers $16\%$ of the
+$+0.015$ $[-0.001,+0.028]$ (Holm $p=0.13$), B2 minus failure $+0.008$
+(Holm $p=0.37$), B3 minus B1 under a budget cap $+0.006$ ($p=0.52$); the best recovers $16\%$ of the
 oracle-minus-failure headroom, below the pre-registered $25\%$ bar.
 Per budget, failure routing of reranking is
 below random at every budget and B1 above it
@@ -512,9 +512,9 @@ differences span zero).
 failure and B1 on NQ ($k=5$: $+0.020$, $+0.012$; $k=20$: $+0.032$,
 $+0.025$), none differs from either on TripClick, and on ArguAna
 Probe-5 trails B1 ($-0.023$ $[-0.038,-0.006]$). On TripClick the probe
-leads NQC at equal cost ($+0.007$ $[+0.000,+0.013]$, Holm $p=0.18$)
-because NQC then reranks more queries ($19$--$78\%$ vs.\ $10$--$75\%$),
-which hurts: equal cost rewards doing less, not selecting better.
+leads NQC at equal cost ($+0.007$ $[+0.000,+0.013]$, Holm $p=0.18$),
+close to its matched-fraction lead ($+0.005$, n.s.); NQC's larger
+reranking share at equal cost ($19$--$78\%$ vs.\ $10$--$75\%$) adds only $\approx0.002$.
 
 Post-action verification, at full cost, cuts TripClick's reranking
 loss from $-0.028$ to $-0.001$ and keeps NQ's gain ($+0.223$ vs.\
