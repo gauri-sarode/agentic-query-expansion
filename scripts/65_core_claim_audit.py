@@ -10,7 +10,8 @@ B. Budgeted failure-restricted oracle. With at most b*n interventions
    at cost kappa, V*(b,k) = (1/n) sum of the top floor(b*n) positive
    (Delta-kappa); V_F*(b,k) is the same restricted to failing queries.
    Reports V_F*/V* and H = V* - V_F* with bootstrap CIs. b = 1 recovers
-   docs/restricted_oracle.json.
+   docs/restricted_oracle.json. Also reports the failure gate's realised
+   gain at each cap and the share of its picks that are failing.
 
 Writes rounded aggregates only to docs/core_claim_audit.json.
 """
@@ -87,7 +88,7 @@ def budget_oracle(d: np.ndarray, F: np.ndarray, b: float, k: float) -> tuple[flo
     return float(v), float(vf)
 
 
-def budgeted(d: np.ndarray, F: np.ndarray, kappas) -> dict:
+def budgeted(d: np.ndarray, F: np.ndarray, kappas, fail_score: np.ndarray) -> dict:
     rng = np.random.default_rng(SEED)
     idx = [rng.integers(0, len(d), len(d)) for _ in range(NBOOT)]
     out = {}
@@ -102,6 +103,15 @@ def budgeted(d: np.ndarray, F: np.ndarray, kappas) -> dict:
                                    "share_ci": [float(np.quantile(sh, .025)), float(np.quantile(sh, .975))] if ok.any() else None,
                                    "H_ci": [float(np.quantile(bs[:, 0] - bs[:, 1], .025)),
                                             float(np.quantile(bs[:, 0] - bs[:, 1], .975))]}
+    # The deployed failure gate at the same caps (top-b by failure score, kappa = 0).
+    order = np.argsort(-fail_score, kind="stable")
+    for b in BUDGETS:
+        pick = order[:int(round(b * len(d)))]
+        v, vf = budget_oracle(d, F, b, 0.0)
+        out[f"failure_gate,b={b}"] = {"gain": float(d[pick].sum() / len(d)),
+                                      "share_of_V_star": float(d[pick].sum() / len(d) / v) if v > 0 else None,
+                                      "share_of_V_F_star": float(d[pick].sum() / len(d) / vf) if vf > 0 else None,
+                                      "picks_failing": float(F[pick].mean())}
     return out
 
 
@@ -143,7 +153,7 @@ def main() -> None:
         settings.append((f"{action}_arguana", d, g["original_ndcg"].to_numpy() <= EPS, sc))
 
     for nm, d, F, sc in settings:
-        res[nm] = {"same_target": same_target(d, sc), "budgeted_oracle": budgeted(d, F, da.KAPPAS)}
+        res[nm] = {"same_target": same_target(d, sc), "budgeted_oracle": budgeted(d, F, da.KAPPAS, sc["failure"])}
         st = res[nm]["same_target"]["scores"]
         print(f"{nm:26s} pH={np.mean(d > EPS):.3f} " + " | ".join(
             f"{m}: {v['auc_help_vs_rest']['estimate']:.3f}/{v['auc_help_vs_harm']['estimate']:.3f}/{v['spearman_delta']['estimate']:+.3f}"

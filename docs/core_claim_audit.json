@@ -333,6 +333,36 @@
           0.0094,
           0.0162
         ]
+      },
+      "failure_gate,b=0.1": {
+        "gain": 0.0035,
+        "share_of_V_star": 0.1459,
+        "share_of_V_F_star": 0.3425,
+        "picks_failing": 0.6949
+      },
+      "failure_gate,b=0.25": {
+        "gain": 0.003,
+        "share_of_V_star": 0.1214,
+        "share_of_V_F_star": 0.2903,
+        "picks_failing": 0.6122
+      },
+      "failure_gate,b=0.5": {
+        "gain": 0.003,
+        "share_of_V_star": 0.1232,
+        "share_of_V_F_star": 0.2945,
+        "picks_failing": 0.5646
+      },
+      "failure_gate,b=0.75": {
+        "gain": -0.0015,
+        "share_of_V_star": -0.0627,
+        "share_of_V_F_star": -0.1499,
+        "picks_failing": 0.5051
+      },
+      "failure_gate,b=1.0": {
+        "gain": 0.0007,
+        "share_of_V_star": 0.0268,
+        "share_of_V_F_star": 0.064,
+        "picks_failing": 0.4502
       }
     }
   },
@@ -715,6 +745,36 @@
           0.0217,
           0.0305
         ]
+      },
+      "failure_gate,b=0.1": {
+        "gain": 0.0012,
+        "share_of_V_star": 0.0297,
+        "share_of_V_F_star": 0.0861,
+        "picks_failing": 0.7756
+      },
+      "failure_gate,b=0.25": {
+        "gain": -0.0022,
+        "share_of_V_star": -0.0538,
+        "share_of_V_F_star": -0.1652,
+        "picks_failing": 0.6959
+      },
+      "failure_gate,b=0.5": {
+        "gain": -0.0059,
+        "share_of_V_star": -0.1418,
+        "share_of_V_F_star": -0.4354,
+        "picks_failing": 0.6121
+      },
+      "failure_gate,b=0.75": {
+        "gain": -0.0116,
+        "share_of_V_star": -0.2803,
+        "share_of_V_F_star": -0.8604,
+        "picks_failing": 0.564
+      },
+      "failure_gate,b=1.0": {
+        "gain": -0.0217,
+        "share_of_V_star": -0.5225,
+        "share_of_V_F_star": -1.6041,
+        "picks_failing": 0.4907
       }
     }
   },
@@ -1097,6 +1157,36 @@
           0.0215,
           0.0321
         ]
+      },
+      "failure_gate,b=0.1": {
+        "gain": 0.0003,
+        "share_of_V_star": 0.0068,
+        "share_of_V_F_star": 0.0101,
+        "picks_failing": 0.6949
+      },
+      "failure_gate,b=0.25": {
+        "gain": -0.0031,
+        "share_of_V_star": -0.0498,
+        "share_of_V_F_star": -0.0949,
+        "picks_failing": 0.6122
+      },
+      "failure_gate,b=0.5": {
+        "gain": -0.0101,
+        "share_of_V_star": -0.1635,
+        "share_of_V_F_star": -0.3114,
+        "picks_failing": 0.5646
+      },
+      "failure_gate,b=0.75": {
+        "gain": -0.0248,
+        "share_of_V_star": -0.4024,
+        "share_of_V_F_star": -0.7665,
+        "picks_failing": 0.5051
+      },
+      "failure_gate,b=1.0": {
+        "gain": -0.0278,
+        "share_of_V_star": -0.4509,
+        "share_of_V_F_star": -0.8589,
+        "picks_failing": 0.4502
       }
     }
   },
@@ -1433,6 +1523,36 @@
           0.0068,
           0.0132
         ]
+      },
+      "failure_gate,b=0.1": {
+        "gain": -0.0007,
+        "share_of_V_star": -0.0544,
+        "share_of_V_F_star": -0.7121,
+        "picks_failing": 0.6949
+      },
+      "failure_gate,b=0.25": {
+        "gain": -0.0002,
+        "share_of_V_star": -0.0157,
+        "share_of_V_F_star": -0.2055,
+        "picks_failing": 0.6122
+      },
+      "failure_gate,b=0.5": {
+        "gain": 0.0005,
+        "share_of_V_star": 0.0404,
+        "share_of_V_F_star": 0.5288,
+        "picks_failing": 0.5646
+      },
+      "failure_gate,b=0.75": {
+        "gain": -0.0005,
+        "share_of_V_star": -0.0411,
+        "share_of_V_F_star": -0.5379,
+        "picks_failing": 0.5051
+      },
+      "failure_gate,b=1.0": {
+        "gain": -0.0011,
+        "share_of_V_star": -0.0923,
+        "share_of_V_F_star": -1.2088,
+        "picks_failing": 0.4502
       }
     }
   },
@@ -1861,6 +1981,36 @@
           0.0943,
           0.1112
         ]
+      },
+      "failure_gate,b=0.1": {
+        "gain": 0.0221,
+        "share_of_V_star": 0.2399,
+        "share_of_V_F_star": 0.2449,
+        "picks_failing": 0.7756
+      },
+      "failure_gate,b=0.25": {
+        "gain": 0.0576,
+        "share_of_V_star": 0.3218,
+        "share_of_V_F_star": 0.4045,
+        "picks_failing": 0.6959
+      },
+      "failure_gate,b=0.5": {
+        "gain": 0.1135,
+        "share_of_V_star": 0.4532,
+        "share_of_V_F_star": 0.7973,
+        "picks_failing": 0.6121
+      },
+      "failure_gate,b=0.75": {
+        "gain": 0.1751,
+        "share_of_V_star": 0.699,
+        "share_of_V_F_star": 1.2299,
+        "picks_failing": 0.564
+      },
+      "failure_gate,b=1.0": {
+        "gain": 0.2251,
+        "share_of_V_star": 0.8983,
+        "share_of_V_F_star": 1.5805,
+        "picks_failing": 0.4907
       }
     }
   },
@@ -2243,6 +2393,36 @@
           0.0141,
           0.0199
         ]
+      },
+      "failure_gate,b=0.1": {
+        "gain": 0.0001,
+        "share_of_V_star": 0.0043,
+        "share_of_V_F_star": 0.013,
+        "picks_failing": 0.7756
+      },
+      "failure_gate,b=0.25": {
+        "gain": 0.0014,
+        "share_of_V_star": 0.0486,
+        "share_of_V_F_star": 0.1528,
+        "picks_failing": 0.6959
+      },
+      "failure_gate,b=0.5": {
+        "gain": 0.0039,
+        "share_of_V_star": 0.1389,
+        "share_of_V_F_star": 0.4364,
+        "picks_failing": 0.6121
+      },
+      "failure_gate,b=0.75": {
+        "gain": 0.0075,
+        "share_of_V_star": 0.2682,
+        "share_of_V_F_star": 0.8428,
+        "picks_failing": 0.564
+      },
+      "failure_gate,b=1.0": {
+        "gain": 0.0097,
+        "share_of_V_star": 0.3485,
+        "share_of_V_F_star": 1.0951,
+        "picks_failing": 0.4907
       }
     }
   },
@@ -2487,6 +2667,36 @@
           0.0132,
           0.022
         ]
+      },
+      "failure_gate,b=0.1": {
+        "gain": -0.0025,
+        "share_of_V_star": -0.0886,
+        "share_of_V_F_star": -0.2489,
+        "picks_failing": 0.7966
+      },
+      "failure_gate,b=0.25": {
+        "gain": -0.0009,
+        "share_of_V_star": -0.0304,
+        "share_of_V_F_star": -0.0899,
+        "picks_failing": 0.7245
+      },
+      "failure_gate,b=0.5": {
+        "gain": -0.0083,
+        "share_of_V_star": -0.2802,
+        "share_of_V_F_star": -0.8283,
+        "picks_failing": 0.6786
+      },
+      "failure_gate,b=0.75": {
+        "gain": -0.0119,
+        "share_of_V_star": -0.4008,
+        "share_of_V_F_star": -1.1845,
+        "picks_failing": 0.6345
+      },
+      "failure_gate,b=1.0": {
+        "gain": -0.0159,
+        "share_of_V_star": -0.5375,
+        "share_of_V_F_star": -1.5888,
+        "picks_failing": 0.5855
       }
     }
   },
@@ -2731,6 +2941,36 @@
           0.0256,
           0.0345
         ]
+      },
+      "failure_gate,b=0.1": {
+        "gain": 0.0012,
+        "share_of_V_star": 0.0277,
+        "share_of_V_F_star": 0.0716,
+        "picks_failing": 0.4829
+      },
+      "failure_gate,b=0.25": {
+        "gain": -0.0008,
+        "share_of_V_star": -0.0155,
+        "share_of_V_F_star": -0.0466,
+        "picks_failing": 0.4327
+      },
+      "failure_gate,b=0.5": {
+        "gain": -0.0033,
+        "share_of_V_star": -0.0683,
+        "share_of_V_F_star": -0.2055,
+        "picks_failing": 0.3713
+      },
+      "failure_gate,b=0.75": {
+        "gain": -0.0052,
+        "share_of_V_star": -0.1067,
+        "share_of_V_F_star": -0.3209,
+        "picks_failing": 0.3164
+      },
+      "failure_gate,b=1.0": {
+        "gain": -0.0105,
+        "share_of_V_star": -0.2133,
+        "share_of_V_F_star": -0.6414,
+        "picks_failing": 0.2632
       }
     }
   },
@@ -3067,6 +3307,36 @@
           0.0006,
           0.0045
         ]
+      },
+      "failure_gate,b=0.1": {
+        "gain": -0.0006,
+        "share_of_V_star": -0.1682,
+        "share_of_V_F_star": -0.9133,
+        "picks_failing": 0.3488
+      },
+      "failure_gate,b=0.25": {
+        "gain": -0.0013,
+        "share_of_V_star": -0.3673,
+        "share_of_V_F_star": -1.9948,
+        "picks_failing": 0.3611
+      },
+      "failure_gate,b=0.5": {
+        "gain": -0.0002,
+        "share_of_V_star": -0.0499,
+        "share_of_V_F_star": -0.2712,
+        "picks_failing": 0.2837
+      },
+      "failure_gate,b=0.75": {
+        "gain": -0.0017,
+        "share_of_V_star": -0.4619,
+        "share_of_V_F_star": -2.5084,
+        "picks_failing": 0.2484
+      },
+      "failure_gate,b=1.0": {
+        "gain": -0.0024,
+        "share_of_V_star": -0.6542,
+        "share_of_V_F_star": -3.5523,
+        "picks_failing": 0.214
       }
     }
   },
@@ -3403,6 +3673,36 @@
           0.0293,
           0.0524
         ]
+      },
+      "failure_gate,b=0.1": {
+        "gain": -0.0198,
+        "share_of_V_star": -0.373,
+        "share_of_V_F_star": -0.6915,
+        "picks_failing": 0.3488
+      },
+      "failure_gate,b=0.25": {
+        "gain": -0.0404,
+        "share_of_V_star": -0.5566,
+        "share_of_V_F_star": -1.41,
+        "picks_failing": 0.3611
+      },
+      "failure_gate,b=0.5": {
+        "gain": -0.083,
+        "share_of_V_star": -1.144,
+        "share_of_V_F_star": -2.8979,
+        "picks_failing": 0.2837
+      },
+      "failure_gate,b=0.75": {
+        "gain": -0.1305,
+        "share_of_V_star": -1.7992,
+        "share_of_V_F_star": -4.5578,
+        "picks_failing": 0.2484
+      },
+      "failure_gate,b=1.0": {
+        "gain": -0.1628,
+        "share_of_V_star": -2.2446,
+        "share_of_V_F_star": -5.6861,
+        "picks_failing": 0.214
       }
     }
   },
@@ -3785,6 +4085,36 @@
           0.0452,
           0.0744
         ]
+      },
+      "failure_gate,b=0.1": {
+        "gain": -0.0145,
+        "share_of_V_star": -0.2365,
+        "share_of_V_F_star": -0.3792,
+        "picks_failing": 0.3488
+      },
+      "failure_gate,b=0.25": {
+        "gain": -0.0175,
+        "share_of_V_star": -0.174,
+        "share_of_V_F_star": -0.4567,
+        "picks_failing": 0.3611
+      },
+      "failure_gate,b=0.5": {
+        "gain": -0.0376,
+        "share_of_V_star": -0.3711,
+        "share_of_V_F_star": -0.9832,
+        "picks_failing": 0.2837
+      },
+      "failure_gate,b=0.75": {
+        "gain": -0.0614,
+        "share_of_V_star": -0.6055,
+        "share_of_V_F_star": -1.6043,
+        "picks_failing": 0.2484
+      },
+      "failure_gate,b=1.0": {
+        "gain": -0.0711,
+        "share_of_V_star": -0.7019,
+        "share_of_V_F_star": -1.8597,
+        "picks_failing": 0.214
       }
     }
   }
