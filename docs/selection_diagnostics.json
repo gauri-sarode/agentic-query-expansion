@@ -34,6 +34,8 @@
         },
         "inactive_fraction": 0.7891,
         "mean_delta": 0.0119,
+        "helped_precision": 0.1293,
+        "gain_capture": 0.3196,
         "jaccard_with_oracle": 0.1417
       },
       "nqc": {
@@ -48,6 +50,8 @@
         },
         "inactive_fraction": 0.8401,
         "mean_delta": 0.0049,
+        "helped_precision": 0.0782,
+        "gain_capture": 0.1888,
         "jaccard_with_oracle": 0.1329
       },
       "benefit_linear": {
@@ -62,6 +66,8 @@
         },
         "inactive_fraction": 0.7347,
         "mean_delta": -0.0032,
+        "helped_precision": 0.1293,
+        "gain_capture": 0.3459,
         "jaccard_with_oracle": 0.1484
       },
       "oracle": {
@@ -76,9 +82,14 @@
         },
         "inactive_fraction": 0.5374,
         "mean_delta": 0.0983,
+        "helped_precision": 0.4626,
+        "gain_capture": 1.0,
         "jaccard_with_oracle": 1.0
       }
-    }
+    },
+    "p_helped": 0.1157,
+    "jaccard_valid": false,
+    "random_gain_capture": 0.25
   },
   "llm_qe_nq": {
     "n": 2052,
@@ -114,6 +125,8 @@
         },
         "inactive_fraction": 0.7641,
         "mean_delta": -0.0089,
+        "helped_precision": 0.1111,
+        "gain_capture": 0.2321,
         "jaccard_with_oracle": 0.1438
       },
       "nqc": {
@@ -128,6 +141,8 @@
         },
         "inactive_fraction": 0.7895,
         "mean_delta": -0.0144,
+        "helped_precision": 0.0994,
+        "gain_capture": 0.2129,
         "jaccard_with_oracle": 0.1515
       },
       "benefit_linear": {
@@ -142,6 +157,8 @@
         },
         "inactive_fraction": 0.7349,
         "mean_delta": -0.0047,
+        "helped_precision": 0.1267,
+        "gain_capture": 0.2753,
         "jaccard_with_oracle": 0.1451
       },
       "oracle": {
@@ -156,6 +173,8 @@
         },
         "inactive_fraction": 0.4717,
         "mean_delta": 0.166,
+        "helped_precision": 0.5283,
+        "gain_capture": 1.0,
         "jaccard_with_oracle": 1.0
       },
       "B1_gbdt": {
@@ -170,9 +189,14 @@
         },
         "inactive_fraction": 0.6979,
         "mean_delta": -0.0193,
+        "helped_precision": 0.1209,
+        "gain_capture": 0.2702,
         "jaccard_with_oracle": 0.1425
       }
     },
+    "p_helped": 0.1321,
+    "jaccard_valid": false,
+    "random_gain_capture": 0.25,
     "examples": {
       "failure_selected_but_inactive": [
         {
@@ -230,6 +254,8 @@
         },
         "inactive_fraction": 0.5782,
         "mean_delta": -0.0123,
+        "helped_precision": 0.1837,
+        "gain_capture": 0.2519,
         "jaccard_with_oracle": 0.1243
       },
       "nqc": {
@@ -244,6 +270,8 @@
         },
         "inactive_fraction": 0.6327,
         "mean_delta": -0.0214,
+        "helped_precision": 0.1327,
+        "gain_capture": 0.2127,
         "jaccard_with_oracle": 0.1073
       },
       "benefit_linear": {
@@ -258,6 +286,8 @@
         },
         "inactive_fraction": 0.6088,
         "mean_delta": -0.0031,
+        "helped_precision": 0.1973,
+        "gain_capture": 0.2661,
         "jaccard_with_oracle": 0.1395
       },
       "oracle": {
@@ -272,9 +302,14 @@
         },
         "inactive_fraction": 0.1633,
         "mean_delta": 0.2462,
+        "helped_precision": 0.8367,
+        "gain_capture": 1.0,
         "jaccard_with_oracle": 1.0
       }
-    }
+    },
+    "p_helped": 0.2094,
+    "jaccard_valid": false,
+    "random_gain_capture": 0.25
   },
   "prf_tripclick": {
     "n": 1175,
@@ -310,6 +345,8 @@
         },
         "inactive_fraction": 0.8197,
         "mean_delta": -0.0008,
+        "helped_precision": 0.0714,
+        "gain_capture": 0.2613,
         "jaccard_with_oracle": 0.1417
       },
       "nqc": {
@@ -324,6 +361,8 @@
         },
         "inactive_fraction": 0.8741,
         "mean_delta": -0.0032,
+        "helped_precision": 0.0442,
+        "gain_capture": 0.1456,
         "jaccard_with_oracle": 0.1351
       },
       "benefit_linear": {
@@ -338,6 +377,8 @@
         },
         "inactive_fraction": 0.8673,
         "mean_delta": 0.0028,
+        "helped_precision": 0.0612,
+        "gain_capture": 0.1955,
         "jaccard_with_oracle": 0.1507
       },
       "oracle": {
@@ -352,9 +393,14 @@
         },
         "inactive_fraction": 0.7143,
         "mean_delta": 0.049,
+        "helped_precision": 0.2857,
+        "gain_capture": 1.0,
         "jaccard_with_oracle": 1.0
       }
-    }
+    },
+    "p_helped": 0.0715,
+    "jaccard_valid": false,
+    "random_gain_capture": 0.25
   },
   "rerank_nq": {
     "n": 2052,
@@ -390,6 +436,8 @@
         },
         "inactive_fraction": 0.501,
         "mean_delta": 0.2304,
+        "helped_precision": 0.4503,
+        "gain_capture": 0.3437,
         "jaccard_with_oracle": 0.1438
       },
       "nqc": {
@@ -404,6 +452,8 @@
         },
         "inactive_fraction": 0.5692,
         "mean_delta": 0.2118,
+        "helped_precision": 0.3918,
+        "gain_capture": 0.3118,
         "jaccard_with_oracle": 0.1325
       },
       "benefit_linear": {
@@ -418,6 +468,8 @@
         },
         "inactive_fraction": 0.308,
         "mean_delta": 0.2674,
+        "helped_precision": 0.5809,
+        "gain_capture": 0.4129,
         "jaccard_with_oracle": 0.1807
       },
       "oracle": {
@@ -432,6 +484,8 @@
         },
         "inactive_fraction": 0.0,
         "mean_delta": 0.716,
+        "helped_precision": 1.0,
+        "gain_capture": 1.0,
         "jaccard_with_oracle": 1.0
       },
       "B1_gbdt": {
@@ -446,9 +500,14 @@
         },
         "inactive_fraction": 0.3392,
         "mean_delta": 0.2547,
+        "helped_precision": 0.5575,
+        "gain_capture": 0.3893,
         "jaccard_with_oracle": 0.1646
       }
     },
+    "p_helped": 0.5034,
+    "jaccard_valid": true,
+    "random_gain_capture": 0.3499,
     "examples": {
       "failure_selected_but_inactive": [
         {
@@ -506,6 +565,8 @@
         },
         "inactive_fraction": 0.8343,
         "mean_delta": 0.0054,
+        "helped_precision": 0.0877,
+        "gain_capture": 0.1838,
         "jaccard_with_oracle": 0.1312
       },
       "nqc": {
@@ -520,6 +581,8 @@
         },
         "inactive_fraction": 0.8694,
         "mean_delta": 0.003,
+        "helped_precision": 0.0624,
+        "gain_capture": 0.1296,
         "jaccard_with_oracle": 0.1287
       },
       "benefit_linear": {
@@ -534,6 +597,8 @@
         },
         "inactive_fraction": 0.7193,
         "mean_delta": 0.0048,
+        "helped_precision": 0.152,
+        "gain_capture": 0.2459,
         "jaccard_with_oracle": 0.1477
       },
       "oracle": {
@@ -548,6 +613,8 @@
         },
         "inactive_fraction": 0.4815,
         "mean_delta": 0.1114,
+        "helped_precision": 0.5185,
+        "gain_capture": 1.0,
         "jaccard_with_oracle": 1.0
       },
       "B1_gbdt": {
@@ -562,9 +629,14 @@
         },
         "inactive_fraction": 0.6823,
         "mean_delta": 0.0138,
+        "helped_precision": 0.1657,
+        "gain_capture": 0.3436,
         "jaccard_with_oracle": 0.1477
       }
     },
+    "p_helped": 0.1296,
+    "jaccard_valid": false,
+    "random_gain_capture": 0.25,
     "examples": {
       "failure_selected_but_inactive": [
         {
@@ -622,6 +694,8 @@
         },
         "inactive_fraction": 0.9167,
         "mean_delta": -0.0053,
+        "helped_precision": 0.037,
+        "gain_capture": 0.1701,
         "jaccard_with_oracle": 0.1489
       },
       "nqc": {
@@ -636,6 +710,8 @@
         },
         "inactive_fraction": 0.9167,
         "mean_delta": -0.0049,
+        "helped_precision": 0.0463,
+        "gain_capture": 0.3721,
         "jaccard_with_oracle": 0.1676
       },
       "B1_gbdt": {
@@ -650,6 +726,8 @@
         },
         "inactive_fraction": 0.9352,
         "mean_delta": -0.0017,
+        "helped_precision": 0.0278,
+        "gain_capture": 0.1733,
         "jaccard_with_oracle": 0.1368
       },
       "oracle": {
@@ -664,9 +742,14 @@
         },
         "inactive_fraction": 0.8426,
         "mean_delta": 0.0145,
+        "helped_precision": 0.1574,
+        "gain_capture": 1.0,
         "jaccard_with_oracle": 1.0
       }
     },
+    "p_helped": 0.0395,
+    "jaccard_valid": false,
+    "random_gain_capture": 0.25,
     "examples": {
       "failure_selected_but_inactive": [
         {
@@ -724,6 +807,8 @@
         },
         "inactive_fraction": 0.4444,
         "mean_delta": -0.1607,
+        "helped_precision": 0.1667,
+        "gain_capture": 0.179,
         "jaccard_with_oracle": 0.0964
       },
       "nqc": {
@@ -738,6 +823,8 @@
         },
         "inactive_fraction": 0.4167,
         "mean_delta": -0.1767,
+        "helped_precision": 0.1574,
+        "gain_capture": 0.1994,
         "jaccard_with_oracle": 0.0854
       },
       "B1_gbdt": {
@@ -752,6 +839,8 @@
         },
         "inactive_fraction": 0.3241,
         "mean_delta": -0.1302,
+        "helped_precision": 0.2593,
+        "gain_capture": 0.258,
         "jaccard_with_oracle": 0.1676
       },
       "oracle": {
@@ -766,9 +855,14 @@
         },
         "inactive_fraction": 0.037,
         "mean_delta": 0.2887,
+        "helped_precision": 0.963,
+        "gain_capture": 1.0,
         "jaccard_with_oracle": 1.0
       }
     },
+    "p_helped": 0.2419,
+    "jaccard_valid": false,
+    "random_gain_capture": 0.25,
     "examples": {
       "failure_selected_but_inactive": [
         {
@@ -826,6 +920,8 @@
         },
         "inactive_fraction": 0.4167,
         "mean_delta": -0.0696,
+        "helped_precision": 0.2037,
+        "gain_capture": 0.2295,
         "jaccard_with_oracle": 0.1134
       },
       "nqc": {
@@ -840,6 +936,8 @@
         },
         "inactive_fraction": 0.3704,
         "mean_delta": -0.0435,
+        "helped_precision": 0.2963,
+        "gain_capture": 0.3088,
         "jaccard_with_oracle": 0.1676
       },
       "B1_gbdt": {
@@ -854,6 +952,8 @@
         },
         "inactive_fraction": 0.2778,
         "mean_delta": -0.025,
+        "helped_precision": 0.3056,
+        "gain_capture": 0.3181,
         "jaccard_with_oracle": 0.1613
       },
       "oracle": {
@@ -868,9 +968,14 @@
         },
         "inactive_fraction": 0.0,
         "mean_delta": 0.4005,
+        "helped_precision": 1.0,
+        "gain_capture": 1.0,
         "jaccard_with_oracle": 1.0
       }
     },
+    "p_helped": 0.2721,
+    "jaccard_valid": true,
+    "random_gain_capture": 0.2519,
     "examples": {
       "failure_selected_but_inactive": [
         {

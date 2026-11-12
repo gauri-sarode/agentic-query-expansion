@@ -62,10 +62,19 @@ def diagnose(d: np.ndarray, F: np.ndarray, scorers: dict[str, np.ndarray]) -> di
            "oracle_gain_share": {k: float(dp[c == k].sum() / dp.sum()) if dp.sum() > 0 else None for k in CATS},
            "budget": BUDGET, "selected": {}}
     sel = {m: select(s, BUDGET) for m, s in scorers.items()}
+    # Post-review (tie-free): the oracle's top 25% is padded with Delta=0 ties in
+    # query order whenever P(Delta>0) < 25%, so its Jaccard is only reported where
+    # it is not (jaccard_valid). helped_precision and gain_capture need no ties.
+    helped = d > EPS
+    out["p_helped"] = float(helped.mean())
+    out["jaccard_valid"] = bool(helped.mean() >= BUDGET)
+    out["random_gain_capture"] = float(BUDGET * dp.sum() / dp[sel["oracle"]].sum()) if dp.sum() > 0 else None
     for m, mask in sel.items():
         out["selected"][m] = {"composition": {k: float((c[mask] == k).mean()) for k in CATS},
                               "inactive_fraction": float((np.abs(d[mask]) <= EPS).mean()),
                               "mean_delta": float(d[mask].mean()),
+                              "helped_precision": float(helped[mask].mean()),
+                              "gain_capture": float(dp[mask].sum() / dp[sel["oracle"]].sum()) if dp.sum() > 0 else None,
                               "jaccard_with_oracle": float((mask & sel["oracle"]).sum() / (mask | sel["oracle"]).sum())}
     return out
 
