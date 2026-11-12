@@ -1,0 +1,62 @@
+{
+  "name": "fiqa_core_claim_replication",
+  "written": "2026-11-12",
+  "status": "Pre-committed before FiQA was downloaded. FiQA has never been used in this project (no file, commit or ir_datasets cache entry mentions it). No FiQA query, document, ranking or relevance judgment had been seen when this was written. Every quantity under 'primary' and 'descriptive' is reported regardless of outcome (paper: summary; repository: full aggregates).",
+  "question": "Do the post-review findings of the WSDM paper, all found on inspected traces, replicate on untouched data: (P1) a failure detector ranks 'the intervention helps' (Delta>0) worse than it ranks failure; (P2) among failing queries it ranks the rescued ones no better than chance (the paper's traces show it ranks them lower); (P3/P4) a ten-candidate reranking probe routes better than failure and B1 routing where reranking usually helps?",
+  "data": {
+    "source": "ir_datasets 'beir/fiqa' (BEIR FiQA-2018: 57,638 documents; official train 5,500 / dev 500 / test 648 queries; qrels as distributed). Downloaded into ir_datasets' cache only (fiqa.zip, 17.9 MB, public BEIR mirror); nothing from it is committed.",
+    "split": "Official splits. train: the first 1,500 train queries ordered by sha256(query_id + ':42') (to bound compute; fitting only). val: all 500 dev queries. test: all 648 test queries. Written to configs/fiqa_split.json and committed before any retrieval run.",
+    "metric": "nDCG@10 (the project's src/eval/metrics), relevance as distributed."
+  },
+  "retrieval": "SQLite FTS5 BM25 over title + text, the project's default weights (no tuning on FiQA). Top-100.",
+  "interventions": {
+    "rerank": "Identical to configs/arguana_precommit.json and configs/intervention_scope_precommit.json (MiniLM cross-encoder over the BM25 top-100, reranked top-50 lead, remaining BM25 order follows). No tuning.",
+    "prf": "Identical RM3-style procedure and 108-setting grid; the setting is chosen by val mean nDCG@10 only, then frozen for test.",
+    "llm_qe": "Not run (time before the 2026-11-17 deadline). Stated here, not decided after results.",
+    "priority": "Reranking first, then PRF. PRF is dropped only if it cannot finish before 2026-11-15; any drop is recorded as an amendment before test labels are read.",
+    "cost": "Per-query wall-clock latency of reranking, the ten-candidate probe and PRF is logged; median and P95 reported."
+  },
+  "labels": {
+    "delta": "Delta_a(q) = nDCG@10(intervened) - nDCG@10(BM25 original).",
+    "failure": "F = 1[nDCG@10(original) = 0].",
+    "helped": "Delta > 1e-9.",
+    "harm": "Delta < -1e-9; ties not harmed."
+  },
+  "features": {
+    "pre_action": "The paper's 8 t0 features from compute_retrieval_telemetry on the BM25 top-100, plus NQC (std/mean of the top-100 BM25 scores) and query length: 10 features (as ArguAna).",
+    "semantic": "Frozen bge-small-en-v1.5 query embeddings (for B2 only).",
+    "probe": "Cross-encoder scores of the first 20 BM25 candidates (scripts/58 procedure); probe features for k in {5, 10, 20} as scripts/60 probe_features."
+  },
+  "scorers": {
+    "runner": "scripts/54_baseline_runner.py unchanged (as the ArguAna primary family) on an export in the arguana_frozen.csv format: failure (logistic on the 10 pre-action features), nqc, B1_gbdt, B2_semantic_knn, B3_quantile_LCB, oracle; learned scorers fit on train, selected on val, scored once on test. The paper's 'failure score' below is the runner's failure column.",
+    "probe_10": "scripts/60 procedure unchanged: rn.cat_gbdt fit on train probe features (k=10, primary) and Delta of full reranking, selected on val, scored once on test. k=5, 20 secondary."
+  },
+  "primary": {
+    "family": "One Holm family over P1-rerank, P1-prf, P2-rerank, P2-prf, P3, P4 at alpha 0.05. A P2 test with fewer than 20 rescued failing test queries is reported as not evaluable and removed from the family before adjustment.",
+    "P1": "Per intervention: AUC(F, failure score) - AUC(Delta>0, failure score) on all test queries. Paired bootstrap (10,000 resamples over test queries, seed 42) 95% CI and two-sided p. Replicates if Holm-significant and positive.",
+    "P2": "Per intervention: AUC(Delta>0, failure score) among test queries with F=1, against 0.5. Bootstrap 95% CI and two-sided p of AUC - 0.5. 'Inverted' if Holm-significant and below 0.5; 'no better than chance' if not significant; contradicted if significantly above 0.5.",
+    "P3": "Reranking: Probe-10 routing minus failure routing, budget-averaged over 10/25/50/75% reranked (rn.bootstrap_pair, sign-flip p, 10,000 resamples), as the paper's primary probe tests.",
+    "P4": "Reranking: Probe-10 routing minus B1_gbdt routing, same procedure.",
+    "P3_P4_prediction": "Fixed now: if mean reranking Delta on val is > 0, the paper's account predicts P3 and P4 positive; otherwise it predicts no significant difference. The val mean is recorded before test labels are read. Tests are two-sided either way."
+  },
+  "descriptive": [
+    "failure-only ceiling share E[F(Delta-k)_+]/E[(Delta-k)_+] at kappa in {0, 0.01, 0.02} with bootstrap CIs; rescue and healthy helped/harmed rates",
+    "budget-capped restricted oracle (scripts/65 definitions) at caps 10/25/50/75/100% and kappa in {0, 0.02}; failure-gate realised gain, its share of V* and V_F*, share of its picks failing",
+    "same-target AUC (help vs rest, help vs harm among changed, Spearman with Delta) for failure, nqc, B1, B2, B3, probe_10, with CIs of each minus failure (scripts/65 definitions)",
+    "runner primary contrasts (B1 vs failure, B2 vs failure, B3 vs B1 budget cap), labelled secondary",
+    "probe vs NQC at matched fraction and at equal median and P95 latency cost (scripts/62, 64 definitions), secondary",
+    "detection AUC minus action-utility harm AUC (the paper's Table 2 quantity), secondary",
+    "latency median and P95 per intervention and probe"
+  ],
+  "data_use": {
+    "train": "Fit scorers.",
+    "val": "PRF setting, scorer selection, the P3/P4 prediction; inspected freely.",
+    "test": "Run each intervention once with frozen settings; one analysis pass by a script committed before test labels are read; no change to any setting, scorer or analysis after. Results reported regardless of outcome."
+  },
+  "audits_before_test": [
+    "no run script opens qrels (run scripts read query ids, texts and documents only)",
+    "exact-duplicate query texts across train/val/test (label-free), reported"
+  ],
+  "scope_limits": "One new corpus, 648 test queries, two interventions (no LLM QE), one cross-encoder. FiQA's sparse qrels make F common. Underpowered for differences below roughly 0.015 nDCG@10.",
+  "amendments": []
+}
