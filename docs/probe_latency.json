@@ -1,0 +1,185 @@
+{
+  "_note": "EXPLORATORY post-review; single machine, 50 validation queries per corpus; ArguAna telemetry median from docs/arguana_feature_latency.txt (no P95).",
+  "latency_s": {
+    "nq": {
+      "probe_5": {
+        "median": 0.054,
+        "p95": 0.076
+      },
+      "probe_10": {
+        "median": 0.052,
+        "p95": 0.091
+      },
+      "probe_20": {
+        "median": 0.101,
+        "p95": 0.168
+      },
+      "rest_5": {
+        "median": 0.378,
+        "p95": 0.534
+      },
+      "rest_10": {
+        "median": 0.406,
+        "p95": 0.588
+      },
+      "rest_20": {
+        "median": 0.386,
+        "p95": 0.552
+      },
+      "full": {
+        "median": 0.48,
+        "p95": 0.661
+      },
+      "telemetry": {
+        "median": 1.582,
+        "p95": 2.258
+      }
+    },
+    "tripclick": {
+      "probe_5": {
+        "median": 0.062,
+        "p95": 0.084
+      },
+      "probe_10": {
+        "median": 0.106,
+        "p95": 0.133
+      },
+      "probe_20": {
+        "median": 0.209,
+        "p95": 0.243
+      },
+      "rest_5": {
+        "median": 1.021,
+        "p95": 1.191
+      },
+      "rest_10": {
+        "median": 1.022,
+        "p95": 1.184
+      },
+      "rest_20": {
+        "median": 0.895,
+        "p95": 1.031
+      },
+      "full": {
+        "median": 1.114,
+        "p95": 1.276
+      },
+      "telemetry": {
+        "median": 0.347,
+        "p95": 1.352
+      }
+    },
+    "arguana": {
+      "probe_5": {
+        "median": 0.07,
+        "p95": 0.079
+      },
+      "probe_10": {
+        "median": 0.133,
+        "p95": 0.144
+      },
+      "probe_20": {
+        "median": 0.262,
+        "p95": 0.276
+      },
+      "rest_5": {
+        "median": 1.205,
+        "p95": 1.289
+      },
+      "rest_10": {
+        "median": 1.148,
+        "p95": 1.231
+      },
+      "rest_20": {
+        "median": 1.024,
+        "p95": 1.1
+      },
+      "full": {
+        "median": 1.264,
+        "p95": 1.356
+      },
+      "telemetry": {
+        "median": 0.317,
+        "p95": null
+      }
+    }
+  },
+  "nq": {
+    "probe10_minus_nqc_equal_cost": {
+      "median_s": {
+        "estimate": 0.0199,
+        "ci_low": 0.0124,
+        "ci_high": 0.0281,
+        "nqc_fraction_at_equal_cost": {
+          "0.1": 0.192,
+          "0.25": 0.319,
+          "0.5": 0.531,
+          "0.75": 0.742
+        }
+      },
+      "p95_s": {
+        "estimate": 0.01,
+        "ci_low": 0.0022,
+        "ci_high": 0.0176,
+        "nqc_fraction_at_equal_cost": {
+          "0.1": 0.227,
+          "0.25": 0.36,
+          "0.5": 0.583,
+          "0.75": 0.805
+        }
+      }
+    }
+  },
+  "tripclick": {
+    "probe10_minus_nqc_equal_cost": {
+      "median_s": {
+        "estimate": 0.0069,
+        "ci_low": 0.0004,
+        "ci_high": 0.0133,
+        "nqc_fraction_at_equal_cost": {
+          "0.1": 0.187,
+          "0.25": 0.325,
+          "0.5": 0.554,
+          "0.75": 0.783
+        }
+      },
+      "p95_s": {
+        "estimate": 0.0071,
+        "ci_low": 0.001,
+        "ci_high": 0.0138,
+        "nqc_fraction_at_equal_cost": {
+          "0.1": 0.197,
+          "0.25": 0.336,
+          "0.5": 0.568,
+          "0.75": 0.8
+        }
+      }
+    }
+  },
+  "arguana": {
+    "probe10_minus_nqc_equal_cost": {
+      "median_s": {
+        "estimate": 0.007,
+        "ci_low": -0.0122,
+        "ci_high": 0.0262,
+        "nqc_fraction_at_equal_cost": {
+          "0.1": 0.196,
+          "0.25": 0.332,
+          "0.5": 0.56,
+          "0.75": 0.787
+        }
+      },
+      "p95_s": {
+        "estimate": 0.007,
+        "ci_low": -0.0118,
+        "ci_high": 0.0263,
+        "nqc_fraction_at_equal_cost": {
+          "0.1": 0.197,
+          "0.25": 0.333,
+          "0.5": 0.56,
+          "0.75": 0.786
+        }
+      }
+    }
+  }
+}
