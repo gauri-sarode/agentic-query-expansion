@@ -5,6 +5,7 @@
       "n": 1175,
       "p_helped": 0.1157,
       "n_changed": 261,
+      "failure_auc_of_failure_score": 0.6493,
       "scores": {
         "failure": {
           "auc_help_vs_rest": {
@@ -371,6 +372,7 @@
       "n": 2052,
       "p_helped": 0.1321,
       "n_changed": 616,
+      "failure_auc_of_failure_score": 0.6801,
       "scores": {
         "failure": {
           "auc_help_vs_rest": {
@@ -783,6 +785,7 @@
       "n": 1175,
       "p_helped": 0.2094,
       "n_changed": 610,
+      "failure_auc_of_failure_score": 0.6493,
       "scores": {
         "failure": {
           "auc_help_vs_rest": {
@@ -1195,6 +1198,7 @@
       "n": 1175,
       "p_helped": 0.0715,
       "n_changed": 214,
+      "failure_auc_of_failure_score": 0.6493,
       "scores": {
         "failure": {
           "auc_help_vs_rest": {
@@ -1561,6 +1565,7 @@
       "n": 2052,
       "p_helped": 0.5034,
       "n_changed": 1234,
+      "failure_auc_of_failure_score": 0.6801,
       "scores": {
         "failure": {
           "auc_help_vs_rest": {
@@ -2019,6 +2024,7 @@
       "n": 2052,
       "p_helped": 0.1296,
       "n_changed": 500,
+      "failure_auc_of_failure_score": 0.6801,
       "scores": {
         "failure": {
           "auc_help_vs_rest": {
@@ -2431,6 +2437,7 @@
       "n": 1175,
       "p_helped": 0.1379,
       "n_changed": 359,
+      "failure_auc_of_failure_score": 0.6377,
       "scores": {
         "failure": {
           "auc_help_vs_rest": {
@@ -2705,6 +2712,7 @@
       "n": 2052,
       "p_helped": 0.1813,
       "n_changed": 803,
+      "failure_auc_of_failure_score": 0.6878,
       "scores": {
         "failure": {
           "auc_help_vs_rest": {
@@ -2979,6 +2987,7 @@
       "n": 430,
       "p_helped": 0.0395,
       "n_changed": 38,
+      "failure_auc_of_failure_score": 0.6506,
       "scores": {
         "failure": {
           "auc_help_vs_rest": {
@@ -3345,6 +3354,7 @@
       "n": 430,
       "p_helped": 0.2419,
       "n_changed": 303,
+      "failure_auc_of_failure_score": 0.6506,
       "scores": {
         "failure": {
           "auc_help_vs_rest": {
@@ -3711,6 +3721,7 @@
       "n": 430,
       "p_helped": 0.2721,
       "n_changed": 297,
+      "failure_auc_of_failure_score": 0.6506,
       "scores": {
         "failure": {
           "auc_help_vs_rest": {

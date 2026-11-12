@@ -31,21 +31,19 @@ on healthy queries, which it never sees. On TripClick and BEIR NQ,
 across eight intervention, corpus, and retriever settings, this
 failure-only ceiling is, without a budget cap, $8$--$57\%$ of the oracle's gain; a
 pre-registered run on an untouched benchmark (ArguAna) gives
-$18$--$39\%$ (at a per-query cost of $0.02$ nDCG@10: $8$--$57\%$ and
-$22$--$41\%$). Under a $10\%$ cap (exploratory) it can loosen (to $98\%$ on NQ
-reranking), yet the failure gate realises at most a quarter of the
-capped oracle's gain. Detection is ordinary QPP (AUC $0.62$--$0.70$),
+$18$--$39\%$ ($8$--$57\%$ and $22$--$41\%$ at a per-query cost of
+$0.02$). Under a $10\%$ cap (exploratory) it loosens for rescue-rich
+interventions (to $98\%$ on NQ reranking), yet the failure gate
+realises at most $24\%$ of the unrestricted oracle's gain at that cap. Detection is ordinary QPP (AUC $0.62$--$0.70$),
 but against the same benefit label ($\Delta>0$; exploratory) it reaches only
 $0.42$--$0.56$. At matched budgets, failure, NQC, and pre-action benefit
 routing stay near
 random, and failure routing spends a substantial fraction of its
-budget on failing queries the intervention leaves unchanged. In an exploratory analysis,
-observing part of the intervention helps where it usually helps: on
-NQ, routing reranking on cross-encoder scores of the first ten
-candidates beats failure routing by $+0.024$ nDCG@10 at matched
-reranking fractions and NQC routing by $+0.010$ to $+0.020$ at equal
-measured cost (P95 or median latency), but not on TripClick or
-ArguAna.
+budget on failing queries the intervention leaves unchanged. Exploratory probes of the
+intervention help where it usually helps: on NQ, routing reranking on
+cross-encoder scores of ten candidates beats failure routing by
+$+0.024$ nDCG@10 at matched fractions and NQC by $+0.010$ to $+0.020$
+at equal cost (P95 or median latency); not on TripClick or ArguAna.
 \end{abstract}
 
 \maketitle
@@ -77,7 +75,7 @@ positive cost (Section~\ref{sec:framework}).
 corpora, one pre-registered and untouched: the uncapped \emph{failure-only
 ceiling} is $8$--$57\%$ of the oracle's gain, failure scores rank
 helped queries weakly, and no pre-action predictor we test recovers
-the rest; at small budgets the gate's picks bind, not the ceiling.
+the rest; eligibility and selection within it limit the gate together.
 \textbf{(C3)} Routing at matched budgets and measured cost, with
 partial probes of the intervention as a test of whether
 intervention-specific evidence changes the decision.
@@ -109,9 +107,9 @@ Mallen et al.~\cite{mallen-adaptive} retrieve only for less popular
 entities; cascade rankers~\cite{cascade-ranking} spend costly stages
 only on promising candidates, and cutoff and efficiency
 predictors~\cite{culpepper-cutoff,tonellotto-selective} set per-query
-reranking depth or pruning. In uplift terms~\cite{causal-classification}, our setting
-is unusually clean: both outcomes are observed for every query
-offline, so the uplift label is exact up to relevance-label noise.
+reranking depth or pruning. In uplift terms~\cite{causal-classification}, both
+outcomes are observed offline, so our label is exact up to relevance
+noise.
 
 \section{Framework}
 \label{sec:framework}
@@ -252,15 +250,17 @@ best failure-restricted policy reaches $8$--$57\%$ of the oracle's gain
 pays a further $0.004$--$0.011$ and loses outright for PRF and dense
 TripClick QE.
 
-\textbf{Under a budget cap} (exploratory, post-review) the restriction binds less
-where rescues are common. At a $10\%$ cap failing queries hold $98\%$
+\textbf{Under a budget cap} (exploratory, post-review) the restriction loosens
+only where rescues are common. At a $10\%$ cap failing queries hold $98\%$
 $[97,99]$ of the capped oracle's gain for NQ reranking and
 $54$--$67\%$ for the other reranking and ArguAna QE settings; the
-other seven stay within $0.06$ of their uncapped share, and from $25\%$
+other seven stay within $0.06$ of their uncapped share ($8$--$43\%$), and from $25\%$
 all are within $0.004$ of it but NQ reranking ($80\%$; $\kappa=0$, alike at $0.02$).
-Yet at $10\%$ the failure gate realises at most $24\%$ of the capped
-oracle's gain, and loses on ArguAna, where $35\%$ of its picks fail:
-at small budgets the gate's picks, not the restriction, bind.
+The gate also selects poorly within the eligible set: at $10\%$ it
+realises at most $34\%$ of the restricted ceiling ($24\%$ of the capped
+oracle) and loses in five settings, all three on ArguAna, and at
+$25$--$75\%$ in most. Eligibility and selection limit failure routing
+together at every budget below $100\%$.
 
 \textbf{Which queries a failure gate picks.} At a $25\%$ budget
 (exploratory; categories prespecified, summaries chosen after
@@ -313,9 +313,10 @@ beats it on NQ ($0.721$ vs.\ $0.680$).
 
 \textbf{Against the same label, it is weak.} On whether the
 intervention helps ($\Delta>0$; exploratory, post-review), the
-detector's AUC is $0.42$--$0.56$ in all eleven settings, its interval
+detector's AUC is $0.42$--$0.56$ in all eleven settings ($0.64$--$0.69$
+for failure on the same queries), its interval
 below $0.5$ for NQ PRF and ArguAna QE and reranking and above only for
-dense NQ QE. Benefit scores beat it on NQ reranking ($+0.08$ to
+dense NQ QE. Benefit scores, themselves weak (AUC $\le0.58$; NQ probe $0.65$), beat it on NQ reranking ($+0.08$ to
 $+0.17$, probe largest), NQ PRF, and ArguAna QE and reranking
 ($+0.07$ to $+0.12$); elsewhere differences span zero, but the linear
 model trails it on TripClick PRF ($-0.06$). NQC, a better failure
@@ -531,11 +532,12 @@ their base rate, and
 failure routing spends a substantial fraction of its budget where the
 intervention does nothing. The second alone would fit `no pre-action signal we test
 predicts benefit'; the first is what makes failure specifically the
-wrong target. They bind in different regimes: the ceiling at large
-budgets, the gate's picks at small ones. Pre-action telemetry describes the original ranking,
-while $\Delta_a$ depends on what the intervention retrieves. For these systems only: on NQ, always reranking is
-better when its $0.48$\,s is affordable, with probes the cheaper
-trade-off; on TripClick and ArguAna, not reranking is better on average.
+wrong target. Both limits coexist: the restriction excludes healthy gains, the gate
+selects poorly among failing queries, and small caps loosen only the
+first, for rescue-rich interventions. Pre-action telemetry describes the original ranking,
+while $\Delta_a$ depends on what the intervention retrieves. For these systems only: on NQ, always rerank when its
+$0.48$\,s is affordable, else probe; on TripClick and ArguAna,
+skipping reranking is better on average.
 
 \textbf{Limitations.} One small (3B) generator; reranking and PRF only
 under BM25, with one cross-encoder and one PRF family. Three corpora,
@@ -547,13 +549,13 @@ click-derived and sparse. The cost weight $\kappa$ is illustrative;
 latencies are single-machine measurements (median, with a P95
 check), and probes cover reranking only. TripClick's QE benefit model uses the unfused validation label. Apart from
 ArguAna, all analyses reuse inspected test sets; every pre-committed
-quantity is reported in full in the repository.
+quantity is reported in full.
 
 \section{Conclusion}
 
 A controller acting only on failing queries gets at most the oracle's
-gain on them ($8$--$57\%$ uncapped); at small caps the gate's picks
-bind instead. Failure detection ranks helped queries weakly (AUC
+gain on them ($8$--$57\%$ uncapped), and a failure gate selects
+poorly even among them. Failure detection ranks helped queries weakly (AUC
 $0.42$--$0.56$); a partial probe helps only where the intervention usually
 helps. Selective-intervention work should report the failure-only
 ceiling and cost-aware routing curves, not only AUC.

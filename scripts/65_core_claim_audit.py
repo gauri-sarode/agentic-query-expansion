@@ -59,14 +59,14 @@ def target_metrics(d: np.ndarray, s: np.ndarray) -> dict:
             "spearman_delta": float(spearmanr(s, d).statistic)}
 
 
-def same_target(d: np.ndarray, scorers: dict[str, np.ndarray]) -> dict:
+def same_target(d: np.ndarray, F: np.ndarray, scorers: dict[str, np.ndarray]) -> dict:
     rng = np.random.default_rng(SEED)
     idx = [rng.integers(0, len(d), len(d)) for _ in range(NBOOT)]
     keys = ("auc_help_vs_rest", "auc_help_vs_harm", "spearman_delta")
     point = {m: target_metrics(d, s) for m, s in scorers.items()}
     boot = {m: np.array([[target_metrics(d[i], s[i])[k] for k in keys] for i in idx]) for m, s in scorers.items()}
     out = {"n": int(len(d)), "p_helped": float((d > EPS).mean()), "n_changed": int((np.abs(d) > EPS).sum()),
-           "scores": {}}
+           "failure_auc_of_failure_score": auc(F, scorers["failure"]), "scores": {}}
     for m in scorers:
         out["scores"][m] = {k: {"estimate": point[m][k],
                                 "ci": [float(np.nanquantile(boot[m][:, j], .025)), float(np.nanquantile(boot[m][:, j], .975))]}
@@ -153,7 +153,7 @@ def main() -> None:
         settings.append((f"{action}_arguana", d, g["original_ndcg"].to_numpy() <= EPS, sc))
 
     for nm, d, F, sc in settings:
-        res[nm] = {"same_target": same_target(d, sc), "budgeted_oracle": budgeted(d, F, da.KAPPAS, sc["failure"])}
+        res[nm] = {"same_target": same_target(d, F, sc), "budgeted_oracle": budgeted(d, F, da.KAPPAS, sc["failure"])}
         st = res[nm]["same_target"]["scores"]
         print(f"{nm:26s} pH={np.mean(d > EPS):.3f} " + " | ".join(
             f"{m}: {v['auc_help_vs_rest']['estimate']:.3f}/{v['auc_help_vs_harm']['estimate']:.3f}/{v['spearman_delta']['estimate']:+.3f}"
