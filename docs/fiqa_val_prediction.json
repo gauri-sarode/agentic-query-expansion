@@ -1,0 +1,6 @@
+{
+  "_note": "configs/fiqa_precommit.json P3_P4_prediction, recorded before test labels are read.",
+  "val_mean_rerank_delta": 0.1011,
+  "n_val": 500,
+  "prediction": "P3 and P4 positive"
+}
