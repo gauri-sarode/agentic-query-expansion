@@ -1,0 +1,19 @@
+\begin{table}[t]
+\caption{ArguAna test ($n=430$): pre-action routing gain over BM25
+($\times10^3$), averaged over budgets of $10$--$100\%$ (registered). B1: gradient
+boosting on $\Delta$; B2: $k$-NN over frozen query embeddings; B3:
+lower-quantile boosting. Always: intervening on every query (no
+budget); Rand.\ is the mean budget times Always.}
+\label{tab:arguana}
+\footnotesize
+\setlength{\tabcolsep}{2.2pt}
+\begin{tabular}{@{}lrrrrrrrr@{}}
+\toprule
+ & Always & Fail. & NQC & B1 & B2 & B3 & Rand. & Oracle \\
+\midrule
+Reranking & $-71.1$ & $-40.7$ & $-35.3$ & $-25.4$ & $-32.2$ & $-36.3$ & $-37.0$ & 52.8 \\
+PRF       & $-2.4$ & $-1.2$ & $-1.1$ & $-1.1$ & $-1.3$ & $-0.4$ & $-1.2$ & 2.4 \\
+LLM QE    & $-162.8$ & $-87.3$ & $-91.3$ & $-80.5$ & $-79.7$ & $-84.0$ & $-84.6$ & 9.9 \\
+\bottomrule
+\end{tabular}
+\end{table}
