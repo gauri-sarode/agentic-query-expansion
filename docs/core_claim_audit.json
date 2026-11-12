@@ -5,6 +5,15 @@
       "n": 1175,
       "p_helped": 0.1157,
       "n_changed": 261,
+      "failure_auc_helped_within_failing": {
+        "estimate": 0.4705,
+        "n_failing": 529,
+        "n_rescued": 38,
+        "ci": [
+          0.357,
+          0.5829
+        ]
+      },
       "failure_auc_of_failure_score": 0.6493,
       "scores": {
         "failure": {
@@ -372,6 +381,15 @@
       "n": 2052,
       "p_helped": 0.1321,
       "n_changed": 616,
+      "failure_auc_helped_within_failing": {
+        "estimate": 0.4395,
+        "n_failing": 1007,
+        "n_rescued": 69,
+        "ci": [
+          0.3753,
+          0.5074
+        ]
+      },
       "failure_auc_of_failure_score": 0.6801,
       "scores": {
         "failure": {
@@ -785,6 +803,15 @@
       "n": 1175,
       "p_helped": 0.2094,
       "n_changed": 610,
+      "failure_auc_helped_within_failing": {
+        "estimate": 0.4385,
+        "n_failing": 529,
+        "n_rescued": 90,
+        "ci": [
+          0.3753,
+          0.5028
+        ]
+      },
       "failure_auc_of_failure_score": 0.6493,
       "scores": {
         "failure": {
@@ -1198,6 +1225,15 @@
       "n": 1175,
       "p_helped": 0.0715,
       "n_changed": 214,
+      "failure_auc_helped_within_failing": {
+        "estimate": 0.3805,
+        "n_failing": 529,
+        "n_rescued": 4,
+        "ci": [
+          0.1097,
+          0.8656
+        ]
+      },
       "failure_auc_of_failure_score": 0.6493,
       "scores": {
         "failure": {
@@ -1565,6 +1601,15 @@
       "n": 2052,
       "p_helped": 0.5034,
       "n_changed": 1234,
+      "failure_auc_helped_within_failing": {
+        "estimate": 0.3708,
+        "n_failing": 1007,
+        "n_rescued": 461,
+        "ci": [
+          0.3363,
+          0.4052
+        ]
+      },
       "failure_auc_of_failure_score": 0.6801,
       "scores": {
         "failure": {
@@ -2024,6 +2069,15 @@
       "n": 2052,
       "p_helped": 0.1296,
       "n_changed": 500,
+      "failure_auc_helped_within_failing": {
+        "estimate": 0.3397,
+        "n_failing": 1007,
+        "n_rescued": 53,
+        "ci": [
+          0.2716,
+          0.4091
+        ]
+      },
       "failure_auc_of_failure_score": 0.6801,
       "scores": {
         "failure": {
@@ -2437,6 +2491,15 @@
       "n": 1175,
       "p_helped": 0.1379,
       "n_changed": 359,
+      "failure_auc_helped_within_failing": {
+        "estimate": 0.5087,
+        "n_failing": 688,
+        "n_rescued": 40,
+        "ci": [
+          0.4304,
+          0.5857
+        ]
+      },
       "failure_auc_of_failure_score": 0.6377,
       "scores": {
         "failure": {
@@ -2712,6 +2775,15 @@
       "n": 2052,
       "p_helped": 0.1813,
       "n_changed": 803,
+      "failure_auc_helped_within_failing": {
+        "estimate": 0.5042,
+        "n_failing": 540,
+        "n_rescued": 82,
+        "ci": [
+          0.4387,
+          0.571
+        ]
+      },
       "failure_auc_of_failure_score": 0.6878,
       "scores": {
         "failure": {
@@ -2987,6 +3059,15 @@
       "n": 430,
       "p_helped": 0.0395,
       "n_changed": 38,
+      "failure_auc_helped_within_failing": {
+        "estimate": 0.5055,
+        "n_failing": 92,
+        "n_rescued": 1,
+        "ci": [
+          0.4058,
+          0.6173
+        ]
+      },
       "failure_auc_of_failure_score": 0.6506,
       "scores": {
         "failure": {
@@ -3354,6 +3435,15 @@
       "n": 430,
       "p_helped": 0.2419,
       "n_changed": 303,
+      "failure_auc_helped_within_failing": {
+        "estimate": 0.3642,
+        "n_failing": 92,
+        "n_rescued": 25,
+        "ci": [
+          0.254,
+          0.4821
+        ]
+      },
       "failure_auc_of_failure_score": 0.6506,
       "scores": {
         "failure": {
@@ -3721,6 +3811,15 @@
       "n": 430,
       "p_helped": 0.2721,
       "n_changed": 297,
+      "failure_auc_helped_within_failing": {
+        "estimate": 0.3354,
+        "n_failing": 92,
+        "n_rescued": 33,
+        "ci": [
+          0.2227,
+          0.4529
+        ]
+      },
       "failure_auc_of_failure_score": 0.6506,
       "scores": {
         "failure": {

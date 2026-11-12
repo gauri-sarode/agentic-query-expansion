@@ -65,7 +65,13 @@ def same_target(d: np.ndarray, F: np.ndarray, scorers: dict[str, np.ndarray]) ->
     keys = ("auc_help_vs_rest", "auc_help_vs_harm", "spearman_delta")
     point = {m: target_metrics(d, s) for m, s in scorers.items()}
     boot = {m: np.array([[target_metrics(d[i], s[i])[k] for k in keys] for i in idx]) for m, s in scorers.items()}
+    # Within failing queries: does the failure score rank the rescued ones higher?
+    fs = scorers["failure"]
+    wf = [auc(d[i][F[i]] > EPS, fs[i][F[i]]) for i in idx]
+    within = {"estimate": auc(d[F] > EPS, fs[F]), "n_failing": int(F.sum()), "n_rescued": int(((d > EPS) & F).sum()),
+              "ci": [float(np.nanquantile(wf, .025)), float(np.nanquantile(wf, .975))]}
     out = {"n": int(len(d)), "p_helped": float((d > EPS).mean()), "n_changed": int((np.abs(d) > EPS).sum()),
+           "failure_auc_helped_within_failing": within,
            "failure_auc_of_failure_score": auc(F, scorers["failure"]), "scores": {}}
     for m in scorers:
         out["scores"][m] = {k: {"estimate": point[m][k],
