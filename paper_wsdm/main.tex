@@ -83,14 +83,14 @@ intervention-specific evidence changes the decision.
 
 \textbf{QPP and selective QE.} Pre- and post-retrieval QPP
 (Clarity~\cite{qpp-clarity}, WIG~\cite{wig}, NQC~\cite{nqc}) predicts
-query difficulty. Cronen-Townsend et al.~\cite{selective-qe} decide
-whether to expand by comparing the clarity of expanded and unexpanded
-rankings; Amati et al.~\cite{amati-selective} gate expansion on
-difficulty predictors; Lv and Zhai~\cite{lv-zhai-adaptive} predict a
-per-query feedback weight; Collins-Thompson~\cite{collins-thompson-risk}
-trades expansion reward against risk. These works evaluate the gated
-system in aggregate; they neither bound what a failure gate can
-recover nor compare gates at matched budgets.
+query difficulty. Cronen-Townsend et al.~\cite{selective-qe} compare
+the clarity of expanded and unexpanded rankings; Amati
+et al.~\cite{amati-selective} gate expansion on difficulty predictors;
+Lv and Zhai~\cite{lv-zhai-adaptive} predict a feedback weight;
+Collins-Thompson~\cite{collins-thompson-risk} trades reward against risk. Even idealised selective
+QE needs QPP at Kendall $\tau\ge0.5$~\cite{hauff-qpp-effective}. Such
+work sizes predictor accuracy or evaluates gated systems; none bounds what a failure gate can
+recover or compares gates at matched budgets.
 
 \textbf{LLM QE and adaptive retrieval.} Query2doc~\cite{query2doc},
 MuGI~\cite{mugi}, and CSQE~\cite{csqe} expand unconditionally;
