@@ -6,7 +6,7 @@ recomputed scores against the stored run where it has them.
 Outputs (results/ is gitignored): results/probes/{corpus}_{split}.json
 
 Usage: PYTHONPATH=. python scripts/58_probe_scores.py CORPUS SPLIT
-  CORPUS in {tripclick, nq, arguana}; SPLIT in {val, test} (arguana: all)
+  CORPUS in {tripclick, nq, arguana, fiqa}; SPLIT in {val, test} (arguana, fiqa: all)
 """
 
 from __future__ import annotations
@@ -35,6 +35,11 @@ def _load(name: str, path: str):
 
 def inputs(corpus: str, split: str) -> tuple[list[str], dict, dict, dict, str]:
     """qids, query texts, BM25 rankings, stored rerank rankings, db path."""
+    if corpus == "fiqa":
+        r67 = _load("r67", "scripts/67_fiqa_runs.py")
+        bm = {q: v["ranking"] for q, v in json.loads(Path("results/fiqa/bm25.json").read_text()).items()}
+        rr = {q: v["ranking"] for q, v in json.loads(Path("results/fiqa/rerank.json").read_text()).items()}
+        return r67.QIDS, r67.queries(), bm, rr, r67.DB
     if corpus == "arguana":
         a52 = _load("a52", "scripts/52_arguana_runs.py")
         bm = {q: v["ranking"] for q, v in json.loads(Path("results/arguana/bm25.json").read_text()).items()}
