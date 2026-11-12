@@ -2,7 +2,8 @@
 (no refitting of probe models): (1) probe-10 versus NQC routing, both at
 matched full-rerank fraction (10-75%) and at equal measured cost (NQC's
 fraction set so its cost equals probe-10's at each of 10/25/50/75%);
-(2) bootstrap CIs for Spearman(score, Delta). Writes rounded aggregates
+(2) bootstrap CIs for Spearman(score, Delta). Holm over the six NQC
+contrasts (matched fraction: sign-flip p; equal cost: bootstrap p). Writes rounded aggregates
 to docs/probe_followups.json.
 """
 
@@ -32,6 +33,7 @@ def main() -> None:
     rn = pp._load("rn54", "scripts/54_baseline_runner.py")
     lat = json.loads((pp.PROBES / "latency.json").read_text())
     res = {"_note": "EXPLORATORY post-review follow-ups on stored probe-10 test scores; not independent confirmation."}
+    ps = {}
     for corpus in ("nq", "tripclick", "arguana"):
         T = pp.corpus_data(corpus)["test"]
         d = T["delta"]
@@ -50,6 +52,7 @@ def main() -> None:
         out = {"matched_fraction_10_75": rn.bootstrap_pair(d, probe, nqc, budgets=pp.TEST_BUDGETS, nboot=NBOOT),
                "equal_cost": {"estimate": float(eq_cost_diff(full)),
                               "ci_low": float(np.quantile(draws, .025)), "ci_high": float(np.quantile(draws, .975)),
+                              "bootstrap_p": float(min(1.0, 2 * min((draws <= 0).mean(), (draws >= 0).mean()))),
                               "nqc_fraction_at_equal_cost": eq},
                "spearman": {}}
         scorers = {"probe_10": probe, **T["comparators"]}
@@ -63,13 +66,20 @@ def main() -> None:
         out["spearman"]["probe_10_minus_B1"] = {"ci_low": float(np.nanquantile(bs, .025)),
                                                 "ci_high": float(np.nanquantile(bs, .975))}
         res[corpus] = out
+        ps[f"{corpus}:matched"] = out["matched_fraction_10_75"]["signflip_p"]
+        ps[f"{corpus}:equal_cost"] = out["equal_cost"]["bootstrap_p"]
         print(corpus, json.dumps(out, default=float)[:900], flush=True)
+
+    res["holm_nqc"] = pp._load("da50", "scripts/50_decision_analyses.py").holm(ps)
+    print(json.dumps(res["holm_nqc"], default=float))
 
     def rnd(x):
         if isinstance(x, (float, np.floating)):
             return round(float(x), 4)
         if isinstance(x, dict):
             return {str(k): rnd(v) for k, v in x.items()}
+        if isinstance(x, (np.bool_,)):
+            return bool(x)
         return x
     Path("docs/probe_followups.json").write_text(json.dumps(rnd(res), indent=2) + "\n")
 

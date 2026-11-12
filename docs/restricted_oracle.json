@@ -1,0 +1,388 @@
+{
+  "_note": "Post-review; frozen inspected traces except ArguAna (pre-registered test); no fitting.",
+  "llm_qe_tripclick": {
+    "0.0": {
+      "oracle": 0.0246,
+      "restricted_best": 0.0103,
+      "healthy_gap": 0.0143,
+      "share_restricted": 0.4182,
+      "share_ci": [
+        0.3152,
+        0.5208
+      ],
+      "all_failures_policy": 0.0103
+    },
+    "0.01": {
+      "oracle": 0.0234,
+      "restricted_best": 0.01,
+      "healthy_gap": 0.0135,
+      "share_restricted": 0.4251,
+      "share_ci": [
+        0.3203,
+        0.5296
+      ],
+      "all_failures_policy": 0.0058
+    },
+    "0.02": {
+      "oracle": 0.0223,
+      "restricted_best": 0.0096,
+      "healthy_gap": 0.0127,
+      "share_restricted": 0.4321,
+      "share_ci": [
+        0.3256,
+        0.5385
+      ],
+      "all_failures_policy": 0.0013
+    }
+  },
+  "llm_qe_nq": {
+    "0.0": {
+      "oracle": 0.0415,
+      "restricted_best": 0.0135,
+      "healthy_gap": 0.028,
+      "share_restricted": 0.3257,
+      "share_ci": [
+        0.2592,
+        0.3948
+      ],
+      "all_failures_policy": 0.0135
+    },
+    "0.01": {
+      "oracle": 0.0402,
+      "restricted_best": 0.0132,
+      "healthy_gap": 0.027,
+      "share_restricted": 0.3281,
+      "share_ci": [
+        0.2609,
+        0.3978
+      ],
+      "all_failures_policy": 0.0086
+    },
+    "0.02": {
+      "oracle": 0.0389,
+      "restricted_best": 0.0128,
+      "healthy_gap": 0.026,
+      "share_restricted": 0.3304,
+      "share_ci": [
+        0.2626,
+        0.4009
+      ],
+      "all_failures_policy": 0.0037
+    }
+  },
+  "rerank_tripclick": {
+    "0.0": {
+      "oracle": 0.0616,
+      "restricted_best": 0.0323,
+      "healthy_gap": 0.0293,
+      "share_restricted": 0.5249,
+      "share_ci": [
+        0.4439,
+        0.6013
+      ],
+      "all_failures_policy": 0.0323
+    },
+    "0.01": {
+      "oracle": 0.0595,
+      "restricted_best": 0.0316,
+      "healthy_gap": 0.028,
+      "share_restricted": 0.5303,
+      "share_ci": [
+        0.448,
+        0.6074
+      ],
+      "all_failures_policy": 0.0278
+    },
+    "0.02": {
+      "oracle": 0.0576,
+      "restricted_best": 0.0308,
+      "healthy_gap": 0.0267,
+      "share_restricted": 0.5353,
+      "share_ci": [
+        0.4521,
+        0.6132
+      ],
+      "all_failures_policy": 0.0233
+    }
+  },
+  "prf_tripclick": {
+    "0.0": {
+      "oracle": 0.0123,
+      "restricted_best": 0.0009,
+      "healthy_gap": 0.0113,
+      "share_restricted": 0.0764,
+      "share_ci": [
+        0.0131,
+        0.1646
+      ],
+      "all_failures_policy": 0.0009
+    },
+    "0.01": {
+      "oracle": 0.0115,
+      "restricted_best": 0.0009,
+      "healthy_gap": 0.0106,
+      "share_restricted": 0.0781,
+      "share_ci": [
+        0.0132,
+        0.1695
+      ],
+      "all_failures_policy": -0.0036
+    },
+    "0.02": {
+      "oracle": 0.0109,
+      "restricted_best": 0.0009,
+      "healthy_gap": 0.01,
+      "share_restricted": 0.0798,
+      "share_ci": [
+        0.0132,
+        0.1736
+      ],
+      "all_failures_policy": -0.0081
+    }
+  },
+  "rerank_nq": {
+    "0.0": {
+      "oracle": 0.2505,
+      "restricted_best": 0.1424,
+      "healthy_gap": 0.1081,
+      "share_restricted": 0.5684,
+      "share_ci": [
+        0.5346,
+        0.6016
+      ],
+      "all_failures_policy": 0.1424
+    },
+    "0.01": {
+      "oracle": 0.2455,
+      "restricted_best": 0.1401,
+      "healthy_gap": 0.1054,
+      "share_restricted": 0.5709,
+      "share_ci": [
+        0.5369,
+        0.6041
+      ],
+      "all_failures_policy": 0.1375
+    },
+    "0.02": {
+      "oracle": 0.2405,
+      "restricted_best": 0.1379,
+      "healthy_gap": 0.1026,
+      "share_restricted": 0.5734,
+      "share_ci": [
+        0.5392,
+        0.6067
+      ],
+      "all_failures_policy": 0.1326
+    }
+  },
+  "prf_nq": {
+    "0.0": {
+      "oracle": 0.0278,
+      "restricted_best": 0.0089,
+      "healthy_gap": 0.019,
+      "share_restricted": 0.3183,
+      "share_ci": [
+        0.2475,
+        0.39
+      ],
+      "all_failures_policy": 0.0089
+    },
+    "0.01": {
+      "oracle": 0.0265,
+      "restricted_best": 0.0086,
+      "healthy_gap": 0.0179,
+      "share_restricted": 0.3241,
+      "share_ci": [
+        0.252,
+        0.397
+      ],
+      "all_failures_policy": 0.004
+    },
+    "0.02": {
+      "oracle": 0.0253,
+      "restricted_best": 0.0083,
+      "healthy_gap": 0.0169,
+      "share_restricted": 0.3301,
+      "share_ci": [
+        0.2568,
+        0.4045
+      ],
+      "all_failures_policy": -0.001
+    }
+  },
+  "llm_qe_tripclick_dense": {
+    "0.0": {
+      "oracle": 0.0297,
+      "restricted_best": 0.01,
+      "healthy_gap": 0.0196,
+      "share_restricted": 0.3383,
+      "share_ci": [
+        0.2505,
+        0.4339
+      ],
+      "all_failures_policy": 0.01
+    },
+    "0.01": {
+      "oracle": 0.0283,
+      "restricted_best": 0.0097,
+      "healthy_gap": 0.0186,
+      "share_restricted": 0.3428,
+      "share_ci": [
+        0.2532,
+        0.4404
+      ],
+      "all_failures_policy": 0.0042
+    },
+    "0.02": {
+      "oracle": 0.0269,
+      "restricted_best": 0.0094,
+      "healthy_gap": 0.0176,
+      "share_restricted": 0.3473,
+      "share_ci": [
+        0.2564,
+        0.4468
+      ],
+      "all_failures_policy": -0.0017
+    }
+  },
+  "llm_qe_nq_dense": {
+    "0.0": {
+      "oracle": 0.049,
+      "restricted_best": 0.0163,
+      "healthy_gap": 0.0327,
+      "share_restricted": 0.3325,
+      "share_ci": [
+        0.2694,
+        0.3956
+      ],
+      "all_failures_policy": 0.0163
+    },
+    "0.01": {
+      "oracle": 0.0472,
+      "restricted_best": 0.0159,
+      "healthy_gap": 0.0313,
+      "share_restricted": 0.3368,
+      "share_ci": [
+        0.2729,
+        0.4007
+      ],
+      "all_failures_policy": 0.0137
+    },
+    "0.02": {
+      "oracle": 0.0454,
+      "restricted_best": 0.0155,
+      "healthy_gap": 0.0299,
+      "share_restricted": 0.3413,
+      "share_ci": [
+        0.2763,
+        0.4061
+      ],
+      "all_failures_policy": 0.011
+    }
+  },
+  "prf_arguana": {
+    "0.0": {
+      "oracle": 0.0037,
+      "restricted_best": 0.0007,
+      "healthy_gap": 0.003,
+      "share_restricted": 0.1842,
+      "share_ci": [
+        0.0,
+        0.5154
+      ],
+      "all_failures_policy": 0.0007
+    },
+    "0.01": {
+      "oracle": 0.0033,
+      "restricted_best": 0.0006,
+      "healthy_gap": 0.0026,
+      "share_restricted": 0.1994,
+      "share_ci": [
+        0.0,
+        0.5612
+      ],
+      "all_failures_policy": -0.0015
+    },
+    "0.02": {
+      "oracle": 0.0029,
+      "restricted_best": 0.0006,
+      "healthy_gap": 0.0023,
+      "share_restricted": 0.2163,
+      "share_ci": [
+        0.0,
+        0.6136
+      ],
+      "all_failures_policy": -0.0036
+    }
+  },
+  "qe_arguana": {
+    "0.0": {
+      "oracle": 0.0725,
+      "restricted_best": 0.0286,
+      "healthy_gap": 0.0439,
+      "share_restricted": 0.3948,
+      "share_ci": [
+        0.2733,
+        0.5177
+      ],
+      "all_failures_policy": 0.0286
+    },
+    "0.01": {
+      "oracle": 0.0701,
+      "restricted_best": 0.028,
+      "healthy_gap": 0.0421,
+      "share_restricted": 0.4001,
+      "share_ci": [
+        0.2772,
+        0.5245
+      ],
+      "all_failures_policy": 0.0265
+    },
+    "0.02": {
+      "oracle": 0.0677,
+      "restricted_best": 0.0275,
+      "healthy_gap": 0.0403,
+      "share_restricted": 0.4055,
+      "share_ci": [
+        0.2809,
+        0.5323
+      ],
+      "all_failures_policy": 0.0243
+    }
+  },
+  "rerank_arguana": {
+    "0.0": {
+      "oracle": 0.1014,
+      "restricted_best": 0.0383,
+      "healthy_gap": 0.0631,
+      "share_restricted": 0.3774,
+      "share_ci": [
+        0.2701,
+        0.4869
+      ],
+      "all_failures_policy": 0.0383
+    },
+    "0.01": {
+      "oracle": 0.0986,
+      "restricted_best": 0.0375,
+      "healthy_gap": 0.0612,
+      "share_restricted": 0.38,
+      "share_ci": [
+        0.2719,
+        0.4902
+      ],
+      "all_failures_policy": 0.0361
+    },
+    "0.02": {
+      "oracle": 0.0959,
+      "restricted_best": 0.0367,
+      "healthy_gap": 0.0592,
+      "share_restricted": 0.3828,
+      "share_ci": [
+        0.2736,
+        0.4941
+      ],
+      "all_failures_policy": 0.034
+    }
+  }
+}

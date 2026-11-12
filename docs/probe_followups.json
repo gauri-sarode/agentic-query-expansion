@@ -11,6 +11,7 @@
       "estimate": 0.0199,
       "ci_low": 0.0119,
       "ci_high": 0.0279,
+      "bootstrap_p": 0.0,
       "nqc_fraction_at_equal_cost": {
         "0.1": 0.1924,
         "0.25": 0.3192,
@@ -56,6 +57,7 @@
       "estimate": 0.0069,
       "ci_low": 0.0002,
       "ci_high": 0.0134,
+      "bootstrap_p": 0.0452,
       "nqc_fraction_at_equal_cost": {
         "0.1": 0.1869,
         "0.25": 0.3246,
@@ -101,6 +103,7 @@
       "estimate": 0.007,
       "ci_low": -0.0127,
       "ci_high": 0.0268,
+      "bootstrap_p": 0.462,
       "nqc_fraction_at_equal_cost": {
         "0.1": 0.1961,
         "0.25": 0.3324,
@@ -133,6 +136,38 @@
         "ci_low": -0.1667,
         "ci_high": 0.0623
       }
+    }
+  },
+  "holm_nqc": {
+    "nq:equal_cost": {
+      "p": 0.0,
+      "p_holm": 0.0,
+      "reject": true
+    },
+    "nq:matched": {
+      "p": 0.0001,
+      "p_holm": 0.0005,
+      "reject": true
+    },
+    "tripclick:equal_cost": {
+      "p": 0.0452,
+      "p_holm": 0.1808,
+      "reject": false
+    },
+    "tripclick:matched": {
+      "p": 0.1511,
+      "p_holm": 0.4533,
+      "reject": false
+    },
+    "arguana:equal_cost": {
+      "p": 0.462,
+      "p_holm": 0.924,
+      "reject": false
+    },
+    "arguana:matched": {
+      "p": 0.7948,
+      "p_holm": 0.924,
+      "reject": false
     }
   }
 }
