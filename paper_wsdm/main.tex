@@ -94,7 +94,10 @@ MuGI~\cite{mugi}, and CSQE~\cite{csqe} expand unconditionally;
 generative expansions often hurt strong retrievers~\cite{weller-qe-fails}
 and fail on unfamiliar or ambiguous queries~\cite{qe-fails-unfamiliar}.
 Kotte~\cite{not-all-queries-need-rewriting} gates prompt-only rewriting
-for dense retrievers without reliable gain;
+for dense retrievers without reliable gain. Sarode~\cite{sarode-cods}
+finds that a learned selector over candidate LLM rewrites captures little
+oracle headroom and transfers inconsistently; we ask whether to intervene
+at all, across three interventions, and bound failure-restricted policies.
 Adaptive-RAG~\cite{adaptive-rag} routes on question complexity and
 Mallen et al.~\cite{mallen-adaptive} retrieve only for less popular
 entities; cascade rankers~\cite{cascade-ranking} spend costly stages
@@ -349,7 +352,10 @@ no better than the detector, and benefit routing beats failure
 routing only for reranking on NQ ($+0.009$ $[+0.003,+0.015]$), where
 it leads at every budget; averaging over $10$--$75\%$ only
 (exploratory; all policies coincide at $100\%$) leaves the same single
-Holm survivor ($+0.011$ $[+0.004,+0.019]$). The benefit model is
+Holm survivor ($+0.011$ $[+0.004,+0.019]$). Per budget
+(exploratory, uncorrected) it is $+0.010$ $[+0.004,+0.018]$ at $10\%$;
+ArguAna's B1 reranking lead at $10\%$ is $+0.018$ $[+0.001,+0.033]$,
+with intervals spanning zero at $25$--$75\%$. The benefit model is
 linear, but ArguAna's B1 and B2 (Section~\ref{sec:arguana}), fit on NQ
 validation (exploratory), do no better: neither beats failure routing
 after Holm for any intervention, and the best recovers $8\%$ of the
@@ -526,8 +532,7 @@ sevenfold across interventions. The other is empirical: the
 pre-action predictors we test, up to gradient boosting and query
 embeddings, select queries no closer to the oracle's than chance, and
 failure routing spends most of its budget where the intervention does
-nothing. Both outcomes are observed offline, so this is not counterfactual
-missingness; pre-action telemetry describes the original ranking,
+nothing. Pre-action telemetry describes the original ranking,
 while $\Delta_a$ depends on what the intervention retrieves. The
 probes support this only in part: a little of the intervention's own
 output locates its gains where it usually helps (NQ), not where it
