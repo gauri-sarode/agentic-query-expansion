@@ -10,7 +10,12 @@ Steps: bm25 (top-100 + 8 t0 features + NQC + query length), rerank,
   prf_d{D}_t{T} (expansion-term ranking; val only unless --all), embed.
 Each intervention record carries its wall-clock latency in ms.
 
-Usage: PYTHONPATH=. python3 scripts/75_iv_runs.py CORPUS STEP [--all] [--limit N]
+Usage: PYTHONPATH=. python3 scripts/75_iv_runs.py CORPUS STEP [--all] [--limit N] [--shard I/N]
+       PYTHONPATH=. python3 scripts/75_iv_runs.py CORPUS STEP [--all] --merge
+--shard I/N runs the queries at positions = I mod N (in parallel processes) into
+{step}.shard{I}.json; --merge folds the shard files into {step}.json in query
+order. Outputs are identical to a single-process run; per-record "ms" is not
+used for reported latency (scripts/76 time mode measures it in isolation).
 """
 from __future__ import annotations
 
@@ -75,6 +80,24 @@ def step_prf(q: str, text: str, bm25, fb_docs: int, n_terms: int) -> dict:
     return {"terms": terms, "ranking": [[d, s] for d, s in hits], "ms": (time.time() - t) * 1000}
 
 
+def _write(path: Path, obj) -> None:
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text(json.dumps(obj))
+    tmp.replace(path)
+
+
+def merge(step: str, qids: list[str]) -> None:
+    out_path = OUT_DIR / f"{step}.json"
+    done = json.loads(out_path.read_text()) if out_path.exists() else {}
+    shards = sorted(OUT_DIR.glob(f"{step}.shard*.json"))
+    for sp in shards:
+        done.update(json.loads(sp.read_text()))
+    _write(out_path, {q: done[q] for q in qids if q in done} | {q: v for q, v in done.items() if q not in set(qids)})
+    for sp in shards:
+        sp.unlink()
+    print(f"{CORPUS} {step}: merged {len(shards)} shards, {sum(q in done for q in qids)}/{len(qids)} done", flush=True)
+
+
 def main() -> None:
     step = sys.argv[2]
     limit = int(sys.argv[sys.argv.index("--limit") + 1]) if "--limit" in sys.argv else None
@@ -91,8 +114,18 @@ def main() -> None:
         print("embed", emb.shape)
         return
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+    if "--merge" in sys.argv:
+        merge(step, qids)
+        return
     out_path = OUT_DIR / f"{step}.json"
     done = json.loads(out_path.read_text()) if out_path.exists() else {}
+    if "--shard" in sys.argv:
+        si, sn = map(int, sys.argv[sys.argv.index("--shard") + 1].split("/"))
+        qids = [q for j, q in enumerate(qids) if j % sn == si]
+        out_path = OUT_DIR / f"{step}.shard{si}.json"
+        if out_path.exists():
+            done.update(json.loads(out_path.read_text()))
+        done = {q: done[q] for q in qids if q in done}
     bm25 = None if step == "bm25" else json.loads((OUT_DIR / "bm25.json").read_text())
     if step.startswith("prf"):
         _, d, t = step.split("_")
@@ -108,7 +141,7 @@ def main() -> None:
         done[q] = fn(q, texts[q], bm25)
         n_new += 1
         if i % 50 == 0 or i == len(qids):
-            out_path.write_text(json.dumps(done))
+            _write(out_path, done)
             if step == "rerank":
                 import torch
                 if torch.backends.mps.is_available():
@@ -116,7 +149,7 @@ def main() -> None:
             rate = (time.time() - t_start) / n_new
             print(f"{CORPUS} {step}: {i}/{len(qids)} ({rate:.2f}s/q, eta {rate * (len(qids) - i) / 60:.1f}min)",
                   flush=True)
-    out_path.write_text(json.dumps(done))
+    _write(out_path, done)
     print(f"{CORPUS} {step}: {len(done)} done, {(time.time() - t_start) / max(n_new, 1):.2f}s/q", flush=True)
 
 
