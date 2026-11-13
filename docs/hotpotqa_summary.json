@@ -1,0 +1,1984 @@
+{
+  "_note": "configs/info_value_precommit.json; untouched benchmark, single test pass; aggregates only.",
+  "n": {
+    "train": 1500,
+    "val": 500,
+    "test": 7405
+  },
+  "prf_selected": {
+    "fb_docs": 5,
+    "fb_terms": 30,
+    "lam": 0.8,
+    "val_ndcg": 0.6221,
+    "val_bm25": 0.6193,
+    "n_settings": 108
+  },
+  "val_prediction": {
+    "_note": "configs/info_value_precommit.json P4, recorded before test labels are read.",
+    "val_mean_rerank_delta": 0.1132,
+    "n_val": 500,
+    "prediction": "P4 positive"
+  },
+  "probe_hyperparameters": {
+    "fold0_probe_5": "{'depth': 3, 'leaves': 15, 'l2': 1.0}",
+    "fold0_probe_10": "{'depth': 3, 'leaves': 15, 'l2': 1.0}",
+    "fold0_probe_20": "{'depth': 3, 'leaves': 15, 'l2': 1.0}"
+  },
+  "latency_s": {
+    "probe_5": {
+      "median_s": 0.0184,
+      "p95_s": 0.0275
+    },
+    "probe_10": {
+      "median_s": 0.0298,
+      "p95_s": 0.0479
+    },
+    "probe_20": {
+      "median_s": 0.0581,
+      "p95_s": 0.0909
+    },
+    "rest_5": {
+      "median_s": 0.215,
+      "p95_s": 0.2744
+    },
+    "rest_10": {
+      "median_s": 0.1928,
+      "p95_s": 0.2451
+    },
+    "rest_20": {
+      "median_s": 0.1717,
+      "p95_s": 0.2493
+    },
+    "full": {
+      "median_s": 0.2184,
+      "p95_s": 0.2866
+    },
+    "telemetry": {
+      "median_s": 6.107,
+      "p95_s": 12.7447,
+      "source": "bm25 step wall clock incl. retrieval (val)"
+    }
+  },
+  "primary_holm": {
+    "P1": {
+      "p": 0.0,
+      "p_holm": 0.0,
+      "reject": true
+    },
+    "P2": {
+      "p": 0.0,
+      "p_holm": 0.0,
+      "reject": true
+    },
+    "P3": {
+      "p": 0.0,
+      "p_holm": 0.0,
+      "reject": true
+    },
+    "P4": {
+      "p": 0.0,
+      "p_holm": 0.0,
+      "reject": true
+    },
+    "P5": {
+      "p": 0.0,
+      "p_holm": 0.0,
+      "reject": true
+    }
+  },
+  "per_action": {
+    "rerank": {
+      "P1": {
+        "estimate": 0.2423,
+        "ci": [
+          0.2257,
+          0.2587
+        ],
+        "p": 0.0,
+        "auc_failure": 0.8852,
+        "auc_helped": 0.643
+      },
+      "P2": {
+        "estimate": 0.0229,
+        "ci": [
+          0.021,
+          0.0247
+        ],
+        "p": 0.0
+      },
+      "P3": {
+        "estimate": 0.0033,
+        "ci": [
+          0.002,
+          0.0048
+        ],
+        "p": 0.0
+      },
+      "P4": {
+        "estimate": 0.0083,
+        "ci": [
+          0.0068,
+          0.0102
+        ],
+        "p": 0.0
+      },
+      "exact_budget_gain_avg": {
+        "failure": 0.0724,
+        "nqc": 0.0568,
+        "B1_gbdt": 0.0758,
+        "B2_semantic_knn": 0.0568,
+        "probe_10": 0.0807
+      },
+      "mechanism": {
+        "n": 7405,
+        "n_failing": 823,
+        "P_reachable_given_F": {
+          "estimate": 0.6865,
+          "ci": [
+            0.6549,
+            0.7174
+          ]
+        },
+        "failing_reachable": {
+          "n": 565,
+          "P_helped": 0.8814,
+          "mean_delta": 0.4656,
+          "P_helped_ci": [
+            0.855,
+            0.9074
+          ]
+        },
+        "failing_unreachable": {
+          "n": 258,
+          "P_helped": 0.0,
+          "mean_delta": 0.0,
+          "P_helped_ci": [
+            0.0,
+            0.0
+          ]
+        },
+        "decomposition": {
+          "P_helped_given_F": 0.6051,
+          "via_reachable": 0.6051,
+          "via_unreachable": 0.0
+        },
+        "AUC_S_reachable_among_failing": {
+          "estimate": 0.3718,
+          "ci": [
+            0.3323,
+            0.4128
+          ]
+        },
+        "reachable_failing_by_S_tertile": [
+          {
+            "n": 188,
+            "P_helped": 0.9043,
+            "mean_delta": 0.4651,
+            "P_helped_ci": [
+              0.8603,
+              0.9444
+            ]
+          },
+          {
+            "n": 188,
+            "P_helped": 0.8989,
+            "mean_delta": 0.4865,
+            "P_helped_ci": [
+              0.8535,
+              0.9405
+            ]
+          },
+          {
+            "n": 189,
+            "P_helped": 0.8413,
+            "mean_delta": 0.4453,
+            "P_helped_ci": [
+              0.7874,
+              0.892
+            ]
+          }
+        ],
+        "healthy": {
+          "rank1": {
+            "n": 5051,
+            "P_helped": 0.2867,
+            "P_harmed": 0.1313,
+            "mean_delta": 0.0314,
+            "mean_delta_ci": [
+              0.0273,
+              0.0354
+            ],
+            "AUC_S_this_vs_other_healthy": 0.2066
+          },
+          "rank2_3": {
+            "n": 943,
+            "P_helped": 0.8738,
+            "P_harmed": 0.0647,
+            "mean_delta": 0.2818,
+            "mean_delta_ci": [
+              0.2689,
+              0.2947
+            ],
+            "AUC_S_this_vs_other_healthy": 0.7261
+          },
+          "rank4_10": {
+            "n": 588,
+            "P_helped": 0.9473,
+            "P_harmed": 0.0459,
+            "mean_delta": 0.3895,
+            "mean_delta_ci": [
+              0.3703,
+              0.4089
+            ],
+            "AUC_S_this_vs_other_healthy": 0.8027
+          }
+        },
+        "healthy_by_S_tertile": [
+          {
+            "n": 2194,
+            "P_helped": 0.2958,
+            "mean_delta": 0.0454,
+            "P_helped_ci": [
+              0.2765,
+              0.3146
+            ]
+          },
+          {
+            "n": 2194,
+            "P_helped": 0.4198,
+            "mean_delta": 0.0818,
+            "P_helped_ci": [
+              0.3995,
+              0.4406
+            ]
+          },
+          {
+            "n": 2194,
+            "P_helped": 0.5738,
+            "mean_delta": 0.1707,
+            "P_helped_ci": [
+              0.5531,
+              0.5944
+            ]
+          }
+        ]
+      },
+      "P5": {
+        "auc": 0.3718,
+        "n_failing": 823,
+        "n_reachable": 565,
+        "n_unreachable": 258,
+        "evaluable": true,
+        "ci": [
+          0.3317,
+          0.412
+        ],
+        "p": 0.0
+      },
+      "mean_delta": 0.1238,
+      "rates": {
+        "p_fail": 0.1111,
+        "rescue": 0.6051,
+        "healthy_helped": 0.4298,
+        "healthy_harmed": 0.1141
+      },
+      "same_target": {
+        "n": 7405,
+        "p_helped": 0.4493,
+        "n_changed": 4078,
+        "failure_auc_helped_within_failing": {
+          "estimate": 0.3728,
+          "n_failing": 823,
+          "n_rescued": 498,
+          "ci": [
+            0.3341,
+            0.4125
+          ]
+        },
+        "failure_auc_of_failure_score": 0.8852,
+        "scores": {
+          "failure": {
+            "auc_help_vs_rest": {
+              "estimate": 0.643,
+              "ci": [
+                0.6305,
+                0.6553
+              ]
+            },
+            "auc_help_vs_harm": {
+              "estimate": 0.6315,
+              "ci": [
+                0.6102,
+                0.6529
+              ]
+            },
+            "spearman_delta": {
+              "estimate": 0.294,
+              "ci": [
+                0.2729,
+                0.315
+              ]
+            }
+          },
+          "nqc": {
+            "auc_help_vs_rest": {
+              "estimate": 0.5373,
+              "ci": [
+                0.5242,
+                0.5507
+              ]
+            },
+            "auc_help_vs_harm": {
+              "estimate": 0.5602,
+              "ci": [
+                0.5381,
+                0.5826
+              ]
+            },
+            "spearman_delta": {
+              "estimate": 0.1047,
+              "ci": [
+                0.0817,
+                0.1274
+              ]
+            },
+            "minus_failure": {
+              "auc_help_vs_rest": {
+                "estimate": -0.1056,
+                "ci": [
+                  -0.1169,
+                  -0.0944
+                ]
+              },
+              "auc_help_vs_harm": {
+                "estimate": -0.0713,
+                "ci": [
+                  -0.0911,
+                  -0.0517
+                ]
+              },
+              "spearman_delta": {
+                "estimate": -0.1892,
+                "ci": [
+                  -0.2093,
+                  -0.1692
+                ]
+              }
+            }
+          },
+          "B1_gbdt": {
+            "auc_help_vs_rest": {
+              "estimate": 0.6747,
+              "ci": [
+                0.6625,
+                0.687
+              ]
+            },
+            "auc_help_vs_harm": {
+              "estimate": 0.6481,
+              "ci": [
+                0.6265,
+                0.6696
+              ]
+            },
+            "spearman_delta": {
+              "estimate": 0.3372,
+              "ci": [
+                0.3157,
+                0.3582
+              ]
+            },
+            "minus_failure": {
+              "auc_help_vs_rest": {
+                "estimate": 0.0317,
+                "ci": [
+                  0.0227,
+                  0.0405
+                ]
+              },
+              "auc_help_vs_harm": {
+                "estimate": 0.0166,
+                "ci": [
+                  0.0011,
+                  0.0317
+                ]
+              },
+              "spearman_delta": {
+                "estimate": 0.0432,
+                "ci": [
+                  0.028,
+                  0.0581
+                ]
+              }
+            }
+          },
+          "B2_semantic_knn": {
+            "auc_help_vs_rest": {
+              "estimate": 0.5559,
+              "ci": [
+                0.5428,
+                0.5691
+              ]
+            },
+            "auc_help_vs_harm": {
+              "estimate": 0.5622,
+              "ci": [
+                0.5397,
+                0.5848
+              ]
+            },
+            "spearman_delta": {
+              "estimate": 0.1044,
+              "ci": [
+                0.0822,
+                0.1268
+              ]
+            },
+            "minus_failure": {
+              "auc_help_vs_rest": {
+                "estimate": -0.0871,
+                "ci": [
+                  -0.105,
+                  -0.0692
+                ]
+              },
+              "auc_help_vs_harm": {
+                "estimate": -0.0693,
+                "ci": [
+                  -0.1004,
+                  -0.0376
+                ]
+              },
+              "spearman_delta": {
+                "estimate": -0.1895,
+                "ci": [
+                  -0.2202,
+                  -0.1588
+                ]
+              }
+            }
+          },
+          "probe_10": {
+            "auc_help_vs_rest": {
+              "estimate": 0.731,
+              "ci": [
+                0.7195,
+                0.7426
+              ]
+            },
+            "auc_help_vs_harm": {
+              "estimate": 0.6558,
+              "ci": [
+                0.6353,
+                0.6764
+              ]
+            },
+            "spearman_delta": {
+              "estimate": 0.4104,
+              "ci": [
+                0.3894,
+                0.4312
+              ]
+            },
+            "minus_failure": {
+              "auc_help_vs_rest": {
+                "estimate": 0.088,
+                "ci": [
+                  0.0763,
+                  0.0997
+                ]
+              },
+              "auc_help_vs_harm": {
+                "estimate": 0.0243,
+                "ci": [
+                  0.0032,
+                  0.0457
+                ]
+              },
+              "spearman_delta": {
+                "estimate": 0.1165,
+                "ci": [
+                  0.0968,
+                  0.1367
+                ]
+              }
+            }
+          }
+        }
+      },
+      "budgeted_oracle": {
+        "k=0.0,b=0.1": {
+          "V_star": 0.0625,
+          "V_F_star": 0.0355,
+          "H": 0.0269,
+          "share": 0.5687,
+          "share_ci": [
+            0.5256,
+            0.612
+          ],
+          "H_ci": [
+            0.0244,
+            0.0294
+          ]
+        },
+        "k=0.0,b=0.25": {
+          "V_star": 0.1137,
+          "V_F_star": 0.0355,
+          "H": 0.0782,
+          "share": 0.3124,
+          "share_ci": [
+            0.2884,
+            0.3368
+          ],
+          "H_ci": [
+            0.0756,
+            0.0808
+          ]
+        },
+        "k=0.0,b=0.5": {
+          "V_star": 0.1428,
+          "V_F_star": 0.0355,
+          "H": 0.1072,
+          "share": 0.2488,
+          "share_ci": [
+            0.2296,
+            0.2684
+          ],
+          "H_ci": [
+            0.1033,
+            0.1112
+          ]
+        },
+        "k=0.0,b=0.75": {
+          "V_star": 0.1428,
+          "V_F_star": 0.0355,
+          "H": 0.1072,
+          "share": 0.2488,
+          "share_ci": [
+            0.2296,
+            0.2684
+          ],
+          "H_ci": [
+            0.1033,
+            0.1112
+          ]
+        },
+        "k=0.0,b=1.0": {
+          "V_star": 0.1428,
+          "V_F_star": 0.0355,
+          "H": 0.1072,
+          "share": 0.2488,
+          "share_ci": [
+            0.2296,
+            0.2684
+          ],
+          "H_ci": [
+            0.1033,
+            0.1112
+          ]
+        },
+        "k=0.01,b=0.1": {
+          "V_star": 0.0615,
+          "V_F_star": 0.0349,
+          "H": 0.0266,
+          "share": 0.567,
+          "share_ci": [
+            0.5241,
+            0.6101
+          ],
+          "H_ci": [
+            0.0242,
+            0.029
+          ]
+        },
+        "k=0.01,b=0.25": {
+          "V_star": 0.1112,
+          "V_F_star": 0.0349,
+          "H": 0.0764,
+          "share": 0.3133,
+          "share_ci": [
+            0.2893,
+            0.3378
+          ],
+          "H_ci": [
+            0.0738,
+            0.0789
+          ]
+        },
+        "k=0.01,b=0.5": {
+          "V_star": 0.1383,
+          "V_F_star": 0.0349,
+          "H": 0.1034,
+          "share": 0.2521,
+          "share_ci": [
+            0.2326,
+            0.2719
+          ],
+          "H_ci": [
+            0.0995,
+            0.1072
+          ]
+        },
+        "k=0.01,b=0.75": {
+          "V_star": 0.1383,
+          "V_F_star": 0.0349,
+          "H": 0.1034,
+          "share": 0.2521,
+          "share_ci": [
+            0.2326,
+            0.2719
+          ],
+          "H_ci": [
+            0.0995,
+            0.1072
+          ]
+        },
+        "k=0.01,b=1.0": {
+          "V_star": 0.1383,
+          "V_F_star": 0.0349,
+          "H": 0.1034,
+          "share": 0.2521,
+          "share_ci": [
+            0.2326,
+            0.2719
+          ],
+          "H_ci": [
+            0.0995,
+            0.1072
+          ]
+        },
+        "k=0.02,b=0.1": {
+          "V_star": 0.0605,
+          "V_F_star": 0.0342,
+          "H": 0.0263,
+          "share": 0.5652,
+          "share_ci": [
+            0.5223,
+            0.6083
+          ],
+          "H_ci": [
+            0.0239,
+            0.0286
+          ]
+        },
+        "k=0.02,b=0.25": {
+          "V_star": 0.1087,
+          "V_F_star": 0.0342,
+          "H": 0.0746,
+          "share": 0.3143,
+          "share_ci": [
+            0.2902,
+            0.339
+          ],
+          "H_ci": [
+            0.072,
+            0.077
+          ]
+        },
+        "k=0.02,b=0.5": {
+          "V_star": 0.1338,
+          "V_F_star": 0.0342,
+          "H": 0.0996,
+          "share": 0.2555,
+          "share_ci": [
+            0.2357,
+            0.2756
+          ],
+          "H_ci": [
+            0.0958,
+            0.1034
+          ]
+        },
+        "k=0.02,b=0.75": {
+          "V_star": 0.1338,
+          "V_F_star": 0.0342,
+          "H": 0.0996,
+          "share": 0.2555,
+          "share_ci": [
+            0.2357,
+            0.2756
+          ],
+          "H_ci": [
+            0.0958,
+            0.1034
+          ]
+        },
+        "k=0.02,b=1.0": {
+          "V_star": 0.1338,
+          "V_F_star": 0.0342,
+          "H": 0.0996,
+          "share": 0.2555,
+          "share_ci": [
+            0.2357,
+            0.2756
+          ],
+          "H_ci": [
+            0.0958,
+            0.1034
+          ]
+        },
+        "failure_gate,b=0.1": {
+          "gain": 0.0252,
+          "share_of_V_star": 0.4038,
+          "share_of_V_F_star": 0.7101,
+          "picks_failing": 0.5149
+        },
+        "failure_gate,b=0.25": {
+          "gain": 0.0588,
+          "share_of_V_star": 0.5174,
+          "share_of_V_F_star": 1.6565,
+          "picks_failing": 0.3479
+        },
+        "failure_gate,b=0.5": {
+          "gain": 0.0946,
+          "share_of_V_star": 0.6625,
+          "share_of_V_F_star": 2.6624,
+          "picks_failing": 0.2147
+        },
+        "failure_gate,b=0.75": {
+          "gain": 0.1132,
+          "share_of_V_star": 0.7931,
+          "share_of_V_F_star": 3.1871,
+          "picks_failing": 0.148
+        },
+        "failure_gate,b=1.0": {
+          "gain": 0.1238,
+          "share_of_V_star": 0.867,
+          "share_of_V_F_star": 3.4841,
+          "picks_failing": 0.1111
+        }
+      },
+      "decision_value": {
+        "k=0.0": {
+          "V_full": 0.1428,
+          "V_0": 0.1238,
+          "scores": {
+            "failure": {
+              "V_T_lo": 0.1238,
+              "V_T_hi": 0.1238,
+              "missing_lo_hi": [
+                0.019,
+                0.019
+              ],
+              "share_of_info_value": [
+                0.0,
+                0.0
+              ],
+              "V_T_lo_minus_V_0": {
+                "estimate": 0.0,
+                "ci": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "nqc": {
+              "V_T_lo": 0.1238,
+              "V_T_hi": 0.1238,
+              "missing_lo_hi": [
+                0.019,
+                0.019
+              ],
+              "share_of_info_value": [
+                0.0,
+                0.0
+              ],
+              "V_T_lo_minus_V_0": {
+                "estimate": 0.0,
+                "ci": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "B1_gbdt": {
+              "V_T_lo": 0.1238,
+              "V_T_hi": 0.1238,
+              "missing_lo_hi": [
+                0.019,
+                0.019
+              ],
+              "share_of_info_value": [
+                0.0,
+                0.0
+              ],
+              "V_T_lo_minus_V_0": {
+                "estimate": 0.0,
+                "ci": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "B2_semantic_knn": {
+              "V_T_lo": 0.1238,
+              "V_T_hi": 0.1238,
+              "missing_lo_hi": [
+                0.019,
+                0.019
+              ],
+              "share_of_info_value": [
+                0.0,
+                0.0
+              ],
+              "V_T_lo_minus_V_0": {
+                "estimate": 0.0,
+                "ci": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "probe_10": {
+              "V_T_lo": 0.1238,
+              "V_T_hi": 0.1238,
+              "missing_lo_hi": [
+                0.019,
+                0.019
+              ],
+              "share_of_info_value": [
+                0.0,
+                0.0
+              ],
+              "V_T_lo_minus_V_0": {
+                "estimate": 0.0,
+                "ci": [
+                  0.0,
+                  0.0
+                ]
+              }
+            }
+          }
+        },
+        "k=0.02": {
+          "V_full": 0.1338,
+          "V_0": 0.1038,
+          "scores": {
+            "failure": {
+              "V_T_lo": 0.1038,
+              "V_T_hi": 0.1038,
+              "missing_lo_hi": [
+                0.03,
+                0.03
+              ],
+              "share_of_info_value": [
+                0.0,
+                0.0
+              ],
+              "V_T_lo_minus_V_0": {
+                "estimate": 0.0,
+                "ci": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "nqc": {
+              "V_T_lo": 0.1038,
+              "V_T_hi": 0.1038,
+              "missing_lo_hi": [
+                0.03,
+                0.03
+              ],
+              "share_of_info_value": [
+                0.0,
+                0.0
+              ],
+              "V_T_lo_minus_V_0": {
+                "estimate": 0.0,
+                "ci": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "B1_gbdt": {
+              "V_T_lo": 0.1038,
+              "V_T_hi": 0.1038,
+              "missing_lo_hi": [
+                0.03,
+                0.03
+              ],
+              "share_of_info_value": [
+                0.0,
+                0.0
+              ],
+              "V_T_lo_minus_V_0": {
+                "estimate": 0.0,
+                "ci": [
+                  -0.0006,
+                  0.0
+                ]
+              }
+            },
+            "B2_semantic_knn": {
+              "V_T_lo": 0.1038,
+              "V_T_hi": 0.1038,
+              "missing_lo_hi": [
+                0.03,
+                0.03
+              ],
+              "share_of_info_value": [
+                0.0,
+                0.0
+              ],
+              "V_T_lo_minus_V_0": {
+                "estimate": 0.0,
+                "ci": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "probe_10": {
+              "V_T_lo": 0.1036,
+              "V_T_hi": 0.1038,
+              "missing_lo_hi": [
+                0.03,
+                0.0302
+              ],
+              "share_of_info_value": [
+                -0.0069,
+                0.0
+              ],
+              "V_T_lo_minus_V_0": {
+                "estimate": -0.0002,
+                "ci": [
+                  -0.0007,
+                  0.0007
+                ]
+              }
+            }
+          }
+        }
+      },
+      "profile": [
+        {
+          "n": 741,
+          "p_fail": 0.0,
+          "p_helped": 0.2618,
+          "mean_delta": 0.0352
+        },
+        {
+          "n": 740,
+          "p_fail": 0.0014,
+          "p_helped": 0.2811,
+          "mean_delta": 0.0401
+        },
+        {
+          "n": 741,
+          "p_fail": 0.0054,
+          "p_helped": 0.3495,
+          "mean_delta": 0.0615
+        },
+        {
+          "n": 740,
+          "p_fail": 0.0135,
+          "p_helped": 0.3919,
+          "mean_delta": 0.0718
+        },
+        {
+          "n": 740,
+          "p_fail": 0.0176,
+          "p_helped": 0.4176,
+          "mean_delta": 0.0825
+        },
+        {
+          "n": 741,
+          "p_fail": 0.054,
+          "p_helped": 0.475,
+          "mean_delta": 0.116
+        },
+        {
+          "n": 740,
+          "p_fail": 0.0797,
+          "p_helped": 0.5068,
+          "mean_delta": 0.1506
+        },
+        {
+          "n": 741,
+          "p_fail": 0.1592,
+          "p_helped": 0.5884,
+          "mean_delta": 0.1964
+        },
+        {
+          "n": 740,
+          "p_fail": 0.2662,
+          "p_helped": 0.6162,
+          "mean_delta": 0.2309
+        },
+        {
+          "n": 741,
+          "p_fail": 0.5142,
+          "p_helped": 0.6046,
+          "mean_delta": 0.2526
+        }
+      ]
+    },
+    "prf": {
+      "P1": {
+        "estimate": 0.3578,
+        "ci": [
+          0.3309,
+          0.3842
+        ],
+        "p": 0.0,
+        "auc_failure": 0.8852,
+        "auc_helped": 0.5274
+      },
+      "P2": {
+        "estimate": -0.0005,
+        "ci": [
+          -0.0005,
+          0.0007
+        ],
+        "p": 0.699
+      },
+      "P3": {
+        "estimate": 0.001,
+        "ci": [
+          -0.0002,
+          0.0014
+        ],
+        "p": 0.1402
+      },
+      "P4": {
+        "estimate": 0.0012,
+        "ci": [
+          0.0001,
+          0.0017
+        ],
+        "p": 0.0366
+      },
+      "exact_budget_gain_avg": {
+        "failure": 0.0006,
+        "nqc": 0.0011,
+        "B1_gbdt": 0.0016,
+        "B2_semantic_knn": 0.0011,
+        "probe_10": 0.0018
+      },
+      "mechanism": {
+        "n": 7405,
+        "n_failing": 823,
+        "P_reachable_given_F": {
+          "estimate": 0.6865,
+          "ci": [
+            0.6549,
+            0.7174
+          ]
+        },
+        "failing_reachable": {
+          "n": 565,
+          "P_helped": 0.023,
+          "mean_delta": 0.0044,
+          "P_helped_ci": [
+            0.0118,
+            0.0366
+          ]
+        },
+        "failing_unreachable": {
+          "n": 258,
+          "P_helped": 0.0,
+          "mean_delta": 0.0,
+          "P_helped_ci": [
+            0.0,
+            0.0
+          ]
+        },
+        "decomposition": {
+          "P_helped_given_F": 0.0158,
+          "via_reachable": 0.0158,
+          "via_unreachable": 0.0
+        },
+        "AUC_S_reachable_among_failing": {
+          "estimate": 0.3718,
+          "ci": [
+            0.3323,
+            0.4128
+          ]
+        },
+        "reachable_failing_by_S_tertile": [
+          {
+            "n": 188,
+            "P_helped": 0.0479,
+            "mean_delta": 0.0092,
+            "P_helped_ci": [
+              0.0203,
+              0.0808
+            ]
+          },
+          {
+            "n": 188,
+            "P_helped": 0.0053,
+            "mean_delta": 0.0009,
+            "P_helped_ci": [
+              0.0,
+              0.0174
+            ]
+          },
+          {
+            "n": 189,
+            "P_helped": 0.0159,
+            "mean_delta": 0.003,
+            "P_helped_ci": [
+              0.0,
+              0.0361
+            ]
+          }
+        ],
+        "healthy": {
+          "rank1": {
+            "n": 5051,
+            "P_helped": 0.0445,
+            "P_harmed": 0.0533,
+            "mean_delta": -0.0036,
+            "mean_delta_ci": [
+              -0.0049,
+              -0.0024
+            ],
+            "AUC_S_this_vs_other_healthy": 0.2066
+          },
+          "rank2_3": {
+            "n": 943,
+            "P_helped": 0.2354,
+            "P_harmed": 0.1474,
+            "mean_delta": 0.0352,
+            "mean_delta_ci": [
+              0.0288,
+              0.0415
+            ],
+            "AUC_S_this_vs_other_healthy": 0.7261
+          },
+          "rank4_10": {
+            "n": 588,
+            "P_helped": 0.1122,
+            "P_harmed": 0.1259,
+            "mean_delta": 0.0035,
+            "mean_delta_ci": [
+              -0.0002,
+              0.0074
+            ],
+            "AUC_S_this_vs_other_healthy": 0.8027
+          }
+        },
+        "healthy_by_S_tertile": [
+          {
+            "n": 2194,
+            "P_helped": 0.0552,
+            "mean_delta": 0.003,
+            "P_helped_ci": [
+              0.046,
+              0.0652
+            ]
+          },
+          {
+            "n": 2194,
+            "P_helped": 0.0789,
+            "mean_delta": 0.0028,
+            "P_helped_ci": [
+              0.0678,
+              0.0904
+            ]
+          },
+          {
+            "n": 2194,
+            "P_helped": 0.0998,
+            "mean_delta": 0.0019,
+            "P_helped_ci": [
+              0.0874,
+              0.1126
+            ]
+          }
+        ]
+      },
+      "P5": {
+        "auc": 0.3718,
+        "n_failing": 823,
+        "n_reachable": 565,
+        "n_unreachable": 258,
+        "evaluable": true,
+        "ci": [
+          0.3317,
+          0.412
+        ],
+        "p": 0.0
+      },
+      "mean_delta": 0.0026,
+      "rates": {
+        "p_fail": 0.1111,
+        "rescue": 0.0158,
+        "healthy_helped": 0.0779,
+        "healthy_harmed": 0.0732
+      },
+      "same_target": {
+        "n": 7405,
+        "p_helped": 0.071,
+        "n_changed": 1008,
+        "failure_auc_helped_within_failing": {
+          "estimate": 0.2837,
+          "n_failing": 823,
+          "n_rescued": 13,
+          "ci": [
+            0.1293,
+            0.4496
+          ]
+        },
+        "failure_auc_of_failure_score": 0.8852,
+        "scores": {
+          "failure": {
+            "auc_help_vs_rest": {
+              "estimate": 0.5274,
+              "ci": [
+                0.5037,
+                0.5517
+              ]
+            },
+            "auc_help_vs_harm": {
+              "estimate": 0.4287,
+              "ci": [
+                0.3931,
+                0.4641
+              ]
+            },
+            "spearman_delta": {
+              "estimate": -0.0364,
+              "ci": [
+                -0.059,
+                -0.0147
+              ]
+            }
+          },
+          "nqc": {
+            "auc_help_vs_rest": {
+              "estimate": 0.4549,
+              "ci": [
+                0.4295,
+                0.4803
+              ]
+            },
+            "auc_help_vs_harm": {
+              "estimate": 0.4738,
+              "ci": [
+                0.438,
+                0.5091
+              ]
+            },
+            "spearman_delta": {
+              "estimate": -0.0196,
+              "ci": [
+                -0.043,
+                0.0036
+              ]
+            },
+            "minus_failure": {
+              "auc_help_vs_rest": {
+                "estimate": -0.0725,
+                "ci": [
+                  -0.096,
+                  -0.0492
+                ]
+              },
+              "auc_help_vs_harm": {
+                "estimate": 0.0451,
+                "ci": [
+                  0.0127,
+                  0.0775
+                ]
+              },
+              "spearman_delta": {
+                "estimate": 0.0169,
+                "ci": [
+                  -0.0053,
+                  0.039
+                ]
+              }
+            }
+          },
+          "B1_gbdt": {
+            "auc_help_vs_rest": {
+              "estimate": 0.5618,
+              "ci": [
+                0.5349,
+                0.5882
+              ]
+            },
+            "auc_help_vs_harm": {
+              "estimate": 0.5643,
+              "ci": [
+                0.5292,
+                0.6005
+              ]
+            },
+            "spearman_delta": {
+              "estimate": 0.0483,
+              "ci": [
+                0.0234,
+                0.0735
+              ]
+            },
+            "minus_failure": {
+              "auc_help_vs_rest": {
+                "estimate": 0.0344,
+                "ci": [
+                  -0.0032,
+                  0.0715
+                ]
+              },
+              "auc_help_vs_harm": {
+                "estimate": 0.1356,
+                "ci": [
+                  0.0849,
+                  0.1877
+                ]
+              },
+              "spearman_delta": {
+                "estimate": 0.0848,
+                "ci": [
+                  0.0509,
+                  0.1197
+                ]
+              }
+            }
+          },
+          "B2_semantic_knn": {
+            "auc_help_vs_rest": {
+              "estimate": 0.511,
+              "ci": [
+                0.4845,
+                0.5373
+              ]
+            },
+            "auc_help_vs_harm": {
+              "estimate": 0.5125,
+              "ci": [
+                0.4768,
+                0.5491
+              ]
+            },
+            "spearman_delta": {
+              "estimate": 0.0084,
+              "ci": [
+                -0.0146,
+                0.0318
+              ]
+            },
+            "minus_failure": {
+              "auc_help_vs_rest": {
+                "estimate": -0.0164,
+                "ci": [
+                  -0.0527,
+                  0.0196
+                ]
+              },
+              "auc_help_vs_harm": {
+                "estimate": 0.0838,
+                "ci": [
+                  0.0334,
+                  0.1359
+                ]
+              },
+              "spearman_delta": {
+                "estimate": 0.0449,
+                "ci": [
+                  0.0131,
+                  0.0773
+                ]
+              }
+            }
+          },
+          "probe_10": {
+            "auc_help_vs_rest": {
+              "estimate": 0.605,
+              "ci": [
+                0.5803,
+                0.6298
+              ]
+            },
+            "auc_help_vs_harm": {
+              "estimate": 0.4733,
+              "ci": [
+                0.4378,
+                0.5094
+              ]
+            },
+            "spearman_delta": {
+              "estimate": -0.0049,
+              "ci": [
+                -0.0289,
+                0.0188
+              ]
+            },
+            "minus_failure": {
+              "auc_help_vs_rest": {
+                "estimate": 0.0776,
+                "ci": [
+                  0.0546,
+                  0.1
+                ]
+              },
+              "auc_help_vs_harm": {
+                "estimate": 0.0446,
+                "ci": [
+                  0.0086,
+                  0.0806
+                ]
+              },
+              "spearman_delta": {
+                "estimate": 0.0316,
+                "ci": [
+                  0.0099,
+                  0.0533
+                ]
+              }
+            }
+          }
+        }
+      },
+      "budgeted_oracle": {
+        "k=0.0,b=0.1": {
+          "V_star": 0.0096,
+          "V_F_star": 0.0003,
+          "H": 0.0093,
+          "share": 0.0347,
+          "share_ci": [
+            0.0171,
+            0.0542
+          ],
+          "H_ci": [
+            0.0083,
+            0.0102
+          ]
+        },
+        "k=0.0,b=0.25": {
+          "V_star": 0.0096,
+          "V_F_star": 0.0003,
+          "H": 0.0093,
+          "share": 0.0347,
+          "share_ci": [
+            0.0171,
+            0.0542
+          ],
+          "H_ci": [
+            0.0083,
+            0.0102
+          ]
+        },
+        "k=0.0,b=0.5": {
+          "V_star": 0.0096,
+          "V_F_star": 0.0003,
+          "H": 0.0093,
+          "share": 0.0347,
+          "share_ci": [
+            0.0171,
+            0.0542
+          ],
+          "H_ci": [
+            0.0083,
+            0.0102
+          ]
+        },
+        "k=0.0,b=0.75": {
+          "V_star": 0.0096,
+          "V_F_star": 0.0003,
+          "H": 0.0093,
+          "share": 0.0347,
+          "share_ci": [
+            0.0171,
+            0.0542
+          ],
+          "H_ci": [
+            0.0083,
+            0.0102
+          ]
+        },
+        "k=0.0,b=1.0": {
+          "V_star": 0.0096,
+          "V_F_star": 0.0003,
+          "H": 0.0093,
+          "share": 0.0347,
+          "share_ci": [
+            0.0171,
+            0.0542
+          ],
+          "H_ci": [
+            0.0083,
+            0.0102
+          ]
+        },
+        "k=0.01,b=0.1": {
+          "V_star": 0.0089,
+          "V_F_star": 0.0003,
+          "H": 0.0086,
+          "share": 0.0355,
+          "share_ci": [
+            0.0176,
+            0.0555
+          ],
+          "H_ci": [
+            0.0077,
+            0.0095
+          ]
+        },
+        "k=0.01,b=0.25": {
+          "V_star": 0.0089,
+          "V_F_star": 0.0003,
+          "H": 0.0086,
+          "share": 0.0355,
+          "share_ci": [
+            0.0176,
+            0.0555
+          ],
+          "H_ci": [
+            0.0077,
+            0.0095
+          ]
+        },
+        "k=0.01,b=0.5": {
+          "V_star": 0.0089,
+          "V_F_star": 0.0003,
+          "H": 0.0086,
+          "share": 0.0355,
+          "share_ci": [
+            0.0176,
+            0.0555
+          ],
+          "H_ci": [
+            0.0077,
+            0.0095
+          ]
+        },
+        "k=0.01,b=0.75": {
+          "V_star": 0.0089,
+          "V_F_star": 0.0003,
+          "H": 0.0086,
+          "share": 0.0355,
+          "share_ci": [
+            0.0176,
+            0.0555
+          ],
+          "H_ci": [
+            0.0077,
+            0.0095
+          ]
+        },
+        "k=0.01,b=1.0": {
+          "V_star": 0.0089,
+          "V_F_star": 0.0003,
+          "H": 0.0086,
+          "share": 0.0355,
+          "share_ci": [
+            0.0176,
+            0.0555
+          ],
+          "H_ci": [
+            0.0077,
+            0.0095
+          ]
+        },
+        "k=0.02,b=0.1": {
+          "V_star": 0.0082,
+          "V_F_star": 0.0003,
+          "H": 0.0079,
+          "share": 0.0363,
+          "share_ci": [
+            0.0179,
+            0.0567
+          ],
+          "H_ci": [
+            0.007,
+            0.0088
+          ]
+        },
+        "k=0.02,b=0.25": {
+          "V_star": 0.0082,
+          "V_F_star": 0.0003,
+          "H": 0.0079,
+          "share": 0.0363,
+          "share_ci": [
+            0.0179,
+            0.0567
+          ],
+          "H_ci": [
+            0.007,
+            0.0088
+          ]
+        },
+        "k=0.02,b=0.5": {
+          "V_star": 0.0082,
+          "V_F_star": 0.0003,
+          "H": 0.0079,
+          "share": 0.0363,
+          "share_ci": [
+            0.0179,
+            0.0567
+          ],
+          "H_ci": [
+            0.007,
+            0.0088
+          ]
+        },
+        "k=0.02,b=0.75": {
+          "V_star": 0.0082,
+          "V_F_star": 0.0003,
+          "H": 0.0079,
+          "share": 0.0363,
+          "share_ci": [
+            0.0179,
+            0.0567
+          ],
+          "H_ci": [
+            0.007,
+            0.0088
+          ]
+        },
+        "k=0.02,b=1.0": {
+          "V_star": 0.0082,
+          "V_F_star": 0.0003,
+          "H": 0.0079,
+          "share": 0.0363,
+          "share_ci": [
+            0.0179,
+            0.0567
+          ],
+          "H_ci": [
+            0.007,
+            0.0088
+          ]
+        },
+        "failure_gate,b=0.1": {
+          "gain": -0.0,
+          "share_of_V_star": -0.0035,
+          "share_of_V_F_star": -0.1001,
+          "picks_failing": 0.5149
+        },
+        "failure_gate,b=0.25": {
+          "gain": 0.0002,
+          "share_of_V_star": 0.0207,
+          "share_of_V_F_star": 0.5962,
+          "picks_failing": 0.3479
+        },
+        "failure_gate,b=0.5": {
+          "gain": 0.0012,
+          "share_of_V_star": 0.1205,
+          "share_of_V_F_star": 3.4688,
+          "picks_failing": 0.2147
+        },
+        "failure_gate,b=0.75": {
+          "gain": 0.0019,
+          "share_of_V_star": 0.2001,
+          "share_of_V_F_star": 5.7583,
+          "picks_failing": 0.148
+        },
+        "failure_gate,b=1.0": {
+          "gain": 0.0026,
+          "share_of_V_star": 0.2724,
+          "share_of_V_F_star": 7.8397,
+          "picks_failing": 0.1111
+        }
+      },
+      "decision_value": {
+        "k=0.0": {
+          "V_full": 0.0096,
+          "V_0": 0.0026,
+          "scores": {
+            "failure": {
+              "V_T_lo": 0.0022,
+              "V_T_hi": 0.0026,
+              "missing_lo_hi": [
+                0.0069,
+                0.0074
+              ],
+              "share_of_info_value": [
+                -0.0587,
+                0.0048
+              ],
+              "V_T_lo_minus_V_0": {
+                "estimate": -0.0004,
+                "ci": [
+                  -0.0008,
+                  0.0005
+                ]
+              }
+            },
+            "nqc": {
+              "V_T_lo": 0.0021,
+              "V_T_hi": 0.0026,
+              "missing_lo_hi": [
+                0.007,
+                0.0075
+              ],
+              "share_of_info_value": [
+                -0.0805,
+                -0.0
+              ],
+              "V_T_lo_minus_V_0": {
+                "estimate": -0.0006,
+                "ci": [
+                  -0.0008,
+                  0.0005
+                ]
+              }
+            },
+            "B1_gbdt": {
+              "V_T_lo": 0.0028,
+              "V_T_hi": 0.0031,
+              "missing_lo_hi": [
+                0.0065,
+                0.0068
+              ],
+              "share_of_info_value": [
+                0.0259,
+                0.0719
+              ],
+              "V_T_lo_minus_V_0": {
+                "estimate": 0.0002,
+                "ci": [
+                  -0.0005,
+                  0.001
+                ]
+              }
+            },
+            "B2_semantic_knn": {
+              "V_T_lo": 0.0021,
+              "V_T_hi": 0.0026,
+              "missing_lo_hi": [
+                0.007,
+                0.0075
+              ],
+              "share_of_info_value": [
+                -0.074,
+                -0.0
+              ],
+              "V_T_lo_minus_V_0": {
+                "estimate": -0.0005,
+                "ci": [
+                  -0.0008,
+                  0.0005
+                ]
+              }
+            },
+            "probe_10": {
+              "V_T_lo": 0.0025,
+              "V_T_hi": 0.003,
+              "missing_lo_hi": [
+                0.0066,
+                0.0071
+              ],
+              "share_of_info_value": [
+                -0.0185,
+                0.0503
+              ],
+              "V_T_lo_minus_V_0": {
+                "estimate": -0.0001,
+                "ci": [
+                  -0.0005,
+                  0.001
+                ]
+              }
+            }
+          }
+        },
+        "k=0.02": {
+          "V_full": 0.0082,
+          "V_0": 0.0,
+          "scores": {
+            "failure": {
+              "V_T_lo": 0.0,
+              "V_T_hi": 0.0,
+              "missing_lo_hi": [
+                0.0082,
+                0.0082
+              ],
+              "share_of_info_value": [
+                0.0,
+                0.0
+              ],
+              "V_T_lo_minus_V_0": {
+                "estimate": 0.0,
+                "ci": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "nqc": {
+              "V_T_lo": 0.0,
+              "V_T_hi": 0.0,
+              "missing_lo_hi": [
+                0.0082,
+                0.0082
+              ],
+              "share_of_info_value": [
+                0.0,
+                0.0
+              ],
+              "V_T_lo_minus_V_0": {
+                "estimate": 0.0,
+                "ci": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "B1_gbdt": {
+              "V_T_lo": 0.0,
+              "V_T_hi": 0.0,
+              "missing_lo_hi": [
+                0.0082,
+                0.0082
+              ],
+              "share_of_info_value": [
+                0.0,
+                0.0
+              ],
+              "V_T_lo_minus_V_0": {
+                "estimate": 0.0,
+                "ci": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "B2_semantic_knn": {
+              "V_T_lo": 0.0,
+              "V_T_hi": 0.0,
+              "missing_lo_hi": [
+                0.0082,
+                0.0082
+              ],
+              "share_of_info_value": [
+                0.0,
+                0.0
+              ],
+              "V_T_lo_minus_V_0": {
+                "estimate": 0.0,
+                "ci": [
+                  0.0,
+                  0.0
+                ]
+              }
+            },
+            "probe_10": {
+              "V_T_lo": 0.0,
+              "V_T_hi": 0.0,
+              "missing_lo_hi": [
+                0.0082,
+                0.0082
+              ],
+              "share_of_info_value": [
+                0.0,
+                0.0
+              ],
+              "V_T_lo_minus_V_0": {
+                "estimate": 0.0,
+                "ci": [
+                  0.0,
+                  0.0
+                ]
+              }
+            }
+          }
+        }
+      },
+      "profile": [
+        {
+          "n": 741,
+          "p_fail": 0.0,
+          "p_helped": 0.0567,
+          "mean_delta": 0.0032
+        },
+        {
+          "n": 740,
+          "p_fail": 0.0014,
+          "p_helped": 0.0554,
+          "mean_delta": 0.003
+        },
+        {
+          "n": 741,
+          "p_fail": 0.0054,
+          "p_helped": 0.0594,
+          "mean_delta": 0.004
+        },
+        {
+          "n": 740,
+          "p_fail": 0.0135,
+          "p_helped": 0.0676,
+          "mean_delta": 0.0024
+        },
+        {
+          "n": 740,
+          "p_fail": 0.0176,
+          "p_helped": 0.0797,
+          "mean_delta": 0.002
+        },
+        {
+          "n": 741,
+          "p_fail": 0.054,
+          "p_helped": 0.0837,
+          "mean_delta": 0.0038
+        },
+        {
+          "n": 740,
+          "p_fail": 0.0797,
+          "p_helped": 0.0824,
+          "mean_delta": 0.0028
+        },
+        {
+          "n": 741,
+          "p_fail": 0.1592,
+          "p_helped": 0.0877,
+          "mean_delta": 0.0044
+        },
+        {
+          "n": 740,
+          "p_fail": 0.2662,
+          "p_helped": 0.0865,
+          "mean_delta": 0.001
+        },
+        {
+          "n": 741,
+          "p_fail": 0.5142,
+          "p_helped": 0.0513,
+          "mean_delta": -0.0003
+        }
+      ]
+    }
+  },
+  "runner_primary_by_fold": {
+    "0": [
+      {
+        "action": "rerank",
+        "method": "B1_gbdt",
+        "vs": "failure",
+        "mode": "exact_budget",
+        "estimate": 0.0025,
+        "ci_low": 0.0015,
+        "ci_high": 0.0036,
+        "signflip_p": 0.0002,
+        "holm_adjusted_signflip_p": 0.0003
+      },
+      {
+        "action": "rerank",
+        "method": "B2_semantic_knn",
+        "vs": "failure",
+        "mode": "exact_budget",
+        "estimate": -0.0124,
+        "ci_low": -0.0141,
+        "ci_high": -0.0104,
+        "signflip_p": 0.0001,
+        "holm_adjusted_signflip_p": 0.0003
+      },
+      {
+        "action": "rerank",
+        "method": "B3_quantile_LCB",
+        "vs": "B1_gbdt",
+        "mode": "budget_cap",
+        "estimate": -0.0752,
+        "ci_low": -0.0786,
+        "ci_high": -0.0717,
+        "signflip_p": 0.0001,
+        "holm_adjusted_signflip_p": 0.0003
+      }
+    ]
+  }
+}
