@@ -39,7 +39,7 @@ def _load(name: str, path: str):
 
 EPS = 1e-9
 BUDGETS = (0.10, 0.25, 0.50, 0.75, 1.00)
-NBOOT = 2000
+NBOOT = 10000
 SEED = 42
 
 
