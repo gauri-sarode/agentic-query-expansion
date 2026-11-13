@@ -35,6 +35,11 @@ def _load(name: str, path: str):
 
 def inputs(corpus: str, split: str) -> tuple[list[str], dict, dict, dict, str]:
     """qids, query texts, BM25 rankings, stored rerank rankings, db path."""
+    if corpus in ("dbpedia", "hotpotqa"):
+        r75 = _load("r75", "scripts/75_iv_runs.py")  # reads the corpus from sys.argv[1]
+        bm = {q: v["ranking"] for q, v in json.loads(Path(f"results/{corpus}/bm25.json").read_text()).items()}
+        rr = {q: v["ranking"] for q, v in json.loads(Path(f"results/{corpus}/rerank.json").read_text()).items()}
+        return r75.QIDS, r75.queries(), bm, rr, r75.DB
     if corpus == "fiqa":
         r67 = _load("r67", "scripts/67_fiqa_runs.py")
         bm = {q: v["ranking"] for q, v in json.loads(Path("results/fiqa/bm25.json").read_text()).items()}
