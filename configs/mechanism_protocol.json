@@ -1,0 +1,22 @@
+{
+  "name": "failure_score_benefit_mechanism",
+  "written": "2026-11-13",
+  "status": "EXPLORATORY (all traces previously inspected). Categories, strata and quantities fixed and committed before any of them is computed. All settings and quantities reported regardless of outcome.",
+  "question": "Why does the failure score track failure but not benefit? Among queries with similar failure scores, what separates those an intervention helps from those it does not?",
+  "hypothesis_H_reach": "For reranking, benefit on a failing query requires a relevant document in the candidate pool below the top 10 (BM25 ranks 11-100), which a score built from the top-ranked list does not observe. Predictions: (a) P(helped | F, unreachable) is ~0 for reranking, by construction; (b) among failing queries, the failure score does not discriminate reachable from unreachable (AUC near 0.5); (c) within reachable failing queries, the helped rate is high and roughly flat across failure-score strata. Falsified if (b) AUC is clearly away from 0.5 in the direction that would let S find reachable queries (> 0.6), or if (c) the helped rate varies strongly with S.",
+  "settings": "Reranking and PRF on NQ, TripClick, ArguAna, FiQA (test, BM25 top-100 as frozen). PRF is a contrast: its pool is not bounded by BM25 top-100, so (a) need not hold. LLM QE excluded (rankings stored in a different format; stated now).",
+  "categories": {
+    "failing (F=1)": "reachable: some judged-relevant document at BM25 ranks 11-100; unreachable: none in top-100.",
+    "healthy (F=0)": "first relevant BM25 rank 1; 2-3; 4-10.",
+    "failure-score strata": "tertiles of S within failing queries and within healthy queries, cut on that setting's test queries."
+  },
+  "quantities": [
+    "P(reachable | F); P(helped | F, reachable); P(helped | F, unreachable); mean Delta per cell; bootstrap 95% CIs (10,000, seed 42)",
+    "decomposition P(helped | F) = P(reachable | F) * P(helped | F, reachable) + P(unreachable | F) * P(helped | F, unreachable)",
+    "AUC of S for reachable vs unreachable among failing queries, bootstrap CI",
+    "helped rate and mean Delta by S-tertile within reachable failing queries, and within each healthy category",
+    "healthy: P(helped), P(harmed), mean Delta per first-relevant-rank category, bootstrap CIs",
+    "AUC of S for each healthy category (rank 1 vs rest)"
+  ],
+  "outputs": "Rounded aggregates only to docs/mechanism.json (no per-query values; TripClick terms). Script: scripts/73_mechanism.py."
+}
