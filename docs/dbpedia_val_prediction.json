@@ -1,0 +1,6 @@
+{
+  "_note": "configs/info_value_precommit.json P4, recorded before test labels are read.",
+  "val_mean_rerank_delta": 0.2051,
+  "n_val": 67,
+  "prediction": "P4 positive"
+}
