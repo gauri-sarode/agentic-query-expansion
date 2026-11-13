@@ -1,0 +1,29 @@
+{
+  "name": "qpp_score_sufficiency",
+  "written": "2026-11-13",
+  "status": "EXPLORATORY (all test sets already inspected; FiQA test already analysed once). Frozen and committed before any quantity below is computed. All settings and all quantities are reported regardless of outcome.",
+  "question": "Does the learned failure gate's score S contain enough information about intervention gain to route well if the decision rule targets E[Delta - kappa | S] instead of ranking by predicted failure? Separates the decision rule (how S is used) from the information in S.",
+  "settings": "The 13 settings of Table 2: the 11 of scripts/65 (TripClick, NQ, dense, ArguAna) and FiQA reranking and PRF (results/fiqa/runner/test_predictions.csv). S = the failure score used in Table 2. Test queries only; no new retrieval run, no refit of S.",
+  "why_not_validation": "The failure detectors were fit on validation, so validation scores are in-sample and their distribution differs from test; LLM QE and dense settings also lack a matching validation Delta. Calibration is therefore cross-fitted on test folds (out-of-fold), uniformly for every setting.",
+  "budgets": [0.10, 0.25, 0.50, 0.75, 1.00],
+  "kappas": [0.0, 0.02],
+  "policies": {
+    "A_failure_ranking": "Intervene on the top floor(b*n) queries by S (the paper's failure routing); always spends the budget; pays kappa per intervention.",
+    "B_calibrated": "Primary. 5-fold cross-fitting: in the training folds, cut S into K=10 equal-frequency bins and estimate g(bin) = mean Delta; assign each held-out query g of its bin (bin edges from training folds). Over all queries, intervene in descending g on queries with g > kappa, up to b*n; ties filled fractionally (expected value). Gain averaged over 20 random fold splits (seed 42).",
+    "B_star_bin_oracle": "Optimistic, in-sample reference: K=10 equal-frequency bins of S on the test queries themselves, g = in-bin mean Delta, same selection rule. The best policy measurable on those 10 bins; not a bound on all policies of S. Sensitivity: K in {5, 20}.",
+    "random": "b * E[Delta - kappa].",
+    "oracle": "V*(b, kappa) of scripts/65 (top floor(b*n) of (Delta-kappa)_+)."
+  },
+  "primary_contrast": "Per setting, B minus A gain averaged over budgets 10/25/50/75% at kappa=0; paired bootstrap over test queries (10,000 resamples, seed 42; each resample redoes one random cross-fit), 95% CI and two-sided p; Holm over the 13 settings. Per-budget and kappa=0.02 values descriptive.",
+  "descriptive": [
+    "shares of V* for A, B, B_star, random at every budget and kappa",
+    "binned profile for a candidate figure: 10 equal-frequency test bins of S with P(F), P(Delta>0), mean Delta and bootstrap 95% CI per bin",
+    "Spearman correlation of S with Delta among failing and among healthy queries"
+  ],
+  "interpretation_fixed_now": {
+    "decision_rule_misuses_S": "B - A budget-averaged Holm-significant and positive in at least 3 of 13 settings.",
+    "S_lacks_actionable_information": "B_star (optimistic) realises under half of V* at the 25% budget in most settings and B is not significantly above random.",
+    "intervention_dependent": "Neither pattern holds across settings; reported per intervention."
+  },
+  "outputs": "Rounded aggregates only to docs/score_sufficiency.json (no per-query values; TripClick terms). Script: scripts/69_score_sufficiency.py."
+}
