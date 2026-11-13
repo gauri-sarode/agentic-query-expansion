@@ -87,7 +87,7 @@ et al.~\cite{amati-selective} gate expansion on difficulty predictors;
 Lv and Zhai~\cite{lv-zhai-adaptive} predict a feedback weight;
 Collins-Thompson~\cite{collins-thompson-risk} trades reward against risk. Even idealised selective
 QE needs QPP at Kendall $\tau\ge0.5$~\cite{hauff-qpp-effective}. Such
-work sizes predictor accuracy or evaluates gated systems; none bounds what a failure gate can
+work sizes predictor accuracy or evaluates gated systems; to our knowledge none bounds what a failure gate can
 recover or compares gates at matched budgets.
 
 \textbf{LLM QE and adaptive retrieval.} Query2doc~\cite{query2doc},
@@ -182,7 +182,13 @@ features (score shape, term coverage, rare-term IDF, entity overlap,
 coherence, perturbation stability; 6 under dense). Action utility is
 fit on $\Delta$ from post-action features. For
 pre-action routing, a \emph{benefit} model regresses $\Delta$ on the 8
-pre-action features alone. Every model and threshold is fit on
+pre-action features alone. Three further benefit predictors,
+pre-registered for ArguAna (Section~\ref{sec:arguana}), use 10
+pre-action features (the 8 above, NQC, query length), as does the
+failure gate on ArguAna and FiQA: B1, LightGBM regression on $\Delta$;
+B3, LightGBM quantile regression; and B2, the distance-weighted mean
+$\Delta$ of the $k$ nearest training queries under frozen
+\texttt{bge-small-en-v1.5} embeddings. Every model and threshold is fit on
 validation and scored once on test; intervals are paired bootstraps
 over queries ($10^4$ resamples). We call the deployed detector,
 used to route, the \emph{learned failure gate}, and any model of
@@ -192,7 +198,7 @@ $\Delta$ a \emph{benefit predictor}.
 (Section~\ref{sec:arguana}) are independent confirmation: every NQ
 query and the TripClick TAIL test set have been inspected.
 \emph{Fixed before a test run}: the NQ, reranking, and PRF runs.
-\emph{Pre-committed analyses of inspected traces}: the AUCs, ceiling,
+\emph{Pre-committed analyses of inspected traces}: the detection and harm AUCs, ceiling,
 budget routing, and Holm correction. \emph{Exploratory}: TripClick test was used during
 development, the changed-query harm comparisons were added after
 seeing the main results, and the
@@ -241,7 +247,8 @@ PRF, FiQA          & .51 & .02 & .14 & .19 & $28\%$ [11, 46] \\
 \textbf{Failure-restricted policies miss most of the gain.} The
 failure-restricted oracle captures $8$--$57\%$ of the oracle's gain
 (Table~\ref{tab:ceiling}; $18$--$46\%$ on ArguAna and FiQA), though it
-never makes a query worse. The share follows how often an
+never makes a query worse; the lowest shares, and the widest intervals,
+come from PRF, which barely acts. The share follows how often an
 intervention rescues a failing query relative to how often it helps a
 healthy one: reranking rescues $17$--$46\%$ of failing queries, so up
 to half its headroom lies there; LLM QE rescues $6$--$15\%$ and PRF
@@ -261,8 +268,8 @@ agrees: reranking rises from $46\%$ to $83\%$ at $10\%$, PRF stays at
 $28\%$.
 
 \textbf{The learned failure gate also selects poorly.} At a $10\%$
-budget, $35$--$80\%$ of its picks are failing queries, yet it realises
-at most $34\%$ of the capped failure-restricted oracle's gain, and its
+budget, $35$--$80\%$ of its picks are failing queries (the rest are healthy),
+and it realises at most $34\%$ of the capped failure-restricted oracle's gain, and its
 gain is negative in five settings (all three on ArguAna) and in
 $7$--$9$ of $11$ at $25$--$75\%$. Among failing queries its score ranks
 the rescued ones no better than chance (Table~\ref{tab:auc}; below it in four settings, not on FiQA). At a
@@ -283,7 +290,8 @@ $100\%$.
 \caption{One score, two targets (test). Failure: AUC of the learned
 failure gate's score for $F$. Helped: its AUC for $\Delta>0$ on the same
 queries, 95\% CI. Within failing: helped AUC among failing queries
-(--: fewer than 20 rescued). Exploratory except FiQA (pre-registered).}
+(--: fewer than 20 rescued). Failure is shared by the interventions on
+a corpus and retriever. Exploratory except FiQA (pre-registered).}
 \label{tab:auc}
 \footnotesize
 \setlength{\tabcolsep}{3pt}
@@ -310,9 +318,10 @@ PRF, FiQA & 0.72 & 0.46 [0.37, 0.54] & -- \\
 \end{tabular}
 \end{table}
 
-\textbf{Failure detection is ordinary QPP; benefit prediction is not.}
+\textbf{The failure gate detects failure, not benefit.}
 The learned failure gate ranks failing queries at AUC
-$0.64$--$0.69$ (Table~\ref{tab:auc}), as NQC~\cite{nqc} does. Scored against whether the
+$0.64$--$0.69$ (Table~\ref{tab:auc}), ordinary QPP accuracy: NQC~\cite{nqc}
+reaches $0.647$ on TripClick and $0.721$ on NQ. Scored against whether the
 intervention helps (exploratory, post-review), the same scores reach
 only $0.42$--$0.56$, with intervals below $0.5$ for NQ PRF and
 ArguAna QE and reranking and above only for dense NQ QE.
@@ -339,7 +348,7 @@ setting (table in the repository).
 
 \begin{figure*}[t]
 \centering
-\pgfplotsset{probeplot/.style={width=0.355\textwidth, height=3.3cm,
+\pgfplotsset{probeplot/.style={width=0.285\textwidth, height=3.3cm,
   xlabel={seconds per query}, xlabel style={font=\footnotesize},
   ticklabel style={font=\scriptsize}, title style={font=\footnotesize},
   ylabel style={font=\footnotesize}, mark size=1.2pt, line width=0.7pt,
@@ -372,11 +381,21 @@ setting (table in the repository).
 \addplot[blue!70!black, mark=square*] coordinates {(0.32,0)(0.44,3.8)(0.63,-4.8)(0.95,-14.9)(1.26,-39.8)(1.58,-71.1)};
 \addplot[green!50!black, mark=diamond*, line width=1.1pt] coordinates {(0.13,0)(0.25,-7.0)(0.42,-18.1)(0.71,-22.1)(0.99,-48.5)(1.28,-71.1)};
 \end{axis}
+\end{tikzpicture}\hfill
+\begin{tikzpicture}
+\begin{axis}[probeplot, title={FiQA (pre-registered)}]
+\addplot[black!45, dashed, mark=none] coordinates {(0,0)(0.084,10.0)(0.209,25.0)(0.419,50.1)(0.628,75.1)(0.837,100.1)};
+\addplot[red!75!black, mark=*] coordinates {(0.07,0)(0.15,11.8)(0.28,38.5)(0.48,61.5)(0.69,80.2)(0.90,100.1)};
+\addplot[orange!85!black, mark=triangle*] coordinates {(0,0)(0.084,11.0)(0.209,27.5)(0.419,50.2)(0.628,70.1)(0.837,100.1)};
+\addplot[blue!70!black, mark=square*] coordinates {(0.07,0)(0.15,12.1)(0.28,26.4)(0.48,49.7)(0.69,76.0)(0.90,100.1)};
+\addplot[green!50!black, mark=diamond*, line width=1.1pt] coordinates {(0.13,0)(0.21,16.5)(0.33,37.4)(0.52,54.6)(0.71,79.7)(0.90,100.1)};
+\end{axis}
 \end{tikzpicture}
 \caption{Reranking gain over BM25 against measured cost per query
 (exploratory) at $0$--$100\%$ of queries reranked; cost is telemetry
-(Failure, B1, paid before deciding) or the probe, plus reranking.
-Oracle (off scale): $0.25$, $0.06$, $0.10$.}
+(Failure, B1, paid before deciding; on FiQA it includes BM25 retrieval)
+or the probe, plus reranking. Oracle (off scale): $0.25$, $0.06$,
+$0.10$, $0.12$.}
 \label{fig:probe}
 \end{figure*}
 
@@ -414,8 +433,8 @@ random by at most $0.006$ at any budget and often falls below it
 scorer's picks are helped within $-0.11$ to $+0.08$ of the base rate. Averaged over budgets, NQC is
 no better than the detector, and benefit routing beats failure
 routing only for reranking on NQ ($+0.009$ $[+0.003,+0.015]$), where
-it leads at every budget (per-budget CIs in the repository). Boosted and embedding predictors (B1, B2;
-Section~\ref{sec:arguana}), fit on NQ validation (exploratory), do no
+it leads at every budget (per-budget CIs in the repository). Boosted and embedding predictors (B1, B2),
+fit on NQ validation (exploratory), do no
 better: none survives Holm, and the best recovers $8\%$ of the
 oracle-minus-failure headroom. Failure routing can still save cost: for
 LLM QE, the deployed failure-selective policy halves generator calls
@@ -431,11 +450,7 @@ predictors beat failure routing on data never inspected for this work?
 \emph{Design}, pre-registered before download
 (\texttt{configs/\allowbreak arguana\_\allowbreak precommit.json}): a
 debate-grouped split ($701/275/430$), the three interventions (LLM QE
-as on NQ), and Holm-corrected primary contrasts for three new
-predictors on 10 pre-action features (the 8 above, NQC, query length):
-B1, LightGBM regression on $\Delta$; B2, distance-weighted mean
-$\Delta$ of the $k$ nearest training queries under
-\texttt{bge-small-en-v1.5}; B3, LightGBM quantile regression (its
+as on NQ), and Holm-corrected primary contrasts for B1--B3 (B3's
 registered quantile choice is unsound, so a secondary B3 fixes
 $0.25$). Leakage fixes (each query is a corpus document; $108$
 arguments are cross-listed) and three externally proposed contrasts
@@ -494,7 +509,7 @@ B1 routing. Against free NQC (post-review), probe routing gains
 $+0.030$ $[+0.022,+0.037]$ at matched fraction and $+0.020$
 $[+0.012,+0.028]$ at equal median-latency cost (both Holm-significant
 over six NQC contrasts), $+0.010$ $[+0.002,+0.018]$ at P95. On
-TripClick and ArguAna, where reranking loses on average, probes do not help: no matched-fraction contrast is significant, and B1 ranks $\Delta$ at least as well (Spearman $0.08$ and $0.10$ vs.\ $0.05$; differences span zero); nor on FiQA, where it helps (Section~\ref{sec:arguana}).
+TripClick and ArguAna, where reranking loses on average, probes do not help: no matched-fraction contrast is significant, and B1 ranks $\Delta$ at least as well (Spearman $0.08$ and $0.10$ vs.\ $0.05$; differences span zero); nor on FiQA, where reranking helps (Section~\ref{sec:arguana}).
 
 \textbf{Robustness} (secondary, uncorrected). Every probe size beats
 failure and B1 on NQ; none does so on TripClick or ArguAna.
