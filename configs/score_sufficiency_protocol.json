@@ -42,6 +42,14 @@
       "reference_comparison": "For each setting, every stored benefit-oriented score T (benefit_linear, B1_gbdt, probe_10 where stored; NQC as a second QPP score): the same B_star_K10 (in-sample 10-bin oracle) and B_calibrated (cross-fitted) as for S, shares of V* at every budget, kappa=0. Contrast: B_star_K10(T) minus B_star_K10(S), averaged over budgets 10-75%, paired bootstrap (10,000, seed 42), 95% CI; descriptive, no Holm. FiQA probe scores were not stored and are not recomputed.",
       "figure_data": "Per setting, 10 equal-frequency test bins of S: P(F) and P(Delta>0) with bootstrap 95% CIs (2,000 resamples per bin), for a candidate figure; settings for the figure chosen as one per corpus with the intervention that acts most (NQ reranking, TripClick reranking, ArguAna reranking, FiQA reranking), fixed now.",
       "outputs": "docs/score_sufficiency_reference.json; scripts/70_score_sufficiency_reference.py."
+    },
+    {
+      "date": "2026-11-13",
+      "status": "Second amendment, added AFTER the primary (f198bc7) and reference (b2fcfdf) results were seen, at external-review request. Committed before computing. Exploratory.",
+      "B_vs_random": "The registered condition 'B is not significantly above random', never computed: B_calibrated minus random, averaged over budgets 10-75%, kappa=0, paired bootstrap with refit (10,000, seed 42), 95% CI, Holm over 13 settings.",
+      "exact_budget_vs_abstention": "B_exact: the same cross-fitted ranking by g but forced to spend floor(b*n) (no abstention). Report B_exact - A (rule effect without abstention) and B_calibrated - B_exact (abstention effect), budget-averaged 10-75%, kappa in {0, 0.02}, bootstrap CIs as above.",
+      "decision_value_gap": "Unbudgeted (b=1), kappa in {0, 0.02}, for every stored score T (failure, nqc, benefit_linear, B1_gbdt, probe_10): V_full = E[(Delta-kappa)_+]; V_0 = (E[Delta]-kappa)_+ (no information: always or never); V_T bracketed by an achievable out-of-sample value V_T_lo = E[1{g_cf(T)>kappa}(Delta-kappa)] (cross-fitted 10-bin g, 20 repeats) and the optimistic in-sample 10-bin value V_T_hi = E[(g_in(T)-kappa)_+]. Report V_full - V_T (information about Delta missing from T) and (V_T - V_0)/(V_full - V_0) (share of the value of full information that T delivers), bracketed. Bootstrap 95% CI (10,000, refit) for V_T_lo - V_0. Neither bracket end is the population V_T; V_T_hi is not a bound.",
+      "outputs": "docs/score_sufficiency_decision_value.json; scripts/72_decision_value.py."
     }
   ]
 }
