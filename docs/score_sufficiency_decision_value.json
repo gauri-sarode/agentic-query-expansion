@@ -1,0 +1,2538 @@
+{
+  "_note": "EXPLORATORY second amendment (post-results, committed before computing). Contrasts are budget-averaged over 10-75%. Decision value at b=1: V_T_lo is an achievable out-of-sample value, V_T_hi the optimistic in-sample 10-bin value; neither is the population V_T.",
+  "llm_qe_tripclick": {
+    "contrasts": {
+      "k=0.0": {
+        "B_minus_random": {
+          "estimate": 0.0024,
+          "ci": [
+            0.0003,
+            0.0075
+          ],
+          "p": 0.0338
+        },
+        "B_exact_minus_A": {
+          "estimate": 0.0008,
+          "ci": [
+            -0.0013,
+            0.005
+          ],
+          "p": 0.2488
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": -0.0001,
+          "ci": [
+            -0.0007,
+            0.0023
+          ],
+          "p": 0.6096
+        }
+      },
+      "k=0.02": {
+        "B_minus_random": {
+          "estimate": 0.008,
+          "ci": [
+            0.0039,
+            0.0122
+          ],
+          "p": 0.0004
+        },
+        "B_exact_minus_A": {
+          "estimate": 0.0008,
+          "ci": [
+            -0.0012,
+            0.0051
+          ],
+          "p": 0.244
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0055,
+          "ci": [
+            0.0013,
+            0.0085
+          ],
+          "p": 0.0032
+        }
+      }
+    },
+    "decision_value": {
+      "k=0.0": {
+        "V_full": 0.0246,
+        "V_0": 0.0007,
+        "scores": {
+          "failure": {
+            "V_T_lo": 0.0022,
+            "V_T_hi": 0.0064,
+            "missing_lo_hi": [
+              0.0182,
+              0.0224
+            ],
+            "share_of_info_value": [
+              0.0633,
+              0.2397
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0015,
+              "ci": [
+                -0.0016,
+                0.0083
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": 0.0015,
+            "V_T_hi": 0.0057,
+            "missing_lo_hi": [
+              0.0189,
+              0.0231
+            ],
+            "share_of_info_value": [
+              0.0364,
+              0.2115
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0009,
+              "ci": [
+                -0.0032,
+                0.0072
+              ]
+            }
+          },
+          "benefit_linear": {
+            "V_T_lo": 0.0001,
+            "V_T_hi": 0.0045,
+            "missing_lo_hi": [
+              0.0201,
+              0.0245
+            ],
+            "share_of_info_value": [
+              -0.0229,
+              0.1608
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0005,
+              "ci": [
+                -0.0038,
+                0.0068
+              ]
+            }
+          }
+        }
+      },
+      "k=0.02": {
+        "V_full": 0.0223,
+        "V_0": 0.0,
+        "scores": {
+          "failure": {
+            "V_T_lo": 0.0002,
+            "V_T_hi": 0.0017,
+            "missing_lo_hi": [
+              0.0206,
+              0.0221
+            ],
+            "share_of_info_value": [
+              0.0088,
+              0.0768
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0002,
+              "ci": [
+                -0.0034,
+                0.0045
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": -0.0021,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0223,
+              0.0244
+            ],
+            "share_of_info_value": [
+              -0.0935,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0021,
+              "ci": [
+                -0.0044,
+                0.0024
+              ]
+            }
+          },
+          "benefit_linear": {
+            "V_T_lo": -0.0029,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0223,
+              0.0252
+            ],
+            "share_of_info_value": [
+              -0.1291,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0029,
+              "ci": [
+                -0.004,
+                0.0033
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "llm_qe_nq": {
+    "contrasts": {
+      "k=0.0": {
+        "B_minus_random": {
+          "estimate": 0.0069,
+          "ci": [
+            0.0022,
+            0.0134
+          ],
+          "p": 0.009
+        },
+        "B_exact_minus_A": {
+          "estimate": -0.0024,
+          "ci": [
+            -0.0042,
+            0.0036
+          ],
+          "p": 0.757
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0053,
+          "ci": [
+            0.0002,
+            0.0097
+          ],
+          "p": 0.0392
+        }
+      },
+      "k=0.02": {
+        "B_minus_random": {
+          "estimate": 0.0162,
+          "ci": [
+            0.0106,
+            0.0207
+          ],
+          "p": 0.0
+        },
+        "B_exact_minus_A": {
+          "estimate": -0.0024,
+          "ci": [
+            -0.0043,
+            0.0035
+          ],
+          "p": 0.77
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0146,
+          "ci": [
+            0.0064,
+            0.0186
+          ],
+          "p": 0.0
+        }
+      }
+    },
+    "decision_value": {
+      "k=0.0": {
+        "V_full": 0.0415,
+        "V_0": 0.0,
+        "scores": {
+          "failure": {
+            "V_T_lo": -0.0021,
+            "V_T_hi": 0.0012,
+            "missing_lo_hi": [
+              0.0403,
+              0.0436
+            ],
+            "share_of_info_value": [
+              -0.0497,
+              0.0281
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0021,
+              "ci": [
+                -0.0058,
+                0.0041
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": -0.0004,
+            "V_T_hi": 0.0015,
+            "missing_lo_hi": [
+              0.04,
+              0.0419
+            ],
+            "share_of_info_value": [
+              -0.0101,
+              0.0363
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0004,
+              "ci": [
+                -0.0058,
+                0.0042
+              ]
+            }
+          },
+          "benefit_linear": {
+            "V_T_lo": -0.0005,
+            "V_T_hi": 0.0028,
+            "missing_lo_hi": [
+              0.0387,
+              0.042
+            ],
+            "share_of_info_value": [
+              -0.0122,
+              0.0679
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0005,
+              "ci": [
+                -0.0049,
+                0.0066
+              ]
+            }
+          },
+          "B1_gbdt": {
+            "V_T_lo": -0.0028,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0415,
+              0.0443
+            ],
+            "share_of_info_value": [
+              -0.0667,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0028,
+              "ci": [
+                -0.0063,
+                0.0029
+              ]
+            }
+          }
+        }
+      },
+      "k=0.02": {
+        "V_full": 0.0389,
+        "V_0": 0.0,
+        "scores": {
+          "failure": {
+            "V_T_lo": -0.0004,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0389,
+              0.0393
+            ],
+            "share_of_info_value": [
+              -0.0111,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0004,
+              "ci": [
+                -0.0037,
+                0.0016
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": -0.0005,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0389,
+              0.0393
+            ],
+            "share_of_info_value": [
+              -0.0119,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0005,
+              "ci": [
+                -0.0033,
+                0.0016
+              ]
+            }
+          },
+          "benefit_linear": {
+            "V_T_lo": -0.0016,
+            "V_T_hi": 0.0001,
+            "missing_lo_hi": [
+              0.0388,
+              0.0405
+            ],
+            "share_of_info_value": [
+              -0.0424,
+              0.0015
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0016,
+              "ci": [
+                -0.0036,
+                0.003
+              ]
+            }
+          },
+          "B1_gbdt": {
+            "V_T_lo": 0.0,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0389,
+              0.0389
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                -0.0032,
+                0.0006
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "rerank_tripclick": {
+    "contrasts": {
+      "k=0.0": {
+        "B_minus_random": {
+          "estimate": 0.0056,
+          "ci": [
+            0.002,
+            0.018
+          ],
+          "p": 0.017
+        },
+        "B_exact_minus_A": {
+          "estimate": -0.0009,
+          "ci": [
+            -0.004,
+            0.01
+          ],
+          "p": 0.4532
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0047,
+          "ci": [
+            -0.0001,
+            0.0128
+          ],
+          "p": 0.0542
+        }
+      },
+      "k=0.02": {
+        "B_minus_random": {
+          "estimate": 0.017,
+          "ci": [
+            0.0089,
+            0.025
+          ],
+          "p": 0.0
+        },
+        "B_exact_minus_A": {
+          "estimate": -0.0009,
+          "ci": [
+            -0.0039,
+            0.01
+          ],
+          "p": 0.4512
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0161,
+          "ci": [
+            0.0043,
+            0.0222
+          ],
+          "p": 0.0006
+        }
+      }
+    },
+    "decision_value": {
+      "k=0.0": {
+        "V_full": 0.0616,
+        "V_0": 0.0,
+        "scores": {
+          "failure": {
+            "V_T_lo": -0.0059,
+            "V_T_hi": 0.0008,
+            "missing_lo_hi": [
+              0.0608,
+              0.0675
+            ],
+            "share_of_info_value": [
+              -0.0955,
+              0.013
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0059,
+              "ci": [
+                -0.009,
+                0.008
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": -0.0041,
+            "V_T_hi": 0.0014,
+            "missing_lo_hi": [
+              0.0602,
+              0.0657
+            ],
+            "share_of_info_value": [
+              -0.0662,
+              0.0232
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0041,
+              "ci": [
+                -0.0096,
+                0.0062
+              ]
+            }
+          },
+          "benefit_linear": {
+            "V_T_lo": -0.0061,
+            "V_T_hi": 0.001,
+            "missing_lo_hi": [
+              0.0606,
+              0.0677
+            ],
+            "share_of_info_value": [
+              -0.0995,
+              0.017
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0061,
+              "ci": [
+                -0.0096,
+                0.0067
+              ]
+            }
+          },
+          "probe_10": {
+            "V_T_lo": -0.0039,
+            "V_T_hi": 0.0016,
+            "missing_lo_hi": [
+              0.06,
+              0.0656
+            ],
+            "share_of_info_value": [
+              -0.0639,
+              0.0265
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0039,
+              "ci": [
+                -0.0091,
+                0.0075
+              ]
+            }
+          }
+        }
+      },
+      "k=0.02": {
+        "V_full": 0.0576,
+        "V_0": 0.0,
+        "scores": {
+          "failure": {
+            "V_T_lo": -0.0021,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0576,
+              0.0597
+            ],
+            "share_of_info_value": [
+              -0.0365,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0021,
+              "ci": [
+                -0.0073,
+                0.004
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": -0.002,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0576,
+              0.0595
+            ],
+            "share_of_info_value": [
+              -0.0344,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.002,
+              "ci": [
+                -0.0073,
+                0.0034
+              ]
+            }
+          },
+          "benefit_linear": {
+            "V_T_lo": -0.0027,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0576,
+              0.0603
+            ],
+            "share_of_info_value": [
+              -0.047,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0027,
+              "ci": [
+                -0.0077,
+                0.0029
+              ]
+            }
+          },
+          "probe_10": {
+            "V_T_lo": -0.0022,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0576,
+              0.0598
+            ],
+            "share_of_info_value": [
+              -0.0391,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0022,
+              "ci": [
+                -0.0074,
+                0.0039
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "prf_tripclick": {
+    "contrasts": {
+      "k=0.0": {
+        "B_minus_random": {
+          "estimate": 0.0,
+          "ci": [
+            -0.001,
+            0.0041
+          ],
+          "p": 0.201
+        },
+        "B_exact_minus_A": {
+          "estimate": -0.0003,
+          "ci": [
+            -0.0015,
+            0.0035
+          ],
+          "p": 0.4122
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0001,
+          "ci": [
+            -0.0005,
+            0.0016
+          ],
+          "p": 0.6458
+        }
+      },
+      "k=0.02": {
+        "B_minus_random": {
+          "estimate": 0.0085,
+          "ci": [
+            0.005,
+            0.0104
+          ],
+          "p": 0.0
+        },
+        "B_exact_minus_A": {
+          "estimate": -0.0003,
+          "ci": [
+            -0.0014,
+            0.0036
+          ],
+          "p": 0.4152
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0085,
+          "ci": [
+            0.0032,
+            0.0099
+          ],
+          "p": 0.0
+        }
+      }
+    },
+    "decision_value": {
+      "k=0.0": {
+        "V_full": 0.0123,
+        "V_0": 0.0,
+        "scores": {
+          "failure": {
+            "V_T_lo": 0.0001,
+            "V_T_hi": 0.003,
+            "missing_lo_hi": [
+              0.0092,
+              0.0121
+            ],
+            "share_of_info_value": [
+              0.0096,
+              0.2468
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0001,
+              "ci": [
+                -0.0023,
+                0.0047
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": -0.0012,
+            "V_T_hi": 0.0024,
+            "missing_lo_hi": [
+              0.0099,
+              0.0134
+            ],
+            "share_of_info_value": [
+              -0.0942,
+              0.1942
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0012,
+              "ci": [
+                -0.0026,
+                0.0041
+              ]
+            }
+          },
+          "benefit_linear": {
+            "V_T_lo": 0.0,
+            "V_T_hi": 0.0027,
+            "missing_lo_hi": [
+              0.0096,
+              0.0122
+            ],
+            "share_of_info_value": [
+              0.0008,
+              0.2172
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                -0.0025,
+                0.0044
+              ]
+            }
+          }
+        }
+      },
+      "k=0.02": {
+        "V_full": 0.0109,
+        "V_0": 0.0,
+        "scores": {
+          "failure": {
+            "V_T_lo": 0.0,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0109,
+              0.0109
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                -0.0022,
+                0.0007
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": 0.0,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0109,
+              0.0109
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                -0.002,
+                0.0005
+              ]
+            }
+          },
+          "benefit_linear": {
+            "V_T_lo": 0.0,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0109,
+              0.0109
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                -0.0022,
+                0.0006
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "rerank_nq": {
+    "contrasts": {
+      "k=0.0": {
+        "B_minus_random": {
+          "estimate": 0.0004,
+          "ci": [
+            -0.0017,
+            0.0109
+          ],
+          "p": 0.1372
+        },
+        "B_exact_minus_A": {
+          "estimate": -0.0016,
+          "ci": [
+            -0.0047,
+            0.0108
+          ],
+          "p": 0.4648
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0,
+          "ci": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0
+        }
+      },
+      "k=0.02": {
+        "B_minus_random": {
+          "estimate": 0.0004,
+          "ci": [
+            -0.0015,
+            0.0108
+          ],
+          "p": 0.1398
+        },
+        "B_exact_minus_A": {
+          "estimate": -0.0016,
+          "ci": [
+            -0.0047,
+            0.0109
+          ],
+          "p": 0.4674
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0,
+          "ci": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0
+        }
+      }
+    },
+    "decision_value": {
+      "k=0.0": {
+        "V_full": 0.2505,
+        "V_0": 0.2251,
+        "scores": {
+          "failure": {
+            "V_T_lo": 0.2251,
+            "V_T_hi": 0.2251,
+            "missing_lo_hi": [
+              0.0255,
+              0.0255
+            ],
+            "share_of_info_value": [
+              0.0,
+              -0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": 0.2251,
+            "V_T_hi": 0.2251,
+            "missing_lo_hi": [
+              0.0255,
+              0.0255
+            ],
+            "share_of_info_value": [
+              0.0,
+              -0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "benefit_linear": {
+            "V_T_lo": 0.2251,
+            "V_T_hi": 0.2251,
+            "missing_lo_hi": [
+              0.0255,
+              0.0255
+            ],
+            "share_of_info_value": [
+              0.0,
+              -0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "B1_gbdt": {
+            "V_T_lo": 0.2251,
+            "V_T_hi": 0.2251,
+            "missing_lo_hi": [
+              0.0255,
+              0.0255
+            ],
+            "share_of_info_value": [
+              0.0,
+              -0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "probe_10": {
+            "V_T_lo": 0.2251,
+            "V_T_hi": 0.2251,
+            "missing_lo_hi": [
+              0.0255,
+              0.0255
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                0.0,
+                0.0
+              ]
+            }
+          }
+        }
+      },
+      "k=0.02": {
+        "V_full": 0.2405,
+        "V_0": 0.2051,
+        "scores": {
+          "failure": {
+            "V_T_lo": 0.2051,
+            "V_T_hi": 0.2051,
+            "missing_lo_hi": [
+              0.0354,
+              0.0354
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": 0.2051,
+            "V_T_hi": 0.2051,
+            "missing_lo_hi": [
+              0.0354,
+              0.0354
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "benefit_linear": {
+            "V_T_lo": 0.2051,
+            "V_T_hi": 0.2051,
+            "missing_lo_hi": [
+              0.0354,
+              0.0354
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "B1_gbdt": {
+            "V_T_lo": 0.2051,
+            "V_T_hi": 0.2051,
+            "missing_lo_hi": [
+              0.0354,
+              0.0354
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "probe_10": {
+            "V_T_lo": 0.2051,
+            "V_T_hi": 0.2051,
+            "missing_lo_hi": [
+              0.0354,
+              0.0354
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                0.0,
+                0.0
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "prf_nq": {
+    "contrasts": {
+      "k=0.0": {
+        "B_minus_random": {
+          "estimate": 0.0001,
+          "ci": [
+            -0.0012,
+            0.0036
+          ],
+          "p": 0.2982
+        },
+        "B_exact_minus_A": {
+          "estimate": 0.0008,
+          "ci": [
+            -0.0013,
+            0.0051
+          ],
+          "p": 0.2428
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0,
+          "ci": [
+            -0.0002,
+            0.0003
+          ],
+          "p": 1.0
+        }
+      },
+      "k=0.02": {
+        "B_minus_random": {
+          "estimate": 0.0025,
+          "ci": [
+            0.0005,
+            0.0066
+          ],
+          "p": 0.0218
+        },
+        "B_exact_minus_A": {
+          "estimate": 0.0008,
+          "ci": [
+            -0.0013,
+            0.0051
+          ],
+          "p": 0.2456
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0024,
+          "ci": [
+            0.0001,
+            0.0054
+          ],
+          "p": 0.042
+        }
+      }
+    },
+    "decision_value": {
+      "k=0.0": {
+        "V_full": 0.0278,
+        "V_0": 0.0097,
+        "scores": {
+          "failure": {
+            "V_T_lo": 0.0083,
+            "V_T_hi": 0.01,
+            "missing_lo_hi": [
+              0.0178,
+              0.0196
+            ],
+            "share_of_info_value": [
+              -0.0793,
+              0.018
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0014,
+              "ci": [
+                -0.0034,
+                0.0023
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": 0.007,
+            "V_T_hi": 0.0099,
+            "missing_lo_hi": [
+              0.0179,
+              0.0208
+            ],
+            "share_of_info_value": [
+              -0.1481,
+              0.0135
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0027,
+              "ci": [
+                -0.0033,
+                0.0024
+              ]
+            }
+          },
+          "benefit_linear": {
+            "V_T_lo": 0.0074,
+            "V_T_hi": 0.0097,
+            "missing_lo_hi": [
+              0.0181,
+              0.0205
+            ],
+            "share_of_info_value": [
+              -0.1287,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0023,
+              "ci": [
+                -0.0035,
+                0.0021
+              ]
+            }
+          },
+          "B1_gbdt": {
+            "V_T_lo": 0.0083,
+            "V_T_hi": 0.0097,
+            "missing_lo_hi": [
+              0.0181,
+              0.0195
+            ],
+            "share_of_info_value": [
+              -0.0769,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0014,
+              "ci": [
+                -0.0035,
+                0.0015
+              ]
+            }
+          }
+        }
+      },
+      "k=0.02": {
+        "V_full": 0.0253,
+        "V_0": 0.0,
+        "scores": {
+          "failure": {
+            "V_T_lo": -0.0017,
+            "V_T_hi": 0.0003,
+            "missing_lo_hi": [
+              0.025,
+              0.027
+            ],
+            "share_of_info_value": [
+              -0.0683,
+              0.01
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0017,
+              "ci": [
+                -0.0033,
+                0.0028
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": 0.0001,
+            "V_T_hi": 0.0014,
+            "missing_lo_hi": [
+              0.0238,
+              0.0251
+            ],
+            "share_of_info_value": [
+              0.0057,
+              0.0569
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0001,
+              "ci": [
+                -0.0028,
+                0.0034
+              ]
+            }
+          },
+          "benefit_linear": {
+            "V_T_lo": 0.0,
+            "V_T_hi": 0.001,
+            "missing_lo_hi": [
+              0.0243,
+              0.0252
+            ],
+            "share_of_info_value": [
+              0.0018,
+              0.0388
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                -0.003,
+                0.0024
+              ]
+            }
+          },
+          "B1_gbdt": {
+            "V_T_lo": -0.0017,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0253,
+              0.027
+            ],
+            "share_of_info_value": [
+              -0.068,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0017,
+              "ci": [
+                -0.0035,
+                0.002
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "llm_qe_tripclick_dense": {
+    "contrasts": {
+      "k=0.0": {
+        "B_minus_random": {
+          "estimate": 0.0051,
+          "ci": [
+            0.001,
+            0.0119
+          ],
+          "p": 0.0182
+        },
+        "B_exact_minus_A": {
+          "estimate": 0.0005,
+          "ci": [
+            -0.0023,
+            0.0071
+          ],
+          "p": 0.3284
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0042,
+          "ci": [
+            0.0,
+            0.0081
+          ],
+          "p": 0.0466
+        }
+      },
+      "k=0.02": {
+        "B_minus_random": {
+          "estimate": 0.0133,
+          "ci": [
+            0.0085,
+            0.0185
+          ],
+          "p": 0.0
+        },
+        "B_exact_minus_A": {
+          "estimate": 0.0005,
+          "ci": [
+            -0.0024,
+            0.0071
+          ],
+          "p": 0.3324
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0124,
+          "ci": [
+            0.005,
+            0.0166
+          ],
+          "p": 0.0
+        }
+      }
+    },
+    "decision_value": {
+      "k=0.0": {
+        "V_full": 0.0297,
+        "V_0": 0.0,
+        "scores": {
+          "failure": {
+            "V_T_lo": -0.0018,
+            "V_T_hi": 0.0021,
+            "missing_lo_hi": [
+              0.0276,
+              0.0315
+            ],
+            "share_of_info_value": [
+              -0.0615,
+              0.0706
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0018,
+              "ci": [
+                -0.0052,
+                0.0062
+              ]
+            }
+          }
+        }
+      },
+      "k=0.02": {
+        "V_full": 0.0269,
+        "V_0": 0.0,
+        "scores": {
+          "failure": {
+            "V_T_lo": -0.001,
+            "V_T_hi": 0.0001,
+            "missing_lo_hi": [
+              0.0269,
+              0.028
+            ],
+            "share_of_info_value": [
+              -0.0384,
+              0.0021
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.001,
+              "ci": [
+                -0.004,
+                0.0026
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "llm_qe_nq_dense": {
+    "contrasts": {
+      "k=0.0": {
+        "B_minus_random": {
+          "estimate": 0.0015,
+          "ci": [
+            -0.0012,
+            0.0095
+          ],
+          "p": 0.1242
+        },
+        "B_exact_minus_A": {
+          "estimate": -0.0028,
+          "ci": [
+            -0.0041,
+            0.0044
+          ],
+          "p": 0.9794
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0022,
+          "ci": [
+            -0.0008,
+            0.0061
+          ],
+          "p": 0.2342
+        }
+      },
+      "k=0.02": {
+        "B_minus_random": {
+          "estimate": 0.0104,
+          "ci": [
+            0.0055,
+            0.016
+          ],
+          "p": 0.0002
+        },
+        "B_exact_minus_A": {
+          "estimate": -0.0028,
+          "ci": [
+            -0.0041,
+            0.0045
+          ],
+          "p": 0.9948
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0111,
+          "ci": [
+            0.0032,
+            0.0156
+          ],
+          "p": 0.001
+        }
+      }
+    },
+    "decision_value": {
+      "k=0.0": {
+        "V_full": 0.049,
+        "V_0": 0.0,
+        "scores": {
+          "failure": {
+            "V_T_lo": -0.0028,
+            "V_T_hi": 0.0019,
+            "missing_lo_hi": [
+              0.0471,
+              0.0518
+            ],
+            "share_of_info_value": [
+              -0.0579,
+              0.0384
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0028,
+              "ci": [
+                -0.0063,
+                0.0068
+              ]
+            }
+          }
+        }
+      },
+      "k=0.02": {
+        "V_full": 0.0454,
+        "V_0": 0.0,
+        "scores": {
+          "failure": {
+            "V_T_lo": -0.0018,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0454,
+              0.0472
+            ],
+            "share_of_info_value": [
+              -0.0392,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0018,
+              "ci": [
+                -0.005,
+                0.0026
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "prf_arguana": {
+    "contrasts": {
+      "k=0.0": {
+        "B_minus_random": {
+          "estimate": -0.0014,
+          "ci": [
+            -0.0013,
+            0.0038
+          ],
+          "p": 0.386
+        },
+        "B_exact_minus_A": {
+          "estimate": -0.0014,
+          "ci": [
+            -0.0017,
+            0.0033
+          ],
+          "p": 0.6702
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": -0.0,
+          "ci": [
+            -0.0004,
+            0.0017
+          ],
+          "p": 0.4524
+        }
+      },
+      "k=0.02": {
+        "B_minus_random": {
+          "estimate": 0.009,
+          "ci": [
+            0.0063,
+            0.0108
+          ],
+          "p": 0.0
+        },
+        "B_exact_minus_A": {
+          "estimate": -0.0014,
+          "ci": [
+            -0.0017,
+            0.0034
+          ],
+          "p": 0.6814
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0103,
+          "ci": [
+            0.0047,
+            0.0109
+          ],
+          "p": 0.0
+        }
+      }
+    },
+    "decision_value": {
+      "k=0.0": {
+        "V_full": 0.0037,
+        "V_0": 0.0,
+        "scores": {
+          "failure": {
+            "V_T_lo": -0.003,
+            "V_T_hi": 0.0009,
+            "missing_lo_hi": [
+              0.0028,
+              0.0067
+            ],
+            "share_of_info_value": [
+              -0.8226,
+              0.2432
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.003,
+              "ci": [
+                -0.0028,
+                0.0031
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": -0.0003,
+            "V_T_hi": 0.0017,
+            "missing_lo_hi": [
+              0.0019,
+              0.0039
+            ],
+            "share_of_info_value": [
+              -0.0755,
+              0.477
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0003,
+              "ci": [
+                -0.0016,
+                0.0038
+              ]
+            }
+          },
+          "B1_gbdt": {
+            "V_T_lo": -0.0025,
+            "V_T_hi": 0.0015,
+            "missing_lo_hi": [
+              0.0021,
+              0.0061
+            ],
+            "share_of_info_value": [
+              -0.6725,
+              0.4114
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0025,
+              "ci": [
+                -0.0029,
+                0.0026
+              ]
+            }
+          }
+        }
+      },
+      "k=0.02": {
+        "V_full": 0.0029,
+        "V_0": 0.0,
+        "scores": {
+          "failure": {
+            "V_T_lo": 0.0,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0029,
+              0.0029
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                -0.0016,
+                0.0007
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": -0.0006,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0029,
+              0.0035
+            ],
+            "share_of_info_value": [
+              -0.2195,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0006,
+              "ci": [
+                -0.0017,
+                0.0018
+              ]
+            }
+          },
+          "B1_gbdt": {
+            "V_T_lo": 0.0,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0029,
+              0.0029
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                -0.0021,
+                0.0
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "qe_arguana": {
+    "contrasts": {
+      "k=0.0": {
+        "B_minus_random": {
+          "estimate": 0.0651,
+          "ci": [
+            0.0421,
+            0.0801
+          ],
+          "p": 0.0
+        },
+        "B_exact_minus_A": {
+          "estimate": -0.0048,
+          "ci": [
+            -0.0131,
+            0.0288
+          ],
+          "p": 0.5004
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0732,
+          "ci": [
+            0.0326,
+            0.0831
+          ],
+          "p": 0.0
+        }
+      },
+      "k=0.02": {
+        "B_minus_random": {
+          "estimate": 0.0731,
+          "ci": [
+            0.0523,
+            0.0882
+          ],
+          "p": 0.0
+        },
+        "B_exact_minus_A": {
+          "estimate": -0.0048,
+          "ci": [
+            -0.0131,
+            0.0285
+          ],
+          "p": 0.4928
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0812,
+          "ci": [
+            0.0412,
+            0.0911
+          ],
+          "p": 0.0
+        }
+      }
+    },
+    "decision_value": {
+      "k=0.0": {
+        "V_full": 0.0725,
+        "V_0": 0.0,
+        "scores": {
+          "failure": {
+            "V_T_lo": 0.0,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0725,
+              0.0725
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                -0.0127,
+                0.0019
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": 0.0,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0725,
+              0.0725
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                -0.0126,
+                0.0015
+              ]
+            }
+          },
+          "B1_gbdt": {
+            "V_T_lo": -0.0004,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0725,
+              0.073
+            ],
+            "share_of_info_value": [
+              -0.0062,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0004,
+              "ci": [
+                -0.0116,
+                0.0017
+              ]
+            }
+          }
+        }
+      },
+      "k=0.02": {
+        "V_full": 0.0677,
+        "V_0": 0.0,
+        "scores": {
+          "failure": {
+            "V_T_lo": 0.0,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0677,
+              0.0677
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                -0.0103,
+                0.0006
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": 0.0,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0677,
+              0.0677
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                -0.0097,
+                0.0002
+              ]
+            }
+          },
+          "B1_gbdt": {
+            "V_T_lo": -0.0005,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0677,
+              0.0682
+            ],
+            "share_of_info_value": [
+              -0.0072,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0005,
+              "ci": [
+                -0.009,
+                0.0003
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "rerank_arguana": {
+    "contrasts": {
+      "k=0.0": {
+        "B_minus_random": {
+          "estimate": 0.0144,
+          "ci": [
+            0.0026,
+            0.0427
+          ],
+          "p": 0.0294
+        },
+        "B_exact_minus_A": {
+          "estimate": 0.0012,
+          "ci": [
+            -0.0107,
+            0.031
+          ],
+          "p": 0.3752
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0178,
+          "ci": [
+            0.0011,
+            0.0374
+          ],
+          "p": 0.0308
+        }
+      },
+      "k=0.02": {
+        "B_minus_random": {
+          "estimate": 0.0283,
+          "ci": [
+            0.0099,
+            0.0503
+          ],
+          "p": 0.0052
+        },
+        "B_exact_minus_A": {
+          "estimate": 0.0012,
+          "ci": [
+            -0.0108,
+            0.031
+          ],
+          "p": 0.3694
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0317,
+          "ci": [
+            0.0055,
+            0.0477
+          ],
+          "p": 0.004
+        }
+      }
+    },
+    "decision_value": {
+      "k=0.0": {
+        "V_full": 0.1014,
+        "V_0": 0.0,
+        "scores": {
+          "failure": {
+            "V_T_lo": -0.0143,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.1014,
+              0.1157
+            ],
+            "share_of_info_value": [
+              -0.1412,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0143,
+              "ci": [
+                -0.0233,
+                0.012
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": -0.0071,
+            "V_T_hi": 0.0031,
+            "missing_lo_hi": [
+              0.0983,
+              0.1085
+            ],
+            "share_of_info_value": [
+              -0.0703,
+              0.0307
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0071,
+              "ci": [
+                -0.0225,
+                0.0162
+              ]
+            }
+          },
+          "B1_gbdt": {
+            "V_T_lo": -0.0021,
+            "V_T_hi": 0.0045,
+            "missing_lo_hi": [
+              0.0968,
+              0.1034
+            ],
+            "share_of_info_value": [
+              -0.0203,
+              0.0447
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0021,
+              "ci": [
+                -0.0209,
+                0.0189
+              ]
+            }
+          },
+          "probe_10": {
+            "V_T_lo": -0.0108,
+            "V_T_hi": 0.0014,
+            "missing_lo_hi": [
+              0.1,
+              0.1122
+            ],
+            "share_of_info_value": [
+              -0.1065,
+              0.0138
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0108,
+              "ci": [
+                -0.0205,
+                0.0187
+              ]
+            }
+          }
+        }
+      },
+      "k=0.02": {
+        "V_full": 0.0959,
+        "V_0": 0.0,
+        "scores": {
+          "failure": {
+            "V_T_lo": -0.0081,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0959,
+              0.1041
+            ],
+            "share_of_info_value": [
+              -0.0849,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0081,
+              "ci": [
+                -0.0211,
+                0.009
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": -0.0084,
+            "V_T_hi": 0.0011,
+            "missing_lo_hi": [
+              0.0948,
+              0.1043
+            ],
+            "share_of_info_value": [
+              -0.0875,
+              0.0116
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0084,
+              "ci": [
+                -0.0206,
+                0.0117
+              ]
+            }
+          },
+          "B1_gbdt": {
+            "V_T_lo": -0.0062,
+            "V_T_hi": 0.0018,
+            "missing_lo_hi": [
+              0.0942,
+              0.1021
+            ],
+            "share_of_info_value": [
+              -0.0644,
+              0.0185
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0062,
+              "ci": [
+                -0.0198,
+                0.0145
+              ]
+            }
+          },
+          "probe_10": {
+            "V_T_lo": -0.0114,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0959,
+              0.1074
+            ],
+            "share_of_info_value": [
+              -0.1191,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0114,
+              "ci": [
+                -0.0192,
+                0.0142
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "prf_fiqa": {
+    "contrasts": {
+      "k=0.0": {
+        "B_minus_random": {
+          "estimate": -0.0005,
+          "ci": [
+            -0.0011,
+            0.0036
+          ],
+          "p": 0.2962
+        },
+        "B_exact_minus_A": {
+          "estimate": -0.0015,
+          "ci": [
+            -0.0021,
+            0.0023
+          ],
+          "p": 0.9776
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": -0.0001,
+          "ci": [
+            -0.0005,
+            0.0012
+          ],
+          "p": 0.7478
+        }
+      },
+      "k=0.02": {
+        "B_minus_random": {
+          "estimate": 0.0082,
+          "ci": [
+            0.005,
+            0.0101
+          ],
+          "p": 0.0
+        },
+        "B_exact_minus_A": {
+          "estimate": -0.0015,
+          "ci": [
+            -0.0021,
+            0.0023
+          ],
+          "p": 0.9774
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0086,
+          "ci": [
+            0.0035,
+            0.0096
+          ],
+          "p": 0.0
+        }
+      }
+    },
+    "decision_value": {
+      "k=0.0": {
+        "V_full": 0.0093,
+        "V_0": 0.0,
+        "scores": {
+          "failure": {
+            "V_T_lo": -0.0003,
+            "V_T_hi": 0.0031,
+            "missing_lo_hi": [
+              0.0062,
+              0.0096
+            ],
+            "share_of_info_value": [
+              -0.0343,
+              0.3289
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0003,
+              "ci": [
+                -0.0022,
+                0.0043
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": -0.0003,
+            "V_T_hi": 0.0035,
+            "missing_lo_hi": [
+              0.0058,
+              0.0096
+            ],
+            "share_of_info_value": [
+              -0.0271,
+              0.3723
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0003,
+              "ci": [
+                -0.0024,
+                0.0043
+              ]
+            }
+          },
+          "B1_gbdt": {
+            "V_T_lo": -0.0005,
+            "V_T_hi": 0.0026,
+            "missing_lo_hi": [
+              0.0067,
+              0.0098
+            ],
+            "share_of_info_value": [
+              -0.0586,
+              0.2773
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0005,
+              "ci": [
+                -0.0027,
+                0.004
+              ]
+            }
+          }
+        }
+      },
+      "k=0.02": {
+        "V_full": 0.0077,
+        "V_0": 0.0,
+        "scores": {
+          "failure": {
+            "V_T_lo": 0.0,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0077,
+              0.0077
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                -0.0019,
+                0.0001
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": 0.0,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0077,
+              0.0077
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                -0.0019,
+                0.0003
+              ]
+            }
+          },
+          "B1_gbdt": {
+            "V_T_lo": 0.0,
+            "V_T_hi": 0.0,
+            "missing_lo_hi": [
+              0.0077,
+              0.0077
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                -0.0018,
+                0.0004
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "rerank_fiqa": {
+    "contrasts": {
+      "k=0.0": {
+        "B_minus_random": {
+          "estimate": 0.0031,
+          "ci": [
+            -0.0006,
+            0.0146
+          ],
+          "p": 0.0702
+        },
+        "B_exact_minus_A": {
+          "estimate": -0.0049,
+          "ci": [
+            -0.0067,
+            0.0069
+          ],
+          "p": 0.9002
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0,
+          "ci": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0
+        }
+      },
+      "k=0.02": {
+        "B_minus_random": {
+          "estimate": 0.0031,
+          "ci": [
+            -0.0006,
+            0.0145
+          ],
+          "p": 0.0682
+        },
+        "B_exact_minus_A": {
+          "estimate": -0.0049,
+          "ci": [
+            -0.0066,
+            0.0069
+          ],
+          "p": 0.9066
+        },
+        "abstention_B_minus_B_exact": {
+          "estimate": 0.0,
+          "ci": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0
+        }
+      }
+    },
+    "decision_value": {
+      "k=0.0": {
+        "V_full": 0.1242,
+        "V_0": 0.1001,
+        "scores": {
+          "failure": {
+            "V_T_lo": 0.1001,
+            "V_T_hi": 0.1001,
+            "missing_lo_hi": [
+              0.0241,
+              0.0241
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                -0.0037,
+                0.0
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": 0.1001,
+            "V_T_hi": 0.1001,
+            "missing_lo_hi": [
+              0.0241,
+              0.0241
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                -0.0031,
+                0.0
+              ]
+            }
+          },
+          "B1_gbdt": {
+            "V_T_lo": 0.1001,
+            "V_T_hi": 0.1001,
+            "missing_lo_hi": [
+              0.0241,
+              0.0241
+            ],
+            "share_of_info_value": [
+              0.0,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": 0.0,
+              "ci": [
+                -0.0025,
+                0.0
+              ]
+            }
+          }
+        }
+      },
+      "k=0.02": {
+        "V_full": 0.1163,
+        "V_0": 0.0801,
+        "scores": {
+          "failure": {
+            "V_T_lo": 0.08,
+            "V_T_hi": 0.0801,
+            "missing_lo_hi": [
+              0.0361,
+              0.0363
+            ],
+            "share_of_info_value": [
+              -0.0048,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0002,
+              "ci": [
+                -0.0059,
+                0.0011
+              ]
+            }
+          },
+          "nqc": {
+            "V_T_lo": 0.0798,
+            "V_T_hi": 0.0801,
+            "missing_lo_hi": [
+              0.0361,
+              0.0365
+            ],
+            "share_of_info_value": [
+              -0.0094,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0003,
+              "ci": [
+                -0.0047,
+                0.0015
+              ]
+            }
+          },
+          "B1_gbdt": {
+            "V_T_lo": 0.0799,
+            "V_T_hi": 0.0801,
+            "missing_lo_hi": [
+              0.0361,
+              0.0364
+            ],
+            "share_of_info_value": [
+              -0.0072,
+              0.0
+            ],
+            "V_T_lo_minus_V_0": {
+              "estimate": -0.0003,
+              "ci": [
+                -0.0043,
+                0.0005
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "holm_B_minus_random": {
+    "qe_arguana": {
+      "p": 0.0,
+      "p_holm": 0.0,
+      "reject": true
+    },
+    "llm_qe_nq": {
+      "p": 0.009,
+      "p_holm": 0.108,
+      "reject": false
+    },
+    "rerank_tripclick": {
+      "p": 0.017,
+      "p_holm": 0.187,
+      "reject": false
+    },
+    "llm_qe_tripclick_dense": {
+      "p": 0.0182,
+      "p_holm": 0.187,
+      "reject": false
+    },
+    "rerank_arguana": {
+      "p": 0.0294,
+      "p_holm": 0.2646,
+      "reject": false
+    },
+    "llm_qe_tripclick": {
+      "p": 0.0338,
+      "p_holm": 0.2704,
+      "reject": false
+    },
+    "rerank_fiqa": {
+      "p": 0.0702,
+      "p_holm": 0.4914,
+      "reject": false
+    },
+    "llm_qe_nq_dense": {
+      "p": 0.1242,
+      "p_holm": 0.7452,
+      "reject": false
+    },
+    "rerank_nq": {
+      "p": 0.1372,
+      "p_holm": 0.7452,
+      "reject": false
+    },
+    "prf_tripclick": {
+      "p": 0.201,
+      "p_holm": 0.804,
+      "reject": false
+    },
+    "prf_fiqa": {
+      "p": 0.2962,
+      "p_holm": 0.8886,
+      "reject": false
+    },
+    "prf_nq": {
+      "p": 0.2982,
+      "p_holm": 0.8886,
+      "reject": false
+    },
+    "prf_arguana": {
+      "p": 0.386,
+      "p_holm": 0.8886,
+      "reject": false
+    }
+  }
+}

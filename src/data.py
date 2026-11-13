@@ -20,6 +20,13 @@ DATASET_IDS = {
     "fiqa-train": "beir/fiqa/train",
     "fiqa-dev": "beir/fiqa/dev",
     "fiqa-test": "beir/fiqa/test",
+    "dbpedia": "beir/dbpedia-entity",
+    "dbpedia-dev": "beir/dbpedia-entity/dev",
+    "dbpedia-test": "beir/dbpedia-entity/test",
+    "hotpotqa": "beir/hotpotqa",
+    "hotpotqa-train": "beir/hotpotqa/train",
+    "hotpotqa-dev": "beir/hotpotqa/dev",
+    "hotpotqa-test": "beir/hotpotqa/test",
 }
 
 # dataset name -> (tripclick slice, split). "-test" is reserved for the
