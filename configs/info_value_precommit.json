@@ -1,0 +1,52 @@
+{
+  "name": "information_value_independent_test",
+  "written": "2026-11-13",
+  "status": "Pre-committed before either dataset was downloaded. Neither BEIR DBPedia-Entity nor BEIR HotpotQA has been used in this project (no file, run, commit or ir_datasets cache entry; SciDocs, not these, appears once as an unrun option in configs/arguana_protocol_external.md). No query, document, ranking or judgment of either has been seen. Every quantity below is reported regardless of outcome.",
+  "question": "On new, untouched data with (DBPedia-Entity) deep graded judgments and (HotpotQA) many queries: does the learned failure gate's score carry decision-relevant information about intervention benefit, and is any shortfall specific to QPP or common to pre-action scores? Designed so that the information-insufficiency account can fail.",
+  "accounts_under_test": {
+    "pre_action_observability_limit": "Exploratory findings to date (docs/score_sufficiency*.json, docs/mechanism.json): pre-action scores, failure-oriented or benefit-oriented, rank intervention benefit near random; only intervention-specific evidence (a reranking probe) sometimes adds information.",
+    "falsifiers": "The account fails on a dataset if the failure score's exact-budget calibrated routing significantly beats random (P2), or if B1 significantly beats the failure score at equal information use (P3), or if the failure score separates reachable from unreachable failing queries (P5)."
+  },
+  "data": {
+    "dbpedia": "ir_datasets 'beir/dbpedia-entity' (4.63M entities; dev 67 and test 400 queries; graded qrels 0-2 as distributed). dbpedia-entity.zip, 639 MB, BEIR mirror.",
+    "hotpotqa": "ir_datasets 'beir/hotpotqa' (5.23M passages; official train / dev / test). hotpotqa.zip, 654 MB, BEIR mirror.",
+    "disk": "16 GB free at writing. DBPedia runs first. HotpotQA runs only if disk allows after DBPedia; a drop or a test subsample is recorded as a dated amendment before any HotpotQA label is read.",
+    "metric": "nDCG@10 (src/eval/metrics), graded relevance as distributed; relevant for reachability = grade > 0."
+  },
+  "splits": {
+    "dbpedia": "No training split exists. The 67 dev queries select the PRF setting only. The 400 test queries are scored by 5-fold cross-fitting: folds by sha256(query_id + ':42') mod 5; for held-out fold k, fit on folds k+1..k+3 and select on fold k+4 (mod 5), as the runner's train/val roles; every test query is scored once, by models that never saw it.",
+    "hotpotqa": "train: first 1,500 train queries by sha256(query_id + ':42') (fitting only); val: first 500 dev queries by the same order (PRF, selection, the P4 prediction); test: all 7,405 test queries.",
+    "file": "configs/info_value_split.json, written from query ids only and committed before any retrieval run."
+  },
+  "retrieval_and_interventions": "SQLite FTS5 BM25 over title + text, project default weights, top-100. Reranking (primary) and PRF (secondary) exactly as configs/fiqa_precommit.json: MiniLM cross-encoder over BM25 top-100, top 50 lead; RM3-style PRF, 108-setting grid, chosen on validation (DBPedia: dev) mean nDCG@10. No LLM QE. No tuning on test.",
+  "features_and_scorers": "As configs/fiqa_precommit.json: 10 pre-action features (8 t0 telemetry, NQC, query length); failure gate = the runner's logistic failure scorer; B1 LightGBM regression on Delta; B2 kNN over bge-small-en-v1.5 query embeddings; probe_10 = rn.cat_gbdt on cross-encoder scores of the first 10 BM25 candidates (scripts/60 probe_features), fit on Delta of full reranking. scripts/54 runner unchanged.",
+  "labels": "Delta = nDCG@10(intervened) - nDCG@10(BM25); F = 1[nDCG@10(BM25) = 0]; helped Delta > 1e-9; reachable = F and a grade>0 document at BM25 ranks 11-100.",
+  "primary": {
+    "family": "One Holm family per dataset over P1-P5 at alpha 0.05 (reranking). A test is not evaluable, and leaves the family before adjustment, if it needs failing queries and fewer than 30 exist, or reachable and unreachable failing queries and fewer than 20 of either exist.",
+    "P1": "AUC(F, S) - AUC(Delta>0, S), S = failure score, all test queries. Predicted > 0.",
+    "P2": "Information in S: exact-budget calibrated routing on S (scripts/72 B_exact: cross-fitted 10-bin E[Delta|S], forced to spend the budget) minus random, budget-averaged over 10/25/50/75%, kappa = 0. Predicted: not significant. Falsifies the account if significantly positive.",
+    "P3": "QPP-specific shortfall: B_exact on B1 minus B_exact on S, same procedure. Predicted: not significant. A significant positive result means benefit-oriented pre-action scores carry information QPP lacks.",
+    "P4": "Intervention-specific evidence: B_exact on probe_10 minus B_exact on S. Prediction fixed from validation as in configs/fiqa_precommit.json: positive if mean validation reranking Delta > 0, else not significant (two-sided either way). The val mean is recorded before test labels are read.",
+    "P5": "Mechanism: AUC of S for reachable vs unreachable among failing queries, against 0.5. Predicted: not above 0.6. Falsifies the mechanism if the 95% CI lower bound exceeds 0.55.",
+    "inference": "Paired bootstrap over test queries, 10,000 resamples, seed 42; routing contrasts redo one random cross-fit per resample (scripts/72); two-sided p."
+  },
+  "descriptive": [
+    "Table 1 quantities: P(F), rescue, healthy helped/harmed, failure-only ceiling share with CI at kappa 0 and 0.02",
+    "same-target AUCs and within-failing AUC (scripts/65 definitions)",
+    "decision-value brackets at b=1 for S, NQC, B1, B2, probe_10 (scripts/72 definitions)",
+    "mechanism quantities of configs/mechanism_protocol.json",
+    "binned profile of S (P(F), P(Delta>0) by decile) for the figure",
+    "runner primary contrasts and latency (median, P95)"
+  ],
+  "data_use": {
+    "fit_and_select": "Train/val roles only (DBPedia: inside the cross-fitting folds).",
+    "test": "Each intervention run once with frozen settings; one analysis pass by a script committed before test labels are read; no change after. A dry run uses validation in place of test with a guard against loading test qrels."
+  },
+  "audits_before_test": [
+    "no run script opens qrels",
+    "exact-duplicate query texts across splits, reported",
+    "ir_datasets cache and repository checked for prior use (recorded above)"
+  ],
+  "scope_limits": "Two corpora, reranking and PRF only, one cross-encoder; DBPedia's 400 test queries limit power (differences below about 0.015 nDCG@10 undetectable); HotpotQA judgments are binary with two relevant passages per query.",
+  "amendments": []
+}
