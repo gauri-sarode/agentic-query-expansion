@@ -162,8 +162,9 @@ built from a failure \emph{score} that also acts on healthy queries.
 \textbf{Information vs.\ policy regret.} For a policy $\pi(S)$ on a
 score $S$ at budget $b$, $V_{\text{orc}}-V_\pi=(V_{\text{orc}}-V_S^*)+(V_S^*-V_\pi)$,
 with $V_S^*$ the best budget-feasible policy using $S$ alone: lost
-information plus misuse. We bracket $V_S^*$ by cross-fitted and
-optimistic in-sample ten-bin policies (Section~\ref{sec:discussion}).
+information plus misuse. We approximate it with cross-fitted ten-bin
+policies and report an optimistic in-sample optimum in the same class
+(Section~\ref{sec:discussion}); neither bounds $V_S^*$.
 
 \section{Setup}
 
@@ -456,18 +457,20 @@ HotpotQA, against the prediction, S beats random by $+0.023$, and B1
 ($+0.003$, small) and the probe beat S (Holm $p<0.001$); simply
 ranking by S gives the same $+0.024$ (exploratory). There, reranking
 helps more the higher the failure score (Figure~\ref{fig:profile}),
-though not within failing queries (P5). By a Shapley split of the rise
-from the lowest to the highest score tertile ($+0.17$), most comes from
-larger gains on healthy queries ($+0.12$ $[0.11,0.13]$) and more
-failures ($+0.06$), with rescue gain ($+0.01$) and reachability
-($-0.01$) minor; on NQ, falling reachability ($-0.08$) cancels the
-rise in failures (descriptive); HotpotQA's two-passage
+though not within failing queries (P5). Mean gain decomposes exactly as
+$m=p_Fp_R\mu_R+(1-p_F)\mu_H$, with $p_F$ the failure rate, $p_R$
+reachability among failures, and $\mu_R$, $\mu_H$ the mean $\Delta$ of
+reachable failures and healthy queries. A four-factor Shapley
+attribution of the change in $m$ from the lowest to the highest
+$S$ tertile ($+0.17$) gives $\mu_H$ $+0.12$ $[0.11,0.13]$, $p_F$
+$+0.06$, $\mu_R$ $+0.01$, $p_R$ $-0.01$; on NQ, $p_R$ ($-0.08$)
+cancels $p_F$ ($+0.05$) (descriptive). HotpotQA's two-passage
 judgments may contribute, untested. The gate's telemetry costs $2.8$\,s
 per query beyond the shared BM25 retrieval, reranking $0.22$\,s, so
-reranking every query is cheaper; but a gate built from the BM25 score
-list and query length, at negligible extra cost, routes as well ($+0.025$ over
-random) and keeps $75\%$ of always reranking's gain at half its cost
-(exploratory). PRF barely acts (mean $\Delta$ $\pm0.003$).
+reranking every query is cheaper; but a gate using only BM25
+score-list features and query length ($0.3$\,ms per query) matches S
+(paired difference $+0.001$ $[-0.0002,+0.003]$) and keeps $75\%$ of
+always reranking's gain at half its cost (exploratory). PRF barely acts (mean $\Delta$ $\pm0.003$).
 
 \section{Partial Observation and Cost}
 \label{sec:probe}
@@ -485,11 +488,9 @@ TripClick, ArguAna, FiQA; the probe $0.05$--$0.13$\,s.
 On NQ, where reranking usually helps, the Probe-10 policy beats
 failure routing by $+0.024$ $[+0.017,$ $+0.031]$ and B1 by $+0.017$
 $[+0.011,$ $+0.022]$ over $10$--$75\%$ reranked (both Holm-significant),
-and its predictions rank $\Delta$ best (Spearman $0.25$). NQ's
-pre-action telemetry (a perturbation search over $2.68$M passages)
-takes longer than reranking every query, so always reranking dominates
-failure and B1 routing; against free NQC (post-review), probe routing
-gains $+0.020$ $[+0.012,+0.028]$ at equal median-latency cost. Probes
+though NQ's pre-action telemetry costs more than reranking every
+query; against free NQC (post-review), probe routing gains $+0.020$
+$[+0.012,+0.028]$ at equal median-latency cost. Probes
 do not help on TripClick and ArguAna, where reranking loses on
 average, nor on FiQA or DBPedia; they do on HotpotQA
 (Section~\ref{sec:arguana}).
@@ -510,11 +511,11 @@ FiQA ($+0.008$ $[+0.002,+0.013]$), and not detectably on DBPedia
 cannot exclude an effect a third of HotpotQA's. High QPP accuracy
 neither guarantees nor precludes intervention value; benefit alignment
 and the cost of the signal decide. Most of what failure routing
-loses is information, not policy: even the optimistic in-sample
-ten-bin policy on $S$ leaves $65$--$93\%$ of the oracle's lead over
-random, and the cross-fitted one gains little over ranking by $S$
-(except by abstaining on ArguAna). This limits the evaluated score
-partition, not everything $S$ could encode. Reachability is predictable
+loses is not recovered by a better rule: within the ten-bin policy
+class, calibration adds little over ranking by $S$ (except by
+abstaining on ArguAna), and even an optimistic in-sample policy leaves
+$65$--$93\%$ of the oracle--random gap. This does not bound arbitrary
+policies on the continuous score. Reachability is predictable
 from deep BM25 scores (AUC $0.59$--$0.70$ on five corpora), yet a
 reachability-factored benefit model does not beat a matched single
 model on any corpus (Holm $p=1.0$; all exploratory).

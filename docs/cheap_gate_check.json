@@ -1,0 +1,154 @@
+{
+  "_note": "EXPLORATORY (post-review): paired contrast of the cheap-feature gates (scripts/81 RCBR_cheap, Mono_cheap: BM25 score list + query length) against the deployed failure gate S, budget-averaged routing gain, paired bootstrap (10,000, seed 42); plus the measured per-query cost of computing the cheap features and evaluating the cheap model. Same data, models and folds as scripts/81. Aggregates only to docs/cheap_gate_check.json. ",
+  "nq": {
+    "routing_gain": {
+      "RCBR_cheap": 0.10086,
+      "Mono_cheap": 0.10355,
+      "S": 0.0921
+    },
+    "contrasts": {
+      "RCBR_cheap - S": {
+        "estimate": 0.00876,
+        "ci": [
+          0.00222,
+          0.01569
+        ],
+        "p": 0.0086
+      },
+      "Mono_cheap - S": {
+        "estimate": 0.01145,
+        "ci": [
+          0.00437,
+          0.01833
+        ],
+        "p": 0.001
+      }
+    }
+  },
+  "tripclick": {
+    "routing_gain": {
+      "RCBR_cheap": -0.01273,
+      "Mono_cheap": -0.01177,
+      "S": -0.00935
+    },
+    "contrasts": {
+      "RCBR_cheap - S": {
+        "estimate": -0.00338,
+        "ci": [
+          -0.01018,
+          0.00316
+        ],
+        "p": 0.2892
+      },
+      "Mono_cheap - S": {
+        "estimate": -0.00242,
+        "ci": [
+          -0.00922,
+          0.00402
+        ],
+        "p": 0.4326
+      }
+    }
+  },
+  "arguana": {
+    "routing_gain": {
+      "RCBR_cheap": -0.02377,
+      "Mono_cheap": -0.02371,
+      "S": -0.03303
+    },
+    "contrasts": {
+      "RCBR_cheap - S": {
+        "estimate": 0.00926,
+        "ci": [
+          -0.0095,
+          0.02515
+        ],
+        "p": 0.364
+      },
+      "Mono_cheap - S": {
+        "estimate": 0.00932,
+        "ci": [
+          -0.00905,
+          0.0259
+        ],
+        "p": 0.3298
+      }
+    }
+  },
+  "fiqa": {
+    "routing_gain": {
+      "RCBR_cheap": 0.04134,
+      "Mono_cheap": 0.04282,
+      "S": 0.04799
+    },
+    "contrasts": {
+      "RCBR_cheap - S": {
+        "estimate": -0.00665,
+        "ci": [
+          -0.01351,
+          0.00133
+        ],
+        "p": 0.1066
+      },
+      "Mono_cheap - S": {
+        "estimate": -0.00518,
+        "ci": [
+          -0.01207,
+          0.00298
+        ],
+        "p": 0.2284
+      }
+    }
+  },
+  "dbpedia": {
+    "routing_gain": {
+      "RCBR_cheap": 0.05906,
+      "Mono_cheap": 0.06046,
+      "S": 0.05536
+    },
+    "contrasts": {
+      "RCBR_cheap - S": {
+        "estimate": 0.00369,
+        "ci": [
+          -0.00448,
+          0.01132
+        ],
+        "p": 0.3722
+      },
+      "Mono_cheap - S": {
+        "estimate": 0.00509,
+        "ci": [
+          -0.00297,
+          0.01309
+        ],
+        "p": 0.2126
+      }
+    }
+  },
+  "hotpotqa": {
+    "routing_gain": {
+      "RCBR_cheap": 0.07425,
+      "Mono_cheap": 0.07455,
+      "S": 0.07298
+    },
+    "contrasts": {
+      "RCBR_cheap - S": {
+        "estimate": 0.00127,
+        "ci": [
+          -0.00016,
+          0.00289
+        ],
+        "p": 0.0804
+      },
+      "Mono_cheap - S": {
+        "estimate": 0.00157,
+        "ci": [
+          0.00024,
+          0.00318
+        ],
+        "p": 0.0208
+      }
+    }
+  },
+  "hotpotqa_cheap_path_seconds_per_query": 0.00034
+}
