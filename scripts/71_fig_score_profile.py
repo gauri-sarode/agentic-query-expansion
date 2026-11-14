@@ -1,13 +1,14 @@
-"""Candidate figure: P(F) and P(Delta>0) by decile of the learned failure
-gate's score, for the four settings fixed in the score-sufficiency
-amendment. Reads docs/score_sufficiency_reference.json (aggregates only);
-writes paper_wsdm/fig_score_profile.tex (a figure* environment)."""
+"""Figure: P(F) and P(Delta>0) by decile of the learned failure gate's
+score, reranking on NQ and TripClick (score-sufficiency amendment) and on
+the pre-registered DBPedia and HotpotQA tests. Reads
+docs/score_sufficiency_reference.json and docs/iv_profile.json (aggregates
+only); writes paper_wsdm/fig_score_profile.tex (a figure* environment)."""
 
 import json
 from pathlib import Path
 
-PANELS = (("rerank_nq", "NQ reranking"), ("rerank_tripclick", "TripClick reranking"),
-          ("rerank_arguana", "ArguAna reranking"), ("rerank_fiqa", "FiQA reranking (pre-reg.)"))
+PANELS = (("rerank_nq", "NQ"), ("rerank_tripclick", "TripClick"),
+          ("rerank_dbpedia", "DBPedia (pre-registered)"), ("rerank_hotpotqa", "HotpotQA (pre-registered)"))
 
 
 def coords(prof, key, lo=None):
@@ -18,6 +19,7 @@ def coords(prof, key, lo=None):
 
 def main() -> None:
     r = json.loads(Path("docs/score_sufficiency_reference.json").read_text())
+    r.update(json.loads(Path("docs/iv_profile.json").read_text()))
     out = [r"""\begin{figure*}[t]
 \centering
 \pgfplotsset{profplot/.style={width=0.285\textwidth, height=3.3cm, xmin=0.5, xmax=10.5, ymin=0, ymax=1,
@@ -36,9 +38,10 @@ def main() -> None:
         if i == 0:
             out.append(r"\legend{$P(F)$, $P(\Delta>0)$}")
         out.append(r"\end{axis}" + "\n" + r"\end{tikzpicture}" + (r"\hfill" if i < 3 else ""))
-    out.append(r"""\caption{Same score, two targets: by decile of the learned failure gate's score
-(test; 95\% bootstrap bands), the failure rate rises steeply while the share of
-queries reranking helps stays flat or falls (exploratory analysis; FiQA from the pre-registered test run).}
+    out.append(r"""\caption{One score, two targets (reranking, test, 95\% bootstrap bands). By decile
+of the learned failure gate's score, the failure rate rises steeply; the share of
+queries reranking helps stays flat or falls on NQ, TripClick, and DBPedia but rises
+on HotpotQA. NQ, TripClick: exploratory.}
 \label{fig:profile}
 \end{figure*}""")
     Path("paper_wsdm/fig_score_profile.tex").write_text("\n".join(out) + "\n")

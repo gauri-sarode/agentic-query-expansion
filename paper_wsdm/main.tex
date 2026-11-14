@@ -10,6 +10,7 @@
 \usepackage{xcolor}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.17}
+\usepgfplotslibrary{fillbetween}
 
 \begin{document}
 
@@ -25,20 +26,21 @@ intervention will improve it. We formalize this distinction as a
 decision under observable telemetry and derive an exact, cost-aware
 decomposition of the gain that no policy intervening only on failing
 queries can reach. We evaluate LLM query expansion, cross-encoder
-reranking, and pseudo-relevance feedback on four benchmarks, two of
+reranking, and pseudo-relevance feedback on six benchmarks, four of
 them pre-registered and untouched. Without a budget cap, a perfect
-failure gate recovers only $8$--$57\%$ of the oracle's gain on
-TripClick and NQ ($18$--$46\%$ on ArguAna and FiQA). On the same
-queries, failure detectors identify retrieval failure but predict
-intervention benefit weakly; on pre-registered FiQA the AUCs are
-$0.72$ and $0.46$--$0.52$. Budgeted evaluation reveals a second
-limit: learned failure gates spend much of their budget on failing
-queries the intervention does not rescue, even where the restriction
-loosens. Stronger pre-action predictors do not close the gap, and
-partial probes of the intervention improve routing on NQ but not on
-TripClick, ArguAna, or pre-registered FiQA. Selective retrieval should
-be evaluated by intervention benefit, oracle headroom, and cost-aware
-routing, not by failure-prediction accuracy alone.
+failure gate recovers only $8$--$57\%$ of the oracle's gain. On the
+same queries, the learned failure gate detects failure far better than
+it predicts benefit, a gap confirmed as a pre-registered prediction on
+three untouched test sets (AUC differences $+0.20$ to $+0.33$). The reason is reachability:
+reranking rescues a failing query only when a relevant document sits
+below the top ten, and the gate's score does not see whether one does
+(AUC $0.27$--$0.53$). How much a failure score helps routing depends
+on the corpus: near random on five corpora, but useful on HotpotQA,
+where benefit grows with difficulty, against our pre-registered
+prediction. Stronger pre-action predictors and partial probes help
+inconsistently. Selective retrieval should be evaluated by
+intervention benefit, oracle headroom, and cost-aware routing, not by
+failure-prediction accuracy alone.
 \end{abstract}
 
 \maketitle
@@ -66,16 +68,15 @@ deployed system can observe, its \emph{observability}, can do better.
 observable telemetry, with an exact decomposition of the gain no
 policy acting only on failing queries can capture, at zero and
 positive cost (Section~\ref{sec:framework}).
-\textbf{(C2)} Evidence on four corpora, two pre-registered and
+\textbf{(C2)} Evidence on six corpora, four pre-registered and
 untouched, that the targets differ and that the difference has
 measurable consequences: the uncapped \emph{failure-only ceiling} is
-$8$--$57\%$ of the oracle's gain, failure scores rank helped queries
-near chance, and a learned failure gate also selects poorly among the
-failing queries it may target.
-\textbf{(C3)} Evidence that better information is not automatically
-enough: at matched budgets and measured cost, stronger pre-action
-benefit predictors and partial probes of the intervention do not
-consistently improve routing.
+$8$--$57\%$ of the oracle's gain, and failure scores rank helped
+queries far below how they rank failing ones.
+\textbf{(C3)} A mechanism, reachability, that explains why the gate
+selects poorly among failing queries, and pre-registered tests of when
+a failure score, stronger pre-action predictors, or partial probes
+improve routing: on some corpora, not on others.
 
 \section{Related Work}
 
@@ -86,9 +87,12 @@ the clarity of expanded and unexpanded rankings; Amati
 et al.~\cite{amati-selective} gate expansion on difficulty predictors;
 Lv and Zhai~\cite{lv-zhai-adaptive} predict a feedback weight;
 Collins-Thompson~\cite{collins-thompson-risk} trades reward against risk. Even idealised selective
-QE needs QPP at Kendall $\tau\ge0.5$~\cite{hauff-qpp-effective}. Such
-work sizes predictor accuracy or evaluates gated systems; to our knowledge none bounds what a failure gate can
-recover or compares gates at matched budgets.
+QE needs QPP at Kendall $\tau\ge0.5$~\cite{hauff-qpp-effective}, and
+Chifu et al.~\cite{chifu-qpp-limits} analyse where QPP fails and what
+that implies for selective query processing. Such work sizes predictor
+accuracy or evaluates gated systems; to our knowledge none bounds what
+a failure gate can recover, explains its selection error, or compares
+gates at matched budgets.
 
 \textbf{LLM QE and adaptive retrieval.} Query2doc~\cite{query2doc},
 MuGI~\cite{mugi}, and CSQE~\cite{csqe} expand unconditionally;
@@ -158,8 +162,10 @@ click-derived relevance labels. BEIR NQ~\cite{beir,natural-questions}:
 2.68M passages, human labels; 800 validation and a disjoint
 2{,}052-query test set. BEIR ArguAna~\cite{arguana}: 8{,}674
 arguments, 1{,}406 queries whose relevant document is the
-counterargument; BEIR FiQA~\cite{fiqa}: 57{,}638 financial posts,
-official splits (Section~\ref{sec:arguana}).
+counterargument; BEIR FiQA~\cite{fiqa}: 57{,}638 financial posts;
+BEIR DBPedia-Entity~\cite{dbpedia-entity}: 4.63M entities, 400 test
+queries with graded labels; BEIR HotpotQA~\cite{hotpotqa}: 5.23M
+passages, 7{,}405 multi-hop test questions (Section~\ref{sec:arguana}).
 
 \textbf{Interventions.} \emph{LLM QE}: BM25 over SQLite FTS5; a
 deterministic rule picks one of four expansion operators or none, and \texttt{qwen2.5:3b} (4-bit,
@@ -194,20 +200,20 @@ over queries ($10^4$ resamples). We call the deployed detector,
 used to route, the \emph{learned failure gate}, and any model of
 $\Delta$ a \emph{benefit predictor}.
 
-\textbf{Evidence ledger.} Only the ArguAna and FiQA results
-(Section~\ref{sec:arguana}) are independent confirmation: every NQ
+\textbf{Evidence ledger.} Only the ArguAna, FiQA, DBPedia, and
+HotpotQA results (Section~\ref{sec:arguana}) are independent
+confirmation: every NQ
 query and the TripClick TAIL test set have been inspected.
 \emph{Fixed before a test run}: the NQ, reranking, and PRF runs.
 \emph{Pre-committed analyses of inspected traces}: the detection and harm AUCs, ceiling,
 budget routing, and Holm correction. \emph{Exploratory}: TripClick test was used during
 development, the changed-query harm comparisons were added after
 seeing the main results, and the
-NQ B1/B2 runs, diagnostics, and probes of Section~\ref{sec:probe}
+NQ B1/B2 runs, diagnostics, probes of Section~\ref{sec:probe}, and the
+reachability analysis on the first four corpora
 followed protocols frozen before computing but after the test sets
-were inspected; the NQC probe contrasts, Spearman intervals, the
-positive-cost and budget-capped ceilings, same-target and
-within-failing AUCs, and P95
-costing were added after review.
+were inspected; analyses added after review are marked in the
+text.
 Pre-commitments and scripts are in the anonymized repository:
 \url{https://anonymous.4open.science/r/agentic-query-expansion-8939/}.
 
@@ -217,8 +223,8 @@ Pre-commitments and scripts are in the anonymized repository:
 \begin{table}[t]
 \caption{Failure-only ceiling (test). Rescue: $P(\Delta>0\mid F)$.
 Healthy helped / harmed: $P(\Delta\gtrless0\mid\neg F)$. Share: perfect
-failure gate's gain over the oracle's at $\kappa=0$, 95\% CI. ArguAna, FiQA:
-pre-registered, untouched test ($n=430$, $648$).}
+failure gate's gain over the oracle's at $\kappa=0$, 95\% CI. Below the
+first rule: pre-registered, untouched test ($n=430$, $648$, $400$, $7{,}405$).}
 \label{tab:ceiling}
 \footnotesize
 \setlength{\tabcolsep}{3pt}
@@ -240,6 +246,8 @@ PRF, ArguAna       & .21 & .01 & .05 & .06 & $18\%$ [0, 52] \\
 LLM QE, ArguAna    & .21 & .27 & .23 & .59 & $39\%$ [27, 52] \\
 Reranking, FiQA    & .51 & .29 & .52 & .23 & $46\%$ [39, 53] \\
 PRF, FiQA          & .51 & .02 & .14 & .19 & $28\%$ [11, 46] \\
+Reranking, DBPedia & .22 & .58 & .77 & .17 & $21\%$ [15, 28] \\
+Reranking, HotpotQA & .11 & .61 & .43 & .11 & $25\%$ [23, 27] \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -260,12 +268,9 @@ query then loses outright for PRF and dense TripClick QE.
 
 \textbf{A budget cap loosens the restriction only where rescues are
 common} (exploratory, post-review). At a $10\%$ cap, failing queries
-hold $98\%$ $[97,99]$ of the capped oracle's gain for NQ reranking and
-$54$--$67\%$ for the other reranking and ArguAna QE settings; the
-other seven stay near their uncapped shares. From a $25\%$ cap only NQ
-reranking ($80\%$) stays above its uncapped share. Pre-registered FiQA
-agrees: reranking rises from $46\%$ to $83\%$ at $10\%$, PRF stays at
-$28\%$.
+hold $54$--$98\%$ of the capped oracle's gain for reranking and
+ArguAna QE ($83\%$ on FiQA); the other settings stay near their
+uncapped shares.
 
 \textbf{The learned failure gate also selects poorly.} At a $10\%$
 budget, $35$--$80\%$ of its picks are failing queries (the rest are healthy),
@@ -277,21 +282,21 @@ $25\%$ budget, $45$--$68\%$ of its picks on TripClick and NQ
 ($30$--$36\%$ on ArguAna) are failing queries the intervention leaves
 unchanged (exploratory).
 
-The ceiling and the selection error are separate constraints.
-Restricting action to failing queries excludes improvements on healthy
-queries; imperfect prediction additionally spends budget on failures
-the intervention does not rescue. Both operate at every budget below
-$100\%$.
+The ceiling and the selection error are separate constraints, and
+both operate at every budget below $100\%$.
 
 \section{Detection vs.\ Benefit}
 \label{sec:auc}
+
+\input{fig_score_profile}
 
 \begin{table}[t]
 \caption{One score, two targets (test). Failure: AUC of the learned
 failure gate's score for $F$. Helped: its AUC for $\Delta>0$ on the same
 queries, 95\% CI. Within failing: helped AUC among failing queries
 (--: fewer than 20 rescued). Failure is shared by the interventions on
-a corpus and retriever. Exploratory except FiQA (pre-registered).}
+a corpus and retriever. Exploratory except the last four rows
+(pre-registered).}
 \label{tab:auc}
 \footnotesize
 \setlength{\tabcolsep}{3pt}
@@ -314,6 +319,8 @@ LLM QE, ArguAna & 0.65 & 0.42 [0.36, 0.48] & 0.36 \\
 \midrule
 Reranking, FiQA & 0.72 & 0.52 [0.47, 0.57] & 0.56 \\
 PRF, FiQA & 0.72 & 0.46 [0.37, 0.54] & -- \\
+Reranking, DBPedia & 0.76 & 0.43 [0.36, 0.49] & 0.48 \\
+Reranking, HotpotQA & 0.89 & 0.64 [0.63, 0.66] & 0.37 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -325,11 +332,12 @@ reaches $0.647$ on TripClick and $0.721$ on NQ. Scored against whether the
 intervention helps (exploratory, post-review), the same scores reach
 only $0.42$--$0.56$, with intervals below $0.5$ for NQ PRF and
 ArguAna QE and reranking and above only for dense NQ QE.
-Pre-registered on FiQA, the gap replicates: $0.72$ against $0.52$
-(reranking) and $0.46$ (PRF), both Holm $p<0.001$.
+Pre-registered on FiQA, DBPedia, and HotpotQA, the gap replicates
+in every setting (Holm $p<0.001$; Section~\ref{sec:arguana}), and
+Figure~\ref{fig:profile} shows its shape.
 
 \textbf{Benefit predictors do better but are weak}
-(helped AUC $\le0.58$; NQ probe $0.65$). They beat the failure score
+(helped AUC $\le0.58$; NQ probe $0.65$, HotpotQA B1 $0.67$ and probe $0.73$). They beat the failure score
 on NQ reranking ($+0.08$ to $+0.17$, probe largest), NQ PRF, and
 ArguAna QE and reranking ($+0.07$ to $+0.12$); elsewhere differences
 span zero, except that the linear model trails it on TripClick PRF
@@ -343,103 +351,43 @@ unchanged, so the harm label is largely a failure indicator; on
 changed queries the gap vanishes in every TripClick and NQ BM25
 setting (table in the repository).
 
+\textbf{Why: reachability} (exploratory on the first four corpora,
+protocol frozen before computing; pre-registered on DBPedia and
+HotpotQA). Reranking reorders the BM25 top 100, so it can rescue a
+failing query only if a relevant document sits at ranks 11--100. No
+failing query without one is helped, on any of the six corpora, while
+$29$--$88\%$ of those with one are. The gate's score, built from the
+top of the ranking, does not find these \emph{reachable} failures: its
+AUC for reachable among failing queries is $0.27$--$0.53$ ($0.40$
+$[0.27,0.54]$ and $0.37$ $[0.33,0.41]$ pre-registered), and among
+reachable failures the helped rate shows no consistent trend across
+its tertiles. Among healthy queries, harm concentrates where the first
+relevant document is already at rank 1 (mean $\Delta$ $-0.02$ to
+$-0.35$ on the first four corpora).
+
 \section{Routing at Matched Budgets}
 \label{sec:routing}
 
-\begin{figure*}[t]
-\centering
-\pgfplotsset{probeplot/.style={width=0.285\textwidth, height=3.3cm,
-  xlabel={seconds per query}, xlabel style={font=\footnotesize},
-  ticklabel style={font=\scriptsize}, title style={font=\footnotesize},
-  ylabel style={font=\footnotesize}, mark size=1.2pt, line width=0.7pt,
-  grid=major, grid style={gray!20}}}
-\begin{tikzpicture}
-\begin{axis}[probeplot, title={NQ}, ylabel={nDCG@10 gain ($\times10^3$)},
-  legend style={font=\tiny, at={(0.52,0.98)}, anchor=north, row sep=-3pt, inner sep=1pt}]
-\addplot[black!45, dashed, mark=none] coordinates {(0,0)(0.05,22.5)(0.12,56.3)(0.24,112.5)(0.36,168.8)(0.48,225.1)};
-\addplot[red!75!black, mark=*] coordinates {(1.58,0)(1.63,22.1)(1.70,57.6)(1.82,113.5)(1.94,175.1)(2.06,225.1)};
-\addplot[orange!85!black, mark=triangle*] coordinates {(0,0)(0.05,23.3)(0.12,52.9)(0.24,107.5)(0.36,162.8)(0.48,225.1)};
-\addplot[blue!70!black, mark=square*] coordinates {(1.58,0)(1.63,28.1)(1.70,63.7)(1.82,126.4)(1.94,180.4)(2.06,225.1)};
-\addplot[green!50!black, mark=diamond*, line width=1.1pt] coordinates {(0.05,0)(0.09,38.8)(0.15,81.8)(0.25,149.0)(0.36,195.5)(0.46,225.1)};
-\legend{Random, Failure, NQC, B1, Probe-10}
-\end{axis}
-\end{tikzpicture}\hfill
-\begin{tikzpicture}
-\begin{axis}[probeplot, title={TripClick}]
-\addplot[black!45, dashed, mark=none] coordinates {(0,0)(0.11,-2.8)(0.28,-6.9)(0.56,-13.9)(0.84,-20.8)(1.11,-27.8)};
-\addplot[red!75!black, mark=*] coordinates {(0.35,0)(0.46,0.4)(0.62,-2.9)(0.90,-10.1)(1.18,-24.8)(1.46,-27.8)};
-\addplot[orange!85!black, mark=triangle*] coordinates {(0,0)(0.11,-2.0)(0.28,-5.4)(0.56,-15.7)(0.84,-26.1)(1.11,-27.8)};
-\addplot[blue!70!black, mark=square*] coordinates {(0.35,0)(0.46,0.3)(0.62,-2.3)(0.90,-8.0)(1.18,-14.0)(1.46,-27.8)};
-\addplot[green!50!black, mark=diamond*, line width=1.1pt] coordinates {(0.11,0)(0.21,0.4)(0.36,-1.8)(0.62,-10.5)(0.87,-18.9)(1.13,-27.8)};
-\end{axis}
-\end{tikzpicture}\hfill
-\begin{tikzpicture}
-\begin{axis}[probeplot, title={ArguAna}]
-\addplot[black!45, dashed, mark=none] coordinates {(0,0)(0.13,-7.1)(0.32,-17.8)(0.63,-35.6)(0.95,-53.4)(1.26,-71.1)};
-\addplot[red!75!black, mark=*] coordinates {(0.32,0)(0.44,-14.5)(0.63,-18.6)(0.95,-37.6)(1.26,-61.4)(1.58,-71.1)};
-\addplot[orange!85!black, mark=triangle*] coordinates {(0,0)(0.13,3.1)(0.32,-11.8)(0.63,-37.1)(0.95,-59.4)(1.26,-71.1)};
-\addplot[blue!70!black, mark=square*] coordinates {(0.32,0)(0.44,3.8)(0.63,-4.8)(0.95,-14.9)(1.26,-39.8)(1.58,-71.1)};
-\addplot[green!50!black, mark=diamond*, line width=1.1pt] coordinates {(0.13,0)(0.25,-7.0)(0.42,-18.1)(0.71,-22.1)(0.99,-48.5)(1.28,-71.1)};
-\end{axis}
-\end{tikzpicture}\hfill
-\begin{tikzpicture}
-\begin{axis}[probeplot, title={FiQA (pre-registered)}]
-\addplot[black!45, dashed, mark=none] coordinates {(0,0)(0.084,10.0)(0.209,25.0)(0.419,50.1)(0.628,75.1)(0.837,100.1)};
-\addplot[red!75!black, mark=*] coordinates {(0.07,0)(0.15,11.8)(0.28,38.5)(0.48,61.5)(0.69,80.2)(0.90,100.1)};
-\addplot[orange!85!black, mark=triangle*] coordinates {(0,0)(0.084,11.0)(0.209,27.5)(0.419,50.2)(0.628,70.1)(0.837,100.1)};
-\addplot[blue!70!black, mark=square*] coordinates {(0.07,0)(0.15,12.1)(0.28,26.4)(0.48,49.7)(0.69,76.0)(0.90,100.1)};
-\addplot[green!50!black, mark=diamond*, line width=1.1pt] coordinates {(0.13,0)(0.21,16.5)(0.33,37.4)(0.52,54.6)(0.71,79.7)(0.90,100.1)};
-\end{axis}
-\end{tikzpicture}
-\caption{Reranking gain over BM25 against measured cost per query
-(exploratory) at $0$--$100\%$ of queries reranked; cost is telemetry
-(Failure, B1, paid before deciding; on FiQA it includes BM25 retrieval)
-or the probe, plus reranking. Oracle (off scale): $0.25$, $0.06$,
-$0.10$, $0.12$.}
-\label{fig:probe}
-\end{figure*}
-
-\begin{table*}[t]
-\caption{Pre-action routing gain (nDCG@10,
-$\times10^3$) by share intervened on: failure (F), benefit (B), random
-(R, expected). Oracle and B$-$F
-[95\% CI]: means over the five budgets (registered; Oracle can fall
-below All); $^*$ Holm-significant over the six settings.}
-\label{tab:routing}
-\footnotesize
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}lrrrrrrrrrrrrrrl@{}}
-\toprule
- & \multicolumn{3}{c}{$10\%$} & \multicolumn{3}{c}{$25\%$} & \multicolumn{3}{c}{$50\%$} & \multicolumn{3}{c}{$75\%$} & $100\%$ & & \\
-\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}
-Setting & F & B & R & F & B & R & F & B & R & F & B & R & All & Oracle & B$-$F (avg.) \\
-\midrule
-LLM QE, TripClick & 3.5 & 1.2 & 0.1 & 3.0 & $-0.8$ & 0.2 & 3.0 & 0.8 & 0.3 & $-1.5$ & 1.0 & 0.5 & 0.7 & 19.7 & $-1.2$ [$-3.6$, $+1.4$] \\
-LLM QE, NQ & 1.2 & 0.8 & $-2.2$ & $-2.2$ & $-1.2$ & $-5.4$ & $-5.9$ & $-2.8$ & $-10.8$ & $-11.6$ & $-12.6$ & $-16.3$ & $-21.7$ & 28.4 & $+0.6$ [$-2.0$, $+2.9$] \\
-Rerank, TripClick & 0.3 & 0.3 & $-2.8$ & $-3.1$ & $-0.8$ & $-6.9$ & $-10.1$ & $-8.6$ & $-13.9$ & $-24.8$ & $-19.7$ & $-20.8$ & $-27.8$ & 40.5 & $+1.8$ [$-3.7$, $+6.3$] \\
-Rerank, NQ & 22.1 & 32.6 & 22.5 & 57.6 & 66.9 & 56.3 & 113.5 & 129.2 & 112.5 & 175.1 & 183.7 & 168.8 & 225.1 & 199.5 & $+8.8$ [$+3.3$, $+15.0$]$^*$ \\
-PRF, TripClick & $-0.7$ & 0.3 & $-0.1$ & $-0.2$ & 0.7 & $-0.3$ & 0.5 & $-0.2$ & $-0.6$ & $-0.5$ & $-1.1$ & $-0.8$ & $-1.1$ & 9.6 & $+0.1$ [$-1.0$, $+1.0$] \\
-PRF, NQ & 0.1 & 0.2 & 1.0 & 1.4 & 1.2 & 2.4 & 3.9 & 5.7 & 4.9 & 7.5 & 7.6 & 7.3 & 9.7 & 24.0 & $+0.4$ [$-1.7$, $+2.4$] \\
-\bottomrule
-\end{tabular}
-\end{table*}
 
 
-\textbf{Pre-action routing.} At every budget, each scorer that
-decides before intervening stays close to random routing and far
-below the oracle (Table~\ref{tab:routing}). Failure routing beats
-random by at most $0.006$ at any budget and often falls below it
-(Figure~\ref{fig:probe}), and at a $25\%$ budget each pre-action
+
+
+
+\textbf{Pre-action routing.} At every budget ($10$--$75\%$), each
+scorer that decides before intervening stays close to random routing
+and far below the oracle on TripClick, NQ, and ArguAna (table and
+cost curves in the repository). Failure routing beats
+random by at most $0.006$ at any budget and often falls below it,
+and at a $25\%$ budget each pre-action
 scorer's picks are helped within $-0.11$ to $+0.08$ of the base rate. Averaged over budgets, NQC is
 no better than the detector, and benefit routing beats failure
 routing only for reranking on NQ ($+0.009$ $[+0.003,+0.015]$), where
 it leads at every budget (per-budget CIs in the repository). Boosted and embedding predictors (B1, B2),
 fit on NQ validation (exploratory), do no
 better: none survives Holm, and the best recovers $8\%$ of the
-oracle-minus-failure headroom. Failure routing can still save cost: for
-LLM QE, the deployed failure-selective policy halves generator calls
-and on NQ recovers most of unconditional QE's loss ($+0.015$
-$[+0.008,+0.022]$); on TripClick no QE policy differs from BM25.
+oracle-minus-failure headroom. Failure routing can still save cost:
+for LLM QE on NQ, the failure-selective policy halves generator calls
+and recovers most of unconditional QE's loss ($+0.015$).
 
 \section{Pre-Registered Replications}
 \label{sec:arguana}
@@ -452,9 +400,8 @@ predictors beat failure routing on data never inspected for this work?
 debate-grouped split ($701/275/430$), the three interventions (LLM QE
 as on NQ), and Holm-corrected primary contrasts for B1--B3 (B3's
 registered quantile choice is unsound, so a secondary B3 fixes
-$0.25$). Leakage fixes (each query is a corpus document; $108$
-arguments are cross-listed) and three externally proposed contrasts
-were dated amendments made before any label was read.
+$0.25$); leakage fixes were dated amendments before any label was
+read.
 \emph{Result: no.} Every intervention loses on average (reranking
 $-0.071$ $[-0.108,-0.034]$, LLM QE $-0.163$), yet the oracle could
 gain $0.053$ and $0.010$ budget-averaged, so the task is pure
@@ -464,7 +411,7 @@ $p=0.37$), B3 minus B1 under a budget cap $+0.006$ ($p=0.52$); the best
 recovers $16\%$ of the oracle-minus-failure headroom, below the
 pre-registered $25\%$ bar, and a secondary family agrees (none of nine
 survives Holm). Failure routing of reranking is below random at every
-budget (Figure~\ref{fig:probe}). PRF changes only $9\%$ of rankings,
+budget. PRF changes only $9\%$ of rankings,
 so its rows are uninformative. At $430$ queries, B1's $+0.015$ may be
 real but is unresolved.
 
@@ -483,6 +430,47 @@ $[0.49,0.63]$; PRF, with 8 rescues, not evaluable) and the probe
 $[-0.001,+0.013]$; Holm $p\ge0.25$). B1 and B2 do not beat failure
 routing either ($-0.006$ each, Holm $p=0.19$).
 
+\begin{table}[t]
+\caption{Pre-registered tests on DBPedia and HotpotQA (reranking, test;
+one Holm family per corpus). S: learned failure gate's score. P2--P4:
+exact-budget calibrated routing, averaged over $10$--$75\%$ budgets.
+Bold: against the prediction.}
+\label{tab:iv}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Test (prediction) & DBPedia & HotpotQA \\
+\midrule
+P1 AUC$_F-$AUC$_{\Delta>0}$ ($>0$) & $+0.33$ [$0.24$, $0.42$] & $+0.24$ [$0.23$, $0.26$] \\
+P2 S $-$ random (n.s.) & $+0.001$ [$-0.002$, $0.013$] & $\mathbf{+0.023}$ [$0.021$, $0.025$] \\
+P3 B1 $-$ S (n.s.) & $+0.003$ [$-0.009$, $0.011$] & $\mathbf{+0.003}$ [$0.002$, $0.005$] \\
+P4 Probe-10 $-$ S ($>0$) & $\mathbf{+0.002}$ [$-0.009$, $0.011$] & $+0.008$ [$0.007$, $0.010$] \\
+P5 AUC reachable ($\le0.6$) & $0.40$ [$0.27$, $0.54$] & $0.37$ [$0.33$, $0.41$] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{DBPedia and HotpotQA.} \emph{Question:} on new data, does the
+failure score carry routing information, and is any shortfall
+specific to QPP? \emph{Predictions}, fixed before download
+(\texttt{configs/\allowbreak info\_\allowbreak value\_\allowbreak precommit.json}),
+were built to let the account `pre-action scores carry little routing
+information' fail: it fails if routing on S beats random (P2) or B1
+beats S (P3); reachability fails if S separates reachable from
+unreachable failing queries (P5). DBPedia's $400$ test queries are
+scored by five-fold cross-fitting; HotpotQA uses $1{,}500$ training and
+$500$ dev queries. \emph{Result} (Table~\ref{tab:iv}): the
+detection--benefit gap (P1) and reachability (P5) hold on both.
+Routing splits. DBPedia behaves as predicted, except that the probe
+does not help. On HotpotQA, against the prediction, S beats random by
+$+0.023$ and B1 and the probe beat S (Holm $p<0.001$): there,
+reranking helps more the higher the failure score
+(Figure~\ref{fig:profile}), so ranking by difficulty is partly ranking
+by benefit, though not within failing queries (P5). Without a budget
+cap no score beats always reranking on either corpus (mean $\Delta$
+$+0.13$, $+0.12$). PRF barely acts (mean $\Delta$ $-0.003$, $+0.003$).
+
 \section{Partial Observation and Cost}
 \label{sec:probe}
 
@@ -493,47 +481,42 @@ analysis (protocol frozen before computing), we score only the first $k\in\{5,10
 BM25 candidates ($k=10$ primary, fixed in the protocol) with the cross-encoder, regress the $\Delta$ of full
 reranking on nine probe features with B1's model and selection rule, and fully rerank the top-scoring queries,
 reusing the probe's scores. Each policy is charged its median measured
-latency (50 validation queries per corpus; Figure~\ref{fig:probe}): full
+latency (50 validation queries per corpus): full
 reranking takes $0.48$, $1.11$, $1.26$, and $0.84$\,s on NQ,
 TripClick, ArguAna, and FiQA, a ten-candidate probe $0.05$--$0.13$\,s.
 
-On NQ, where reranking usually helps (Figure~\ref{fig:probe}), Probe-10 routing beats failure routing by
-$+0.024$ $[+0.017,+0.031]$ and B1 by $+0.017$ $[+0.011,+0.022]$ over
-$10$--$75\%$ reranked (both Holm-significant over the six primary
-tests), and its
-predictions rank $\Delta$ best (Spearman $0.25$ $[0.21,0.29]$; B1
-$0.09$, NQC $-0.06$). NQ's pre-action
-telemetry (a perturbation search over $2.68$M passages) takes longer
-than reranking every query, so always reranking dominates failure and
-B1 routing. Against free NQC (post-review), probe routing gains
-$+0.030$ $[+0.022,+0.037]$ at matched fraction and $+0.020$
-$[+0.012,+0.028]$ at equal median-latency cost (both Holm-significant
-over six NQC contrasts), $+0.010$ $[+0.002,+0.018]$ at P95. On
-TripClick and ArguAna, where reranking loses on average, probes do not help: no matched-fraction contrast is significant, and B1 ranks $\Delta$ at least as well (Spearman $0.08$ and $0.10$ vs.\ $0.05$; differences span zero); nor on FiQA, where reranking helps (Section~\ref{sec:arguana}).
-
-\textbf{Robustness} (secondary, uncorrected). Every probe size beats
-failure and B1 on NQ; none does so on TripClick or ArguAna.
+On NQ, where reranking usually helps, the Probe-10 policy beats
+failure routing by $+0.024$ $[+0.017,$ $+0.031]$ and B1 by $+0.017$
+$[+0.011,$ $+0.022]$ over $10$--$75\%$ reranked (both Holm-significant),
+and its predictions rank $\Delta$ best (Spearman $0.25$). NQ's
+pre-action telemetry (a perturbation search over $2.68$M passages)
+takes longer than reranking every query, so always reranking dominates
+failure and B1 routing; against free NQC (post-review), probe routing
+gains $+0.020$ $[+0.012,+0.028]$ at equal median-latency cost. Probes
+do not help on TripClick and ArguAna, where reranking loses on
+average, nor on FiQA or DBPedia; they do on HotpotQA
+(Section~\ref{sec:arguana}).
 
 \section{Discussion and Limitations}
 
 QPP and selective retrieval predict different targets, and the
 difference matters. One consequence is proven: at any cost,
 failure-restricted policies are capped by the oracle gain on failing
-queries ($8$--$57\%$ uncapped). The other is empirical, for these
-representations, models, and corpora: failure scores rank helped
-queries near chance, and the learned failure gate spends much of its
-budget where the intervention does nothing. The second alone would fit
-`no pre-action signal we test predicts benefit'; the first is what
-makes failure specifically the wrong target. Better information is
-not automatically enough: stronger pre-action predictors and partial
-probes improved routing only on NQ. For these systems only, always
-rerank on NQ and FiQA when affordable and skip it on TripClick and
-ArguAna.
+queries ($8$--$57\%$ uncapped). The other is empirical, replicated on
+three untouched corpora: failure scores rank helped queries far below
+failing ones, and reachability explains why: the gate sees the top of
+the ranking, while rescue depends on what lies below it. Whether a
+failure score still helps routing depends on how benefit varies with
+difficulty: on HotpotQA reranking helps hard queries most and failure
+routing pays; on the other five corpora it does not. Stronger
+predictors and probes helped only on NQ and HotpotQA. The lesson is
+not that pre-action telemetry is uninformative, but that failure
+accuracy does not measure its value.
 
 \textbf{Limitations.} One small (3B) generator; reranking and PRF only
-under BM25, with one cross-encoder and one PRF family. Four corpora,
-two untouched ($430$ and $648$ test queries), underpowered for
-differences below about $0.015$;
+under BM25, with one cross-encoder and one PRF family. Six corpora,
+four untouched; three ($430$, $648$, $400$ test queries) are
+underpowered for differences below about $0.015$;
 under dense retrieval, retriever strength and domain are confounded,
 and the dense QE labels include the reranker. TripClick's labels are
 click-derived and sparse. The cost weight $\kappa$ is illustrative, latencies are single-machine (median, P95 check), and probes cover reranking only. All pre-committed results are reported.
@@ -544,14 +527,15 @@ QPP predicts whether a ranking is poor; selective retrieval needs to
 know whether an intervention helps. A controller acting only on
 failing queries gets at most $8$--$57\%$ of the oracle's gain, a
 learned failure gate selects poorly even among them, and its score
-ranks helped queries at AUC $0.42$--$0.56$, replicated on untouched
-FiQA. Selective-intervention work should report benefit AUC,
+ranks helped queries far below failing ones, on three untouched
+corpora, because rescue depends on reachability it does not observe.
+Selective-intervention work should report benefit AUC,
 failure-only ceilings, and cost-aware routing curves, not only
 failure-detection AUC.
 
 \section*{Ethical Considerations}
 
-All data (TripClick, BEIR NQ, ArguAna, and FiQA) are existing
+All data (TripClick and BEIR NQ, ArguAna, FiQA, DBPedia-Entity, and HotpotQA) are existing
 research benchmarks used under their licenses; TripClick is used for
 non-commercial research, and no model or per-query output fit on it is
 released. TripClick's click logs are aggregate, de-identified

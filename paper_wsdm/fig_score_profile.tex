@@ -5,7 +5,7 @@
   ticklabel style={font=\scriptsize}, title style={font=\footnotesize}, ylabel style={font=\footnotesize},
   mark size=1.2pt, line width=0.7pt, grid=major, grid style={gray!20}}}
 \begin{tikzpicture}
-\begin{axis}[profplot, title={NQ reranking}, ylabel={probability}, legend style={font=\tiny, at={(0.97,0.03)}, anchor=south east, inner sep=1pt, row sep=-3pt}]
+\begin{axis}[profplot, title={NQ}, ylabel={probability}, legend style={font=\tiny, at={(0.97,0.03)}, anchor=south east, inner sep=1pt, row sep=-3pt}]
 \addplot[name path=p_faillo0, draw=none, forget plot] coordinates {(1,0.180) (2,0.220) (3,0.293) (4,0.434) (5,0.400) (6,0.410) (7,0.502) (8,0.483) (9,0.615) (10,0.718)};
 \addplot[name path=p_failhi0, draw=none, forget plot] coordinates {(1,0.301) (2,0.346) (3,0.419) (4,0.576) (5,0.537) (6,0.551) (7,0.639) (8,0.620) (9,0.746) (10,0.835)};
 \addplot[red!75!black, fill opacity=0.15, forget plot] fill between[of=p_faillo0 and p_failhi0];
@@ -18,7 +18,7 @@
 \end{axis}
 \end{tikzpicture}\hfill
 \begin{tikzpicture}
-\begin{axis}[profplot, title={TripClick reranking}]
+\begin{axis}[profplot, title={TripClick}]
 \addplot[name path=p_faillo1, draw=none, forget plot] coordinates {(1,0.136) (2,0.256) (3,0.271) (4,0.291) (5,0.316) (6,0.475) (7,0.350) (8,0.466) (9,0.470) (10,0.610)};
 \addplot[name path=p_failhi1, draw=none, forget plot] coordinates {(1,0.280) (2,0.427) (3,0.441) (4,0.470) (5,0.487) (6,0.661) (7,0.538) (8,0.644) (9,0.641) (10,0.771)};
 \addplot[red!75!black, fill opacity=0.15, forget plot] fill between[of=p_faillo1 and p_failhi1];
@@ -30,31 +30,32 @@
 \end{axis}
 \end{tikzpicture}\hfill
 \begin{tikzpicture}
-\begin{axis}[profplot, title={ArguAna reranking}]
-\addplot[name path=p_faillo2, draw=none, forget plot] coordinates {(1,0.000) (2,0.046) (3,0.023) (4,0.116) (5,0.046) (6,0.116) (7,0.093) (8,0.093) (9,0.279) (10,0.209)};
-\addplot[name path=p_failhi2, draw=none, forget plot] coordinates {(1,0.163) (2,0.256) (3,0.209) (4,0.372) (5,0.279) (6,0.372) (7,0.349) (8,0.326) (9,0.558) (10,0.488)};
+\begin{axis}[profplot, title={DBPedia (pre-registered)}]
+\addplot[name path=p_faillo2, draw=none, forget plot] coordinates {(1,0.000) (2,0.000) (3,0.000) (4,0.025) (5,0.075) (6,0.150) (7,0.125) (8,0.150) (9,0.350) (10,0.300)};
+\addplot[name path=p_failhi2, draw=none, forget plot] coordinates {(1,0.075) (2,0.075) (3,0.125) (4,0.250) (5,0.300) (6,0.425) (7,0.376) (8,0.425) (9,0.650) (10,0.600)};
 \addplot[red!75!black, fill opacity=0.15, forget plot] fill between[of=p_faillo2 and p_failhi2];
-\addplot[red!75!black, mark=*] coordinates {(1,0.070) (2,0.140) (3,0.116) (4,0.233) (5,0.163) (6,0.233) (7,0.209) (8,0.209) (9,0.419) (10,0.349)};
-\addplot[name path=p_helpedlo2, draw=none, forget plot] coordinates {(1,0.302) (2,0.116) (3,0.209) (4,0.140) (5,0.070) (6,0.163) (7,0.209) (8,0.093) (9,0.092) (10,0.093)};
-\addplot[name path=p_helpedhi2, draw=none, forget plot] coordinates {(1,0.581) (2,0.372) (3,0.488) (4,0.419) (5,0.302) (6,0.442) (7,0.488) (8,0.349) (9,0.302) (10,0.302)};
+\addplot[red!75!black, mark=*] coordinates {(1,0.025) (2,0.025) (3,0.050) (4,0.125) (5,0.175) (6,0.275) (7,0.250) (8,0.275) (9,0.500) (10,0.450)};
+\addplot[name path=p_helpedlo2, draw=none, forget plot] coordinates {(1,0.700) (2,0.500) (3,0.700) (4,0.675) (5,0.625) (6,0.525) (7,0.650) (8,0.575) (9,0.475) (10,0.475)};
+\addplot[name path=p_helpedhi2, draw=none, forget plot] coordinates {(1,0.925) (2,0.800) (3,0.925) (4,0.925) (5,0.900) (6,0.825) (7,0.900) (8,0.850) (9,0.775) (10,0.775)};
 \addplot[green!50!black, fill opacity=0.15, forget plot] fill between[of=p_helpedlo2 and p_helpedhi2];
-\addplot[green!50!black, mark=diamond*] coordinates {(1,0.442) (2,0.233) (3,0.349) (4,0.279) (5,0.186) (6,0.302) (7,0.349) (8,0.209) (9,0.186) (10,0.186)};
+\addplot[green!50!black, mark=diamond*] coordinates {(1,0.825) (2,0.650) (3,0.825) (4,0.800) (5,0.775) (6,0.675) (7,0.775) (8,0.725) (9,0.625) (10,0.625)};
 \end{axis}
 \end{tikzpicture}\hfill
 \begin{tikzpicture}
-\begin{axis}[profplot, title={FiQA reranking (pre-reg.)}]
-\addplot[name path=p_faillo3, draw=none, forget plot] coordinates {(1,0.061) (2,0.185) (3,0.292) (4,0.344) (5,0.446) (6,0.354) (7,0.469) (8,0.523) (9,0.615) (10,0.723)};
-\addplot[name path=p_failhi3, draw=none, forget plot] coordinates {(1,0.231) (2,0.400) (3,0.538) (4,0.594) (5,0.692) (6,0.585) (7,0.719) (8,0.754) (9,0.831) (10,0.908)};
+\begin{axis}[profplot, title={HotpotQA (pre-registered)}]
+\addplot[name path=p_faillo3, draw=none, forget plot] coordinates {(1,0.000) (2,0.000) (3,0.001) (4,0.005) (5,0.009) (6,0.039) (7,0.061) (8,0.134) (9,0.234) (10,0.479)};
+\addplot[name path=p_failhi3, draw=none, forget plot] coordinates {(1,0.000) (2,0.004) (3,0.011) (4,0.022) (5,0.027) (6,0.071) (7,0.100) (8,0.185) (9,0.300) (10,0.551)};
 \addplot[red!75!black, fill opacity=0.15, forget plot] fill between[of=p_faillo3 and p_failhi3];
-\addplot[red!75!black, mark=*] coordinates {(1,0.139) (2,0.292) (3,0.415) (4,0.469) (5,0.569) (6,0.462) (7,0.594) (8,0.646) (9,0.723) (10,0.815)};
-\addplot[name path=p_helpedlo3, draw=none, forget plot] coordinates {(1,0.262) (2,0.323) (3,0.215) (4,0.266) (5,0.246) (6,0.292) (7,0.297) (8,0.308) (9,0.339) (10,0.292)};
-\addplot[name path=p_helpedhi3, draw=none, forget plot] coordinates {(1,0.508) (2,0.569) (3,0.431) (4,0.500) (5,0.477) (6,0.538) (7,0.547) (8,0.554) (9,0.585) (10,0.523)};
+\addplot[red!75!black, mark=*] coordinates {(1,0.000) (2,0.001) (3,0.005) (4,0.013) (5,0.018) (6,0.054) (7,0.080) (8,0.159) (9,0.266) (10,0.514)};
+\addplot[name path=p_helpedlo3, draw=none, forget plot] coordinates {(1,0.229) (2,0.249) (3,0.314) (4,0.357) (5,0.382) (6,0.437) (7,0.470) (8,0.553) (9,0.581) (10,0.567)};
+\addplot[name path=p_helpedhi3, draw=none, forget plot] coordinates {(1,0.291) (2,0.314) (3,0.383) (4,0.427) (5,0.453) (6,0.513) (7,0.542) (8,0.626) (9,0.650) (10,0.640)};
 \addplot[green!50!black, fill opacity=0.15, forget plot] fill between[of=p_helpedlo3 and p_helpedhi3];
-\addplot[green!50!black, mark=diamond*] coordinates {(1,0.385) (2,0.446) (3,0.323) (4,0.375) (5,0.354) (6,0.415) (7,0.422) (8,0.431) (9,0.462) (10,0.415)};
+\addplot[green!50!black, mark=diamond*] coordinates {(1,0.262) (2,0.281) (3,0.349) (4,0.392) (5,0.418) (6,0.475) (7,0.507) (8,0.588) (9,0.616) (10,0.605)};
 \end{axis}
 \end{tikzpicture}
-\caption{Same score, two targets: by decile of the learned failure gate's score
-(test; 95\% bootstrap bands), the failure rate rises steeply while the share of
-queries reranking helps stays flat or falls (exploratory analysis; FiQA from the pre-registered test run).}
+\caption{One score, two targets (reranking, test, 95\% bootstrap bands). By decile
+of the learned failure gate's score, the failure rate rises steeply; the share of
+queries reranking helps stays flat or falls on NQ, TripClick, and DBPedia but rises
+on HotpotQA. NQ, TripClick: exploratory.}
 \label{fig:profile}
 \end{figure*}
