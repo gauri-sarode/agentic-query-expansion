@@ -37,9 +37,11 @@ judged-relevant document below the top ten by construction; yet the
 failure score often ranks such repairable failures below unrepairable
 ones (AUC $0.27$--$0.53$; $0.37$ and $0.40$ pre-registered). The
 routing value of failure scores varies by corpus: clear on HotpotQA,
-against our pre-registered prediction, though computing the gate there
-costs more than reranking every query; small or uncertain elsewhere.
-Stronger pre-action predictors and partial probes help inconsistently.
+against our pre-registered prediction, small or uncertain elsewhere.
+There, a benefit model on BM25 score-list features is comparable at
+negligible cost, while the failure gate costs more than reranking.
+Within a ten-bin policy class, better use of the score recovers
+little; stronger predictors and partial probes help inconsistently.
 Selective retrieval should be evaluated by intervention benefit,
 routing gain, and computation cost, not by failure-detection accuracy
 alone.
@@ -69,7 +71,8 @@ deployed system can observe, its \emph{observability}, can do better.
 \textbf{(C1)} A decision framing of selective intervention under
 observable telemetry, with an exact decomposition of the gain no
 policy acting only on failing queries can capture, at zero and
-positive cost (Section~\ref{sec:framework}).
+positive cost, and a split of a score policy's regret into information
+and policy parts (Section~\ref{sec:framework}).
 \textbf{(C2)} Evidence on six corpora, four pre-registered and
 untouched, that the targets differ and that the difference has
 measurable consequences: the uncapped \emph{failure-only ceiling} is
@@ -77,8 +80,8 @@ $8$--$57\%$ of the oracle's gain, and failure scores rank helped
 queries far below how they rank failing ones.
 \textbf{(C3)} A structural constraint, reachability, with evidence
 that failure scores often rank repairable failures below unrepairable
-ones, and pre-registered tests showing that the routing value of
-failure scores, stronger predictors, and probes varies by corpus.
+ones; pre-registered tests showing that the routing value of failure
+scores varies by corpus; and a free score-list benefit gate.
 
 \section{Related Work}
 
@@ -162,9 +165,11 @@ built from a failure \emph{score} that also acts on healthy queries.
 \textbf{Information vs.\ policy regret.} For a policy $\pi(S)$ on a
 score $S$ at budget $b$, $V_{\text{orc}}-V_\pi=(V_{\text{orc}}-V_S^*)+(V_S^*-V_\pi)$,
 with $V_S^*$ the best budget-feasible policy using $S$ alone: lost
-information plus misuse. We approximate it with cross-fitted ten-bin
-policies and report an optimistic in-sample optimum in the same class
-(Section~\ref{sec:discussion}); neither bounds $V_S^*$.
+information plus misuse. Our empirical class intervenes on at most
+$\lfloor bn\rfloor$ queries in order of the mean $\Delta$ of $S$'s ten
+equal-frequency bins, abstaining where it is $\le0$; we report its
+cross-fitted value and an optimistic in-sample optimum
+(Section~\ref{sec:discussion}). Neither bounds $V_S^*$.
 
 \section{Setup}
 
@@ -223,8 +228,10 @@ development, and the
 NQ B1/B2 runs, diagnostics, probes of Section~\ref{sec:probe}, and the
 reachability analysis on the first four corpora
 followed protocols frozen before computing but after the test sets
-were inspected; analyses added after review are marked in the
-text.
+were inspected; so did, after review, the regret, attribution,
+cheap-gate, reachability-model, raw-routing, and latency-split analyses
+(script or protocol committed before computing). Post-review analyses
+are marked in the text.
 Pre-commitments and scripts are in the anonymized repository:
 \url{https://anonymous.4open.science/r/agentic-query-expansion-8939/}.
 
@@ -368,47 +375,41 @@ $-0.35$ on the first four corpora).
 \section{Routing at Matched Budgets}
 \label{sec:routing}
 
-
-
-
-
-
 \textbf{Pre-action routing.} At every budget ($10$--$75\%$), each
-scorer that decides before intervening stays close to random routing
-and far below the oracle on TripClick, NQ, and ArguAna (table and
-cost curves in the repository). Failure routing beats
-random by at most $0.006$ at any budget and often falls below it.
-Averaged over budgets, NQC is
-no better than the detector, and benefit routing beats failure
-routing only for reranking on NQ ($+0.009$ $[+0.003,+0.015]$), where
-it leads at every budget (per-budget CIs in the repository); B1 and B2 do no better
+pre-action scorer stays close to random and far below the oracle on
+TripClick, NQ, and ArguAna (tables and cost curves in the repository):
+failure routing beats random by at most $0.006$ and often falls below
+it, NQC does no better, and benefit routing beats failure routing only
+for NQ reranking ($+0.009$ $[+0.003,+0.015]$); B1 and B2 do no better
 (exploratory).
+
+\textbf{Probes}\label{sec:probe} (exploratory, protocol frozen before
+computing) sit between pre- and post-action telemetry: the
+cross-encoder scores the first $10$ BM25 candidates ($0.05$--$0.13$\,s;
+full reranking $0.48$, $1.11$, $1.26$, $0.84$\,s on NQ, TripClick,
+ArguAna, FiQA, medians on 50 validation queries), and B1's model
+regresses $\Delta$ on these scores. On NQ the probe policy beats
+failure and B1 routing ($+0.024$ $[+0.017,$ $+0.031]$, $+0.017$
+$[+0.011,$ $+0.022]$; Holm-significant) and free NQC at equal median
+cost ($+0.020$ $[+0.012,+0.028]$, post-review). It does not help on
+TripClick, ArguAna, FiQA, or DBPedia, and does on HotpotQA.
 
 \section{Pre-Registered Replications}
 \label{sec:arguana}
 
 
-\textbf{ArguAna.} \emph{Question:} do stronger pre-action benefit
-predictors beat failure routing on data never inspected for this work?
-\emph{Design}, pre-registered before download
-(\texttt{configs/\allowbreak arguana\_\allowbreak precommit.json}): a
-debate-grouped split ($701/275/430$), the three interventions (LLM QE
-as on NQ), and Holm-corrected primary contrasts for B1--B3 (B3's
-registered quantile choice is unsound, so a secondary B3 fixes
-$0.25$); leakage fixes were dated amendments before any label was
-read.
-\emph{Result: no.} Every intervention loses on average (reranking
-$-0.071$ $[-0.108,-0.034]$, LLM QE $-0.163$), yet the oracle could
-gain $0.053$ and $0.010$ budget-averaged, so the task is pure
-selection. For reranking, B1 minus failure routing is $+0.015$
-$[-0.001,+0.028]$ (Holm $p=0.13$), B2 minus failure $+0.008$ (Holm
-$p=0.37$), B3 minus B1 under a budget cap $+0.006$ ($p=0.52$); the best
+\textbf{ArguAna} (pre-registered before download;
+debate-grouped split $701/275/430$; Holm-corrected contrasts for
+B1--B3; leakage fixes were dated amendments before any label was
+read). \emph{Question:} do stronger pre-action benefit predictors beat
+failure routing? \emph{Result: no.} Every intervention loses on average
+(reranking $-0.071$ $[-0.108,-0.034]$, LLM QE $-0.163$), so the task is
+pure selection. For reranking, B1 minus failure routing is $+0.015$
+$[-0.001,+0.028]$ (Holm $p=0.13$) and B2 $+0.008$ ($p=0.37$); the best
 recovers $16\%$ of the oracle-minus-failure headroom, below the
-pre-registered $25\%$ bar, and a secondary family agrees (none of nine
-survives Holm). Failure routing of reranking is below random at every
-budget. PRF changes only $9\%$ of rankings,
-so its rows are uninformative. At $430$ queries, B1's $+0.015$ may be
-real but is unresolved.
+pre-registered $25\%$ bar, and a secondary family agrees. Failure
+routing is below random at every budget; PRF changes only $9\%$ of
+rankings. At $430$ queries, B1's $+0.015$ is unresolved.
 
 \textbf{FiQA} (predictions fixed before download, one Holm family;
 $1{,}500$/$500$/$648$ queries). \emph{Confirmed:} the failure score
@@ -462,38 +463,17 @@ $m=p_Fp_R\mu_R+(1-p_F)\mu_H$, with $p_F$ the failure rate, $p_R$
 reachability among failures, and $\mu_R$, $\mu_H$ the mean $\Delta$ of
 reachable failures and healthy queries. A four-factor Shapley
 attribution of the change in $m$ from the lowest to the highest
-$S$ tertile ($+0.17$) gives $\mu_H$ $+0.12$ $[0.11,0.13]$, $p_F$
-$+0.06$, $\mu_R$ $+0.01$, $p_R$ $-0.01$; on NQ, $p_R$ ($-0.08$)
-cancels $p_F$ ($+0.05$) (descriptive). HotpotQA's two-passage
+$S$ tertile ($+0.17$, matched exactly) gives $\mu_H$ $+0.12$
+$[0.11,0.13]$, $p_F$ $+0.06$, $\mu_R$ $+0.01$, $p_R$ $-0.01$. Between
+extreme deciles $\mu_H$ still dominates ($+0.14$) but the other factors
+shift, so only $\mu_H$'s role is robust; on NQ, falling $p_R$ offsets
+the others (descriptive). HotpotQA's two-passage
 judgments may contribute, untested. The gate's telemetry costs $2.8$\,s
 per query beyond the shared BM25 retrieval, reranking $0.22$\,s, so
-reranking every query is cheaper; but a gate using only BM25
-score-list features and query length ($0.3$\,ms per query) matches S
-(paired difference $+0.001$ $[-0.0002,+0.003]$) and keeps $75\%$ of
+reranking every query is cheaper; but a benefit model on BM25
+score-list features and query length ($0.3$\,ms per query) is
+comparable to S (paired difference $+0.001$ $[-0.0002,+0.003]$) and keeps $75\%$ of
 always reranking's gain at half its cost (exploratory). PRF barely acts (mean $\Delta$ $\pm0.003$).
-
-\section{Partial Observation and Cost}
-\label{sec:probe}
-
-
-
-A probe sits between pre- and post-action telemetry. In an exploratory
-analysis (protocol frozen before computing), the cross-encoder scores
-the first $10$ BM25 candidates; B1's model regresses full reranking's
-$\Delta$ on nine probe features, and the top-scoring queries are fully
-reranked. Each policy is charged its median latency on 50 validation
-queries: full reranking $0.48$, $1.11$, $1.26$, $0.84$\,s on NQ,
-TripClick, ArguAna, FiQA; the probe $0.05$--$0.13$\,s.
-
-On NQ, where reranking usually helps, the Probe-10 policy beats
-failure routing by $+0.024$ $[+0.017,$ $+0.031]$ and B1 by $+0.017$
-$[+0.011,$ $+0.022]$ over $10$--$75\%$ reranked (both Holm-significant),
-though NQ's pre-action telemetry costs more than reranking every
-query; against free NQC (post-review), probe routing gains $+0.020$
-$[+0.012,+0.028]$ at equal median-latency cost. Probes
-do not help on TripClick and ArguAna, where reranking loses on
-average, nor on FiQA or DBPedia; they do on HotpotQA
-(Section~\ref{sec:arguana}).
 
 \section{Discussion and Limitations}
 \label{sec:discussion}
@@ -514,8 +494,11 @@ and the cost of the signal decide. Most of what failure routing
 loses is not recovered by a better rule: within the ten-bin policy
 class, calibration adds little over ranking by $S$ (except by
 abstaining on ArguAna), and even an optimistic in-sample policy leaves
-$65$--$93\%$ of the oracle--random gap. This does not bound arbitrary
-policies on the continuous score. Reachability is predictable
+$65$--$93\%$ of the oracle--random gap ($65$--$99\%$ cross-fitted).
+This does not bound policies on the continuous score, and the oracle's
+realised $\Delta$ includes noise no pre-action signal can predict: the
+best pre-action predictor we trained closes $5$--$15\%$ of the gap
+($41\%$ on HotpotQA). Reachability is predictable
 from deep BM25 scores (AUC $0.59$--$0.70$ on five corpora), yet a
 reachability-factored benefit model does not beat a matched single
 model on any corpus (Holm $p=1.0$; all exploratory).
