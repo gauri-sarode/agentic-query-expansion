@@ -29,18 +29,20 @@ queries can reach. We evaluate LLM query expansion, cross-encoder
 reranking, and pseudo-relevance feedback on six benchmarks, four of
 them pre-registered and untouched. Without a budget cap, a perfect
 failure gate recovers only $8$--$57\%$ of the oracle's gain. On the
-same queries, the learned failure gate detects failure far better than
-it predicts benefit, a gap confirmed as a pre-registered prediction on
-three untouched test sets (AUC differences $+0.20$ to $+0.33$). The reason is reachability:
-reranking rescues a failing query only when a relevant document sits
-below the top ten, and the gate's score does not see whether one does
-(AUC $0.27$--$0.53$). How much a failure score helps routing depends
-on the corpus: near random on five corpora, but useful on HotpotQA,
-where benefit grows with difficulty, against our pre-registered
-prediction. Stronger pre-action predictors and partial probes help
-inconsistently. Selective retrieval should be evaluated by
-intervention benefit, oracle headroom, and cost-aware routing, not by
-failure-prediction accuracy alone.
+same queries, the learned failure gate's score ranks failing queries
+far better than queries the intervention helps (pre-registered on three
+untouched test sets: AUC $0.72$--$0.89$ against $0.43$--$0.64$). For
+fixed-candidate reranking, rescuing a failing query requires a
+judged-relevant document below the top ten by construction; yet the
+failure score often ranks such repairable failures below unrepairable
+ones (AUC $0.27$--$0.53$; $0.37$ and $0.40$ pre-registered). The
+routing value of failure scores varies by corpus: clear on HotpotQA,
+against our pre-registered prediction, though computing the gate there
+costs more than reranking every query; small or uncertain elsewhere.
+Stronger pre-action predictors and partial probes help inconsistently.
+Selective retrieval should be evaluated by intervention benefit,
+routing gain, and computation cost, not by failure-detection accuracy
+alone.
 \end{abstract}
 
 \maketitle
@@ -73,10 +75,10 @@ untouched, that the targets differ and that the difference has
 measurable consequences: the uncapped \emph{failure-only ceiling} is
 $8$--$57\%$ of the oracle's gain, and failure scores rank helped
 queries far below how they rank failing ones.
-\textbf{(C3)} A mechanism, reachability, that explains why the gate
-selects poorly among failing queries, and pre-registered tests of when
-a failure score, stronger pre-action predictors, or partial probes
-improve routing: on some corpora, not on others.
+\textbf{(C3)} A structural constraint, reachability, with evidence
+that failure scores often rank repairable failures below unrepairable
+ones, and pre-registered tests showing that the routing value of
+failure scores, stronger predictors, and probes varies by corpus.
 
 \section{Related Work}
 
@@ -88,11 +90,11 @@ et al.~\cite{amati-selective} gate expansion on difficulty predictors;
 Lv and Zhai~\cite{lv-zhai-adaptive} predict a feedback weight;
 Collins-Thompson~\cite{collins-thompson-risk} trades reward against risk. Even idealised selective
 QE needs QPP at Kendall $\tau\ge0.5$~\cite{hauff-qpp-effective}, and
-Chifu et al.~\cite{chifu-qpp-limits} analyse where QPP fails and what
-that implies for selective query processing. Such work sizes predictor
-accuracy or evaluates gated systems; to our knowledge none bounds what
-a failure gate can recover, explains its selection error, or compares
-gates at matched budgets.
+Chifu et al.~\cite{chifu-qpp-limits} find QPP accuracy strongly
+collection-dependent and QPP-driven selective processing only
+marginally better. To our knowledge, no such work bounds what a
+failure-restricted policy can recover, scores failure and benefit on
+the same queries, or explains the gate's selection error.
 
 \textbf{LLM QE and adaptive retrieval.} Query2doc~\cite{query2doc},
 MuGI~\cite{mugi}, and CSQE~\cite{csqe} expand unconditionally;
@@ -105,7 +107,10 @@ oracle headroom and transfers inconsistently; we ask whether to intervene
 at all, across three interventions, and bound failure-restricted policies.
 Adaptive-RAG~\cite{adaptive-rag} routes on question complexity and
 Mallen et al.~\cite{mallen-adaptive} retrieve only for less popular
-entities; cascade rankers~\cite{cascade-ranking} spend costly stages
+entities. Graph-based adaptive reranking~\cite{gar} extends the
+candidate pool beyond first-stage retrieval; we instead ask whether
+failure scores identify which queries a fixed-pool intervention can
+help. Cascade rankers~\cite{cascade-ranking} spend costly stages
 only on promising candidates, and cutoff and efficiency
 predictors~\cite{culpepper-cutoff,tonellotto-selective} set per-query
 reranking depth or pruning. In uplift terms~\cite{causal-classification}, both
@@ -275,8 +280,8 @@ uncapped shares.
 \textbf{The learned failure gate also selects poorly.} At a $10\%$
 budget, $35$--$80\%$ of its picks are failing queries (the rest are healthy),
 and it realises at most $34\%$ of the capped failure-restricted oracle's gain, and its
-gain is negative in five settings (all three on ArguAna) and in
-$7$--$9$ of $11$ at $25$--$75\%$. Among failing queries its score ranks
+gain is negative in five of the first eleven settings (all three on
+ArguAna) and in $7$--$9$ of them at $25$--$75\%$. Among failing queries its score ranks
 the rescued ones no better than chance (Table~\ref{tab:auc}; below it in four settings, not on FiQA). At a
 $25\%$ budget, $45$--$68\%$ of its picks on TripClick and NQ
 ($30$--$36\%$ on ArguAna) are failing queries the intervention leaves
@@ -338,30 +343,25 @@ Figure~\ref{fig:profile} shows its shape.
 
 \textbf{Benefit predictors do better but are weak}
 (helped AUC $\le0.58$; NQ probe $0.65$, HotpotQA B1 $0.67$ and probe $0.73$). They beat the failure score
-on NQ reranking ($+0.08$ to $+0.17$, probe largest), NQ PRF, and
-ArguAna QE and reranking ($+0.07$ to $+0.12$); elsewhere differences
-span zero, except that the linear model trails it on TripClick PRF
-($-0.06$).
+on NQ reranking ($+0.08$ to $+0.17$), NQ PRF, and ArguAna QE and
+reranking ($+0.07$ to $+0.12$); elsewhere differences mostly span zero.
 
-\textbf{The detector's lead over harm prediction does not contradict
-this.} Detection beats harm AUC by $+0.02$ to $+0.33$
-(Holm-significant in seven of eight original settings; $+0.22$ and
-$+0.20$ on FiQA), but failing queries cannot be harmed and are mostly
-unchanged, so the harm label is largely a failure indicator; on
-changed queries the gap vanishes in every TripClick and NQ BM25
-setting (table in the repository).
+\textbf{Harm is not a cleaner target.} Detection beats harm AUC, but
+failing queries cannot be harmed, so harm largely tracks failure; on
+changed TripClick and NQ queries the gap vanishes (repository).
 
 \textbf{Why: reachability} (exploratory on the first four corpora,
 protocol frozen before computing; pre-registered on DBPedia and
-HotpotQA). Reranking reorders the BM25 top 100, so it can rescue a
-failing query only if a relevant document sits at ranks 11--100. No
-failing query without one is helped, on any of the six corpora, while
-$29$--$88\%$ of those with one are. The gate's score, built from the
-top of the ranking, does not find these \emph{reachable} failures: its
-AUC for reachable among failing queries is $0.27$--$0.53$ ($0.40$
-$[0.27,0.54]$ and $0.37$ $[0.33,0.41]$ pre-registered), and among
-reachable failures the helped rate shows no consistent trend across
-its tertiles. Among healthy queries, harm concentrates where the first
+HotpotQA). For fixed-candidate reranking, rescuing a failing query
+requires a judged-relevant document at BM25 ranks 11--100, by
+construction. Empirically, such \emph{reachable} failures vary widely
+($51$--$83\%$ of failing queries), $29$--$88\%$ of them are rescued,
+yet the failure score often ranks reachable failures below
+unreachable ones (AUC $0.27$--$0.53$; $0.40$ $[0.27,0.54]$ and $0.37$
+$[0.33,0.41]$ pre-registered), and among reachable failures the helped
+rate shows no consistent trend across its tertiles. The highest
+failure scores can thus prioritise queries this reranker cannot
+repair. Among healthy queries, harm concentrates where the first
 relevant document is already at rank 1 (mean $\Delta$ $-0.02$ to
 $-0.35$ on the first four corpora).
 
@@ -377,17 +377,14 @@ $-0.35$ on the first four corpora).
 scorer that decides before intervening stays close to random routing
 and far below the oracle on TripClick, NQ, and ArguAna (table and
 cost curves in the repository). Failure routing beats
-random by at most $0.006$ at any budget and often falls below it,
-and at a $25\%$ budget each pre-action
-scorer's picks are helped within $-0.11$ to $+0.08$ of the base rate. Averaged over budgets, NQC is
+random by at most $0.006$ at any budget and often falls below it.
+Averaged over budgets, NQC is
 no better than the detector, and benefit routing beats failure
 routing only for reranking on NQ ($+0.009$ $[+0.003,+0.015]$), where
 it leads at every budget (per-budget CIs in the repository). Boosted and embedding predictors (B1, B2),
 fit on NQ validation (exploratory), do no
 better: none survives Holm, and the best recovers $8\%$ of the
-oracle-minus-failure headroom. Failure routing can still save cost:
-for LLM QE on NQ, the failure-selective policy halves generator calls
-and recovers most of unconditional QE's loss ($+0.015$).
+oracle-minus-failure headroom.
 
 \section{Pre-Registered Replications}
 \label{sec:arguana}
@@ -418,10 +415,8 @@ real but is unresolved.
 \textbf{FiQA.} \emph{Predictions}, fixed before download in
 \texttt{configs/\allowbreak fiqa\_\allowbreak precommit.json}: (P1) the failure score ranks
 failure better than benefit; (P2) among failing queries it ranks the
-rescued ones below chance; (P3, P4) since reranking helps on
-validation ($+0.10$), Probe-10 routing beats failure and B1 routing.
-Reranking and PRF follow the ArguAna protocol ($1{,}500$ training,
-$500$ dev, $648$ test queries; one Holm family, five evaluable tests).
+rescued ones below chance; (P3, P4) Probe-10 routing beats failure and
+B1 routing ($1{,}500$/$500$/$648$ queries; one Holm family).
 \emph{Confirmed:} failure detection does not translate into benefit
 prediction (P1: $0.72$ against $0.52$ and $0.46$, Holm $p<0.001$).
 \emph{Not confirmed:} the within-failing inversion ($0.56$
@@ -432,9 +427,11 @@ routing either ($-0.006$ each, Holm $p=0.19$).
 
 \begin{table}[t]
 \caption{Pre-registered tests on DBPedia and HotpotQA (reranking, test;
-one Holm family per corpus). S: learned failure gate's score. P2--P4:
-exact-budget calibrated routing, averaged over $10$--$75\%$ budgets.
-Bold: against the prediction.}
+one Holm family per corpus). S: learned failure gate's score. P2--P4
+spend each budget ($10$--$75\%$, averaged) in order of $\mathbb{E}[\Delta]$
+in ten score bins, cross-fitted over test queries (5 folds, 20
+repeats): a test of the information in a score, not a deployable
+policy. Bold: against the prediction.}
 \label{tab:iv}
 \footnotesize
 \setlength{\tabcolsep}{3pt}
@@ -462,14 +459,17 @@ unreachable failing queries (P5). DBPedia's $400$ test queries are
 scored by five-fold cross-fitting; HotpotQA uses $1{,}500$ training and
 $500$ dev queries. \emph{Result} (Table~\ref{tab:iv}): the
 detection--benefit gap (P1) and reachability (P5) hold on both.
-Routing splits. DBPedia behaves as predicted, except that the probe
-does not help. On HotpotQA, against the prediction, S beats random by
-$+0.023$ and B1 and the probe beat S (Holm $p<0.001$): there,
-reranking helps more the higher the failure score
-(Figure~\ref{fig:profile}), so ranking by difficulty is partly ranking
-by benefit, though not within failing queries (P5). Without a budget
-cap no score beats always reranking on either corpus (mean $\Delta$
-$+0.13$, $+0.12$). PRF barely acts (mean $\Delta$ $-0.003$, $+0.003$).
+DBPedia behaves as predicted, except that the probe does not help. On
+HotpotQA, against the prediction, S beats random by $+0.023$, and B1
+($+0.003$, small) and the probe beat S (Holm $p<0.001$); simply
+ranking by S gives the same $+0.024$ (exploratory). There, reranking
+helps more the higher the failure score (Figure~\ref{fig:profile}),
+though not within failing queries (P5); HotpotQA's two-passage
+multi-hop judgments may contribute, which we did not test. This is a
+quality gain at a fixed number of interventions, not a cost saving:
+beyond the shared BM25 retrieval, the gate's telemetry takes $2.8$\,s
+per query (median, exploratory), reranking $0.22$\,s, so reranking
+every query is cheaper. PRF barely acts (mean $\Delta$ $\pm0.003$).
 
 \section{Partial Observation and Cost}
 \label{sec:probe}
@@ -504,14 +504,14 @@ difference matters. One consequence is proven: at any cost,
 failure-restricted policies are capped by the oracle gain on failing
 queries ($8$--$57\%$ uncapped). The other is empirical, replicated on
 three untouched corpora: failure scores rank helped queries far below
-failing ones, and reachability explains why: the gate sees the top of
-the ranking, while rescue depends on what lies below it. Whether a
-failure score still helps routing depends on how benefit varies with
-difficulty: on HotpotQA reranking helps hard queries most and failure
-routing pays; on the other five corpora it does not. Stronger
-predictors and probes helped only on NQ and HotpotQA. The lesson is
-not that pre-action telemetry is uninformative, but that failure
-accuracy does not measure its value.
+failing ones, and for reranking they often rank repairable failures
+last. Yet failure routing has heterogeneous value: raw routing on the
+failure score beats random clearly on HotpotQA ($+0.024$), slightly on
+FiQA ($+0.008$ $[+0.002,+0.013]$), and not detectably on DBPedia
+($+0.002$ $[-0.004,+0.007]$; all exploratory), whose $400$ queries
+cannot exclude an effect a third of HotpotQA's. High QPP accuracy
+neither guarantees nor precludes intervention value; benefit alignment
+and the cost of the signal decide.
 
 \textbf{Limitations.} One small (3B) generator; reranking and PRF only
 under BM25, with one cross-encoder and one PRF family. Six corpora,
@@ -524,14 +524,14 @@ click-derived and sparse. The cost weight $\kappa$ is illustrative, latencies ar
 \section{Conclusion}
 
 QPP predicts whether a ranking is poor; selective retrieval needs to
-know whether an intervention helps. A controller acting only on
-failing queries gets at most $8$--$57\%$ of the oracle's gain, a
-learned failure gate selects poorly even among them, and its score
-ranks helped queries far below failing ones, on three untouched
-corpora, because rescue depends on reachability it does not observe.
-Selective-intervention work should report benefit AUC,
-failure-only ceilings, and cost-aware routing curves, not only
-failure-detection AUC.
+know whether an intervention helps. We bound the gain failure-restricted
+policies cannot reach and show that learned failure scores often
+misrank intervention opportunities. For fixed-pool reranking,
+reachability explains part of the mismatch: severe failures can be
+impossible to rescue. The value of failure-based routing still varies
+by corpus, as the pre-registered HotpotQA result shows. Selective
+retrieval should be evaluated by intervention benefit, routing gain,
+and computation cost, not by failure-detection accuracy alone.
 
 \section*{Ethical Considerations}
 

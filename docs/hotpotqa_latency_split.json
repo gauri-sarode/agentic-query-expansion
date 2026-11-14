@@ -1,0 +1,15 @@
+{
+  "_note": "EXPLORATORY (post-review). HotpotQA, 50 val queries (scripts/68 sample), single process, alternating order. bm25_only is shared by every policy; incremental_telemetry is what a gated policy adds. Full reranking median 0.218 s (results latency_s.full).",
+  "bm25_only": {
+    "median_s": 3.101,
+    "p95_s": 6.318
+  },
+  "bm25_plus_telemetry": {
+    "median_s": 5.787,
+    "p95_s": 11.153
+  },
+  "incremental_telemetry_paired": {
+    "median_s": 2.779,
+    "p95_s": 4.681
+  }
+}

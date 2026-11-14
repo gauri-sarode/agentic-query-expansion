@@ -1,0 +1,27 @@
+{
+  "_note": "EXPLORATORY (post-review, after the test passes): raw failure-score routing for reranking, i.e. rerank the top b of test queries by the learned failure gate's score with no calibration, minus random routing (b * mean Delta), averaged over b in {10, 25, 50, 75}%. Paired bootstrap over test queries (10,000 resamples, seed 42). Compares with the pre-registered P2, which routes by cross-fitted binned E[Delta | score]. Aggregates only to docs/raw_routing_check.json. ",
+  "fiqa": {
+    "n": 648,
+    "raw_minus_random": 0.0079,
+    "ci": [
+      0.0015,
+      0.0133
+    ]
+  },
+  "dbpedia": {
+    "n": 400,
+    "raw_minus_random": 0.0015,
+    "ci": [
+      -0.0044,
+      0.0073
+    ]
+  },
+  "hotpotqa": {
+    "n": 7405,
+    "raw_minus_random": 0.0235,
+    "ci": [
+      0.0217,
+      0.0252
+    ]
+  }
+}
