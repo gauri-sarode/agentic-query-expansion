@@ -1,0 +1,50 @@
+{
+  "name": "actionability_aware_selective_reranking",
+  "written": "2026-11-14",
+  "status": "EXPLORATORY. Every test set below has been inspected (DBPedia and HotpotQA after their single pre-registered pass). Quantities, models, features and contrasts are fixed here and committed before any of them is computed. All settings and quantities are reported regardless of outcome. Nothing here re-establishes independence of reused test sets.",
+  "scope": "Fixed-pool cross-encoder reranking of the BM25 top 100 only, on NQ, TripClick, ArguAna, FiQA, DBPedia, HotpotQA (test splits as frozen). Reachability is defined only for this intervention; QE and PRF can change the candidate set and are excluded.",
+  "definitions": {
+    "F": "nDCG@10 of the BM25 ranking = 0",
+    "R": "F and a judged-relevant (grade > 0) document at BM25 ranks 11-100",
+    "Delta": "nDCG@10(rerank) - nDCG@10(BM25)",
+    "S": "the deployed learned failure gate's score on test (as in docs/mechanism.json)"
+  },
+  "A_regret_decomposition": {
+    "identity": "V_oracle(b) - V_pi(b) = [V_oracle(b) - V_S*(b)] (information regret) + [V_S*(b) - V_pi(b)] (policy regret), kappa = 0, budget b in {10, 25, 50, 75}% (intervene on at most floor(b n) queries), averaged over b.",
+    "estimates": "V_oracle: top-b by realised Delta (positive part). V_S* is not observed; it is bracketed: lo = cross-fitted 10-bin E[Delta | S] routing with abstention (scripts/69 crossfit + select_gain, 5 folds, 20 repeats; a feasible out-of-sample policy), hi = in-sample 10-bin routing (scripts/70 bstar; optimistic for the 10-bin partition, not a bound on V_S*). V_pi: pi = rerank the top b by S (raw ranking, no calibration). Random: b * mean(Delta).",
+    "reported": "per setting: V_oracle, V_S*_lo, V_S*_hi, V_raw, V_random (budget-averaged); information regret bracket; policy regret bracket; information regret share of (V_oracle - V_random). Paired bootstrap CIs (10,000, seed 42) for V_oracle - V_raw and V_S*_lo - V_raw.",
+    "caveat": "The identity is standard decision theory, not a new result; only its estimation for retrieval interventions is at issue. Policy regret of raw ranking can be estimated negative when lo understates V_S*."
+  },
+  "B_reachability_conditioned_routing": {
+    "decomposition": "E[Delta | X] = P(F|X) P(R|F,X) E[Delta | F,R,X] + (1 - P(F|X)) E[Delta | not F, X]; exact for fixed-pool reranking because Delta = 0 when F and not R.",
+    "features": {
+      "base": "the 10 pre-action features used by B1 (8 t0 telemetry, NQC, query length)",
+      "deep": "from the BM25 top-100 score list s_1..s_100 (zero-padded, with the count returned): s_11/s_1, s_20/s_1, s_50/s_1, s_100/s_1, mean(s_1..s_10)/s_1, mean(s_11..s_100)/s_1, std(s_11..s_100)/s_1, (s_10 - s_11)/s_1, (s_11 - s_100)/s_1, n_returned",
+      "full": "base + deep",
+      "cheap": "top_score, score_margin, score_entropy, NQC, query length + deep: computable from the BM25 score list and query text alone, no extra retrieval"
+    },
+    "training_data": "NQ, TripClick: validation split; ArguAna, FiQA, HotpotQA: train + validation splits; DBPedia: for test fold k, the other four folds (scripts/76 folds). Test queries never enter fitting.",
+    "models": "LightGBM, one fixed configuration for every head and every comparator, no tuning: n_estimators 200, learning_rate 0.05, num_leaves 15, min_child_samples 20, subsample 0.8 (freq 1), colsample_bytree 0.8, random_state 42. Heads: failure classifier on all training queries; reachability classifier on failing training queries; rescue-gain regressor on reachable failing training queries; healthy-gain regressor on healthy training queries. A head with fewer than 30 training rows, or a classifier with fewer than 10 of either class, is replaced by its training mean (reported).",
+    "policies": {
+      "RCBR_full": "rank test queries by the combined prediction from full features",
+      "RCBR_cheap": "same with cheap features",
+      "Mono_full": "single LightGBM regressor of Delta on full features (same training data and configuration)",
+      "Mono_cheap": "same with cheap features",
+      "Mono_base": "single LightGBM regressor on base features (B1-like)",
+      "ablation_noR": "RCBR_full with P(R|F,X) replaced by its training mean",
+      "ablation_noMu": "RCBR_full with E[Delta|F,R,X] replaced by its training mean",
+      "S": "deployed failure score (raw ranking)",
+      "random": "b * mean(Delta)"
+    },
+    "evaluation": "Routing gain = mean over b in {10, 25, 50, 75}% of the realised Delta of the top floor(b n) test queries by the policy's score, divided by n. Paired bootstrap over test queries (10,000, seed 42).",
+    "primary_contrasts": "per setting: RCBR_full - Mono_full. Holm over the six settings at alpha 0.05.",
+    "secondary": "RCBR_full - S; RCBR_cheap - Mono_cheap; RCBR_full - ablation_noR; RCBR_full - ablation_noMu; each policy minus random; AUC of the reachability head for R among failing test queries vs the AUC of S; Spearman of each policy score with Delta; helped AUC.",
+    "cost": "Cheap features cost nothing beyond BM25 retrieval, so a cheap gate's cost at budget b is b times the median reranking latency (latency_s.full or the stored median). Reported: the share of always-rerank gain each cheap policy retains at b = 50% and 75%, against random."
+  },
+  "C_heterogeneity": {
+    "components": "Within each tertile and each decile of S on test: p_F = P(F), p_R = P(R | F), mu_R = E[Delta | F, R], mu_H = E[Delta | not F]; reconstructed m = p_F p_R mu_R + (1 - p_F) mu_H, checked equal to observed mean Delta.",
+    "attribution": "Change in m from the bottom to the top tertile of S split into the four components by the Shapley decomposition over (p_F, p_R, mu_R, mu_H) (24 orderings), with bootstrap 95% CIs (10,000, seed 42).",
+    "question": "Which components make m rise with S on HotpotQA and not on the other corpora? Descriptive, not causal."
+  },
+  "outputs": "Rounded aggregates only to docs/actionability.json (no per-query values; TripClick terms). Script: scripts/81_actionability.py."
+}
