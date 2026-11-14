@@ -159,6 +159,12 @@ label avoids. The identity is elementary; its use is that every term is
 measurable offline for any intervention. It does not bound a policy
 built from a failure \emph{score} that also acts on healthy queries.
 
+\textbf{Information vs.\ policy regret.} For a policy $\pi(S)$ on a
+score $S$ at budget $b$, $V_{\text{orc}}-V_\pi=(V_{\text{orc}}-V_S^*)+(V_S^*-V_\pi)$,
+with $V_S^*$ the best budget-feasible policy using $S$ alone: lost
+information plus misuse. We bracket $V_S^*$ by cross-fitted and
+optimistic in-sample ten-bin policies (Section~\ref{sec:discussion}).
+
 \section{Setup}
 
 \textbf{Data.} TripClick~\cite{tripclick}: 1.52M health documents, the
@@ -282,10 +288,7 @@ budget, $35$--$80\%$ of its picks are failing queries (the rest are healthy),
 and it realises at most $34\%$ of the capped failure-restricted oracle's gain, and its
 gain is negative in five of the first eleven settings (all three on
 ArguAna) and in $7$--$9$ of them at $25$--$75\%$. Among failing queries its score ranks
-the rescued ones no better than chance (Table~\ref{tab:auc}; below it in four settings, not on FiQA). At a
-$25\%$ budget, $45$--$68\%$ of its picks on TripClick and NQ
-($30$--$36\%$ on ArguAna) are failing queries the intervention leaves
-unchanged (exploratory).
+the rescued ones no better than chance (Table~\ref{tab:auc}; below it in four settings, not on FiQA).
 
 The ceiling and the selection error are separate constraints, and
 both operate at every budget below $100\%$.
@@ -346,9 +349,6 @@ Figure~\ref{fig:profile} shows its shape.
 on NQ reranking ($+0.08$ to $+0.17$), NQ PRF, and ArguAna QE and
 reranking ($+0.07$ to $+0.12$); elsewhere differences mostly span zero.
 
-\textbf{Harm is not a cleaner target.} Detection beats harm AUC, but
-failing queries cannot be harmed, so harm largely tracks failure; on
-changed TripClick and NQ queries the gap vanishes (repository).
 
 \textbf{Why: reachability} (exploratory on the first four corpora,
 protocol frozen before computing; pre-registered on DBPedia and
@@ -381,10 +381,8 @@ random by at most $0.006$ at any budget and often falls below it.
 Averaged over budgets, NQC is
 no better than the detector, and benefit routing beats failure
 routing only for reranking on NQ ($+0.009$ $[+0.003,+0.015]$), where
-it leads at every budget (per-budget CIs in the repository). Boosted and embedding predictors (B1, B2),
-fit on NQ validation (exploratory), do no
-better: none survives Holm, and the best recovers $8\%$ of the
-oracle-minus-failure headroom.
+it leads at every budget (per-budget CIs in the repository); B1 and B2 do no better
+(exploratory).
 
 \section{Pre-Registered Replications}
 \label{sec:arguana}
@@ -462,12 +460,13 @@ helps more the higher the failure score (Figure~\ref{fig:profile}),
 though not within failing queries (P5). By a Shapley split of the rise
 from the lowest to the highest score tertile ($+0.17$), most comes from
 larger gains on healthy queries ($+0.12$ $[0.11,0.13]$) and more
-failures ($+0.06$); on NQ, falling reachability ($-0.08$) cancels the
+failures ($+0.06$), with rescue gain ($+0.01$) and reachability
+($-0.01$) minor; on NQ, falling reachability ($-0.08$) cancels the
 rise in failures (descriptive); HotpotQA's two-passage
 judgments may contribute, untested. The gate's telemetry costs $2.8$\,s
 per query beyond the shared BM25 retrieval, reranking $0.22$\,s, so
 reranking every query is cheaper; but a gate built from the BM25 score
-list alone, free beyond retrieval, routes as well ($+0.025$ over
+list and query length, at negligible extra cost, routes as well ($+0.025$ over
 random) and keeps $75\%$ of always reranking's gain at half its cost
 (exploratory). PRF barely acts (mean $\Delta$ $\pm0.003$).
 
@@ -497,6 +496,7 @@ average, nor on FiQA or DBPedia; they do on HotpotQA
 (Section~\ref{sec:arguana}).
 
 \section{Discussion and Limitations}
+\label{sec:discussion}
 
 QPP and selective retrieval predict different targets, and the
 difference matters. One consequence is proven: at any cost,
@@ -511,12 +511,14 @@ FiQA ($+0.008$ $[+0.002,+0.013]$), and not detectably on DBPedia
 cannot exclude an effect a third of HotpotQA's. High QPP accuracy
 neither guarantees nor precludes intervention value; benefit alignment
 and the cost of the signal decide. Most of what failure routing
-loses is information, not policy: calibrating the score recovers
-little beyond ranking by it (except by abstaining on ArguAna), and information regret is $65$--$99\%$ of
-the oracle's lead over random. Reachability itself is predictable from
-deep BM25 scores (AUC $0.59$--$0.70$ on five corpora), yet a
+loses is information, not policy: even the optimistic in-sample
+ten-bin policy on $S$ leaves $65$--$93\%$ of the oracle's lead over
+random, and the cross-fitted one gains little over ranking by $S$
+(except by abstaining on ArguAna). This limits the evaluated score
+partition, not everything $S$ could encode. Reachability is predictable
+from deep BM25 scores (AUC $0.59$--$0.70$ on five corpora), yet a
 reachability-factored benefit model does not beat a matched single
-model on any corpus (all exploratory).
+model on any corpus (Holm $p=1.0$; all exploratory).
 
 \textbf{Limitations.} One small (3B) generator; reranking and PRF only
 under BM25, with one cross-encoder and one PRF family. Six corpora,
