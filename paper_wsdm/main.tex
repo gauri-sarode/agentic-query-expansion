@@ -412,18 +412,13 @@ budget. PRF changes only $9\%$ of rankings,
 so its rows are uninformative. At $430$ queries, B1's $+0.015$ may be
 real but is unresolved.
 
-\textbf{FiQA.} \emph{Predictions}, fixed before download in
-\texttt{configs/\allowbreak fiqa\_\allowbreak precommit.json}: (P1) the failure score ranks
-failure better than benefit; (P2) among failing queries it ranks the
-rescued ones below chance; (P3, P4) Probe-10 routing beats failure and
-B1 routing ($1{,}500$/$500$/$648$ queries; one Holm family).
-\emph{Confirmed:} failure detection does not translate into benefit
-prediction (P1: $0.72$ against $0.52$ and $0.46$, Holm $p<0.001$).
-\emph{Not confirmed:} the within-failing inversion ($0.56$
-$[0.49,0.63]$; PRF, with 8 rescues, not evaluable) and the probe
-(minus failure $-0.001$ $[-0.009,+0.008]$, minus B1 $+0.006$
-$[-0.001,+0.013]$; Holm $p\ge0.25$). B1 and B2 do not beat failure
-routing either ($-0.006$ each, Holm $p=0.19$).
+\textbf{FiQA} (predictions fixed before download, one Holm family;
+$1{,}500$/$500$/$648$ queries). \emph{Confirmed:} the failure score
+ranks failure above benefit ($0.72$ against $0.52$ and $0.46$, Holm
+$p<0.001$). \emph{Not confirmed:} the within-failing inversion ($0.56$
+$[0.49,0.63]$) and Probe-10 beating failure and B1 routing ($-0.001$,
+$+0.006$; Holm $p\ge0.25$); B1 and B2 do not beat failure routing
+either ($-0.006$ each).
 
 \begin{table}[t]
 \caption{Pre-registered tests on DBPedia and HotpotQA (reranking, test;
@@ -464,12 +459,17 @@ HotpotQA, against the prediction, S beats random by $+0.023$, and B1
 ($+0.003$, small) and the probe beat S (Holm $p<0.001$); simply
 ranking by S gives the same $+0.024$ (exploratory). There, reranking
 helps more the higher the failure score (Figure~\ref{fig:profile}),
-though not within failing queries (P5); HotpotQA's two-passage
-multi-hop judgments may contribute, which we did not test. This is a
-quality gain at a fixed number of interventions, not a cost saving:
-beyond the shared BM25 retrieval, the gate's telemetry takes $2.8$\,s
-per query (median, exploratory), reranking $0.22$\,s, so reranking
-every query is cheaper. PRF barely acts (mean $\Delta$ $\pm0.003$).
+though not within failing queries (P5). By a Shapley split of the rise
+from the lowest to the highest score tertile ($+0.17$), most comes from
+larger gains on healthy queries ($+0.12$ $[0.11,0.13]$) and more
+failures ($+0.06$); on NQ, falling reachability ($-0.08$) cancels the
+rise in failures (descriptive); HotpotQA's two-passage
+judgments may contribute, untested. The gate's telemetry costs $2.8$\,s
+per query beyond the shared BM25 retrieval, reranking $0.22$\,s, so
+reranking every query is cheaper; but a gate built from the BM25 score
+list alone, free beyond retrieval, routes as well ($+0.025$ over
+random) and keeps $75\%$ of always reranking's gain at half its cost
+(exploratory). PRF barely acts (mean $\Delta$ $\pm0.003$).
 
 \section{Partial Observation and Cost}
 \label{sec:probe}
@@ -477,13 +477,12 @@ every query is cheaper. PRF barely acts (mean $\Delta$ $\pm0.003$).
 
 
 A probe sits between pre- and post-action telemetry. In an exploratory
-analysis (protocol frozen before computing), we score only the first $k\in\{5,10,20\}$
-BM25 candidates ($k=10$ primary, fixed in the protocol) with the cross-encoder, regress the $\Delta$ of full
-reranking on nine probe features with B1's model and selection rule, and fully rerank the top-scoring queries,
-reusing the probe's scores. Each policy is charged its median measured
-latency (50 validation queries per corpus): full
-reranking takes $0.48$, $1.11$, $1.26$, and $0.84$\,s on NQ,
-TripClick, ArguAna, and FiQA, a ten-candidate probe $0.05$--$0.13$\,s.
+analysis (protocol frozen before computing), the cross-encoder scores
+the first $10$ BM25 candidates; B1's model regresses full reranking's
+$\Delta$ on nine probe features, and the top-scoring queries are fully
+reranked. Each policy is charged its median latency on 50 validation
+queries: full reranking $0.48$, $1.11$, $1.26$, $0.84$\,s on NQ,
+TripClick, ArguAna, FiQA; the probe $0.05$--$0.13$\,s.
 
 On NQ, where reranking usually helps, the Probe-10 policy beats
 failure routing by $+0.024$ $[+0.017,$ $+0.031]$ and B1 by $+0.017$
@@ -511,7 +510,13 @@ FiQA ($+0.008$ $[+0.002,+0.013]$), and not detectably on DBPedia
 ($+0.002$ $[-0.004,+0.007]$; all exploratory), whose $400$ queries
 cannot exclude an effect a third of HotpotQA's. High QPP accuracy
 neither guarantees nor precludes intervention value; benefit alignment
-and the cost of the signal decide.
+and the cost of the signal decide. Most of what failure routing
+loses is information, not policy: calibrating the score recovers
+little beyond ranking by it (except by abstaining on ArguAna), and information regret is $65$--$99\%$ of
+the oracle's lead over random. Reachability itself is predictable from
+deep BM25 scores (AUC $0.59$--$0.70$ on five corpora), yet a
+reachability-factored benefit model does not beat a matched single
+model on any corpus (all exploratory).
 
 \textbf{Limitations.} One small (3B) generator; reranking and PRF only
 under BM25, with one cross-encoder and one PRF family. Six corpora,
