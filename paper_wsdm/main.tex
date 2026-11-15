@@ -27,10 +27,9 @@ decision under observable telemetry and derive an exact, cost-aware
 decomposition of the gain that no policy intervening only on failing
 queries can reach. We evaluate LLM query expansion, cross-encoder
 reranking, and pseudo-relevance feedback on six benchmarks, four of
-them pre-registered and untouched. Without a budget cap, a perfect
-failure gate recovers only $8$--$57\%$ of the oracle's gain. On the
-same queries, the learned failure gate's score ranks failing queries
-far better than queries the intervention helps (pre-registered on three
+them pre-registered and untouched. A perfect failure gate recovers
+only $8$--$57\%$ of the oracle's gain, and the learned gate's score
+ranks failing queries far better than queries the intervention helps (pre-registered on three
 untouched test sets: AUC $0.72$--$0.89$ against $0.43$--$0.64$). For
 fixed-candidate reranking, rescuing a failing query requires a
 judged-relevant document below the top ten by construction; yet the
@@ -436,11 +435,11 @@ tertile ($+0.17$) gives most to $\mu_H$ ($+0.12$ $[0.11,0.13]$), the
 only factor robust to decile endpoints (descriptive). HotpotQA's two-passage
 judgments may contribute, untested. The gate's telemetry costs $2.8$\,s
 per query beyond the shared BM25 retrieval, reranking $0.22$\,s, so
-reranking every query is cheaper; but a benefit model on BM25
-score-list features and query length ($0.3$\,ms per query) is
-comparable to S (paired difference $+0.001$ $[-0.0002,+0.003]$) and,
-reranking $50\%$ of queries, keeps $75\%$ of always reranking's gain
-(exploratory). PRF barely acts (mean $\Delta$ $\pm0.003$).
+reranking every query is cheaper; but a single benefit model on BM25
+score-list features and query length ($0.3$\,ms per query) matches or
+slightly beats S (paired difference $+0.002$ $[0.000,0.003]$) and,
+reranking $50\%$ of queries, keeps $76\%$ of always reranking's gain,
+as S does, without its telemetry (exploratory). PRF barely acts (mean $\Delta$ $\pm0.003$).
 
 \section{Value of Observability}
 \label{sec:routing}
@@ -516,7 +515,8 @@ four untouched; three ($430$, $648$, $400$ test queries) are
 underpowered for differences below about $0.015$;
 under dense retrieval, retriever strength and domain are confounded,
 and the dense QE labels include the reranker. TripClick's labels are
-click-derived and sparse. The cost weight $\kappa$ is illustrative, latencies are single-machine (median, P95 check), and probes cover reranking only. All pre-committed results are reported.
+click-derived and sparse. The cost weight $\kappa$ is illustrative, latencies are single-machine (median, P95 check), and probes cover reranking only. Exploratory intervals and p-values are
+uncorrected across analyses. All pre-committed results are reported.
 
 \section{Conclusion}
 
