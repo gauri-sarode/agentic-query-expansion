@@ -224,8 +224,8 @@ visualization bands use $2{,}000$. We call the deployed detector,
 used to route, the \emph{learned failure gate}, and any model of
 $\Delta$ a \emph{benefit predictor}.
 
-\textbf{Evidence ledger.} Only the ArguAna, FiQA, DBPedia, and
-HotpotQA results (Section~\ref{sec:arguana}) are independent
+\textbf{Evidence ledger.} Only the pre-registered tests on ArguAna,
+FiQA, DBPedia, and HotpotQA (Section~\ref{sec:arguana}) are independent
 confirmation: every NQ
 query and the TripClick TAIL test set have been inspected.
 \emph{Fixed before a test run}: the NQ, reranking, and PRF runs.
@@ -279,11 +279,11 @@ Reranking, HotpotQA & .11 & .61 & .43 & .11 & $25\%$ [23, 27] \\
 
 \textbf{Failure-restricted policies miss most of the gain.} The
 failure-restricted oracle captures $8$--$57\%$ of the oracle's gain
-(Table~\ref{tab:ceiling}; $18$--$46\%$ on ArguAna and FiQA), though it
+(Table~\ref{tab:ceiling}; $18$--$46\%$ on the four untouched corpora), though it
 never makes a query worse; PRF, which barely acts, has the lowest
 shares. The share follows how often an
 intervention rescues a failing query relative to how often it helps a
-healthy one: reranking rescues $17$--$46\%$ of failing queries, so up
+healthy one: reranking rescues $17$--$61\%$ of failing queries, so up
 to half its headroom lies there; LLM QE rescues $6$--$15\%$ and PRF
 almost never. The rest sits in healthy queries the intervention also
 often harms, which only benefit prediction can separate.
