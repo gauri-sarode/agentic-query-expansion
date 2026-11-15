@@ -30,5 +30,12 @@
     "quantities": "With the deployed S: AUC(F_tau, S), AUC(Delta > 0, S), their difference with bootstrap CI; within-F_tau helped AUC (if at least 20 helped and 20 not helped); failure-restricted oracle share E[F_tau (Delta)+] / E[(Delta)+] with CI; P(Delta < 0 | F_tau) (zero by construction only at tau = 0). With a gate refit on F_tau (fit_failure on the training data): AUC(F_tau) and AUC(Delta > 0) on test. Bootstrap 10,000, seed 42.",
     "caveat": "For tau > 0 failing queries can be harmed; the no-harm property and the perfect-gate result of Section 3 hold only at tau = 0."
   },
-  "outputs": "Rounded aggregates only to docs/observability_frontier.json. Script: scripts/83_observability_frontier.py."
+  "outputs": "Rounded aggregates only to docs/observability_frontier.json. Script: scripts/83_observability_frontier.py.",
+  "amendments": [
+    {
+      "date": "2026-11-15",
+      "change": "A training_scores: inner folds use sha256(query_id + ':oof') mod 5 instead of ':42'.",
+      "reason": "With ':42', DBPedia's training data (four outer folds defined by the same hash) leaves one inner fold empty; found in a smoke run (50 resamples) that also printed smoke values for NQ, TripClick, ArguAna and FiQA before failing on DBPedia. Applied to all corpora; no other change."
+    }
+  ]
 }
