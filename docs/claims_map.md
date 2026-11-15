@@ -23,3 +23,4 @@ Every number in the WSDM draft (`paper_wsdm/main.tex`) comes from a committed sc
 | Probe at equal median latency vs free-feature model; inner-fold balance (§7) | exploratory, post-review | `scripts/84_frontier_cost_check.py` | `docs/frontier_cost_check.json` |
 | Failure-threshold sensitivity, tau <= 0.3 (§6) | exploratory | `scripts/83_observability_frontier.py` (C) | `docs/observability_frontier.json` |
 | Predictive value per information set: helped AUC and Spearman, Z0_free / Z0_full / Zp / Z1 (§8) | exploratory, post-review | `scripts/85_frontier_predictive.py` | `docs/frontier_predictive.json` |
+| Table 4: per-corpus Zp-Z0_free, Z1-Zp, equal-latency, keep-vs-always with nominal paired CIs (§8) | exploratory | `scripts/83_observability_frontier.py` (B), `scripts/84_frontier_cost_check.py` | `docs/observability_frontier.json`, `docs/frontier_cost_check.json` |
