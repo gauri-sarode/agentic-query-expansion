@@ -38,7 +38,7 @@ def main() -> None:
         if i == 0:
             out.append(r"\legend{$P(F)$, $P(\Delta>0)$}")
         out.append(r"\end{axis}" + "\n" + r"\end{tikzpicture}" + (r"\hfill" if i < 3 else ""))
-    out.append(r"""\caption{One score, two targets (reranking, test, 95\% bootstrap bands). By decile
+    out.append(r"""\caption{One score, two targets (reranking, test, 95\% bootstrap bands, 2{,}000 resamples). By decile
 of the learned failure gate's score, the failure rate rises steeply; the share of
 queries reranking helps stays flat or falls on NQ, TripClick, and DBPedia but rises
 on HotpotQA. NQ, TripClick: exploratory.}
