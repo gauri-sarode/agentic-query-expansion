@@ -218,9 +218,9 @@ $\Delta$ of the $k$ nearest training queries under frozen
 \texttt{bge-small-en-v1.5} embeddings. Every model and threshold is fit on
 validation (NQ, TripClick), on training splits with validation
 selection (ArguAna, FiQA, HotpotQA), or by cross-fitting (DBPedia),
-and scored once on test; intervals are paired bootstraps
-over queries ($10^4$ resamples; Figure~\ref{fig:profile}'s bands
-$2{,}000$). We call the deployed detector,
+and scored once on test. Unless noted, intervals are paired bootstraps
+over test queries with $10^4$ resamples; Figure~\ref{fig:profile}'s
+visualization bands use $2{,}000$. We call the deployed detector,
 used to route, the \emph{learned failure gate}, and any model of
 $\Delta$ a \emph{benefit predictor}.
 
@@ -434,8 +434,7 @@ reachability among failures, and $\mu_R$, $\mu_H$ the mean $\Delta$ of
 reachable failures and healthy queries. A Shapley attribution (24
 orderings) of the rise in $m$ from the lowest to the highest $S$
 tertile ($+0.17$) gives most to $\mu_H$ ($+0.12$ $[0.11,0.13]$), the
-only factor robust to decile endpoints (descriptive). HotpotQA's two-passage
-judgments may contribute, untested. The gate's telemetry costs $2.8$\,s
+only factor robust to decile endpoints (descriptive). The gate's telemetry costs $2.8$\,s
 per query beyond the shared BM25 retrieval, reranking $0.22$\,s, so
 reranking every query is cheaper; but a single benefit model on BM25
 score-list features and query length ($0.3$\,ms per query) matches or
@@ -472,9 +471,10 @@ ArguAna; full $Z_0$ changes it by $-0.01$ to $+0.03$.
 (significant on NQ, HotpotQA), $Z_1$ a further $+0.003$ to $+0.009$
 (significant on four corpora); full over free $Z_0$ adds $+0.002$
 $[0.001,0.003]$ on HotpotQA, and intervals span zero elsewhere.
-\emph{Decision at fixed latency}, where the $Z_0^{\text{free}}$ policy
-spends the probe's latency on reranking a further
-$c_{\text{probe}}/c_{\text{rerank}}$ of queries: the probe loses
+\emph{Decision at fixed latency}: on the same test queries, the
+$Z_0^{\text{free}}$ policy reranks $\lfloor(b+c_{\text{probe}}/c_{\text{rerank}})n\rfloor$
+queries where $Z_p$ reranks $\lfloor bn\rfloor$, with $c$ the median
+latencies on 50 validation queries, averaged over $b$. The probe loses
 wherever reranking helps on average
 (NQ, FiQA, DBPedia, HotpotQA: $-0.010$ to $-0.016$), and gains on
 TripClick ($+0.007$ $[0.001,0.012]$; ArguAna $+0.010$, n.s.). Once
@@ -498,13 +498,12 @@ failing ones, and for reranking they often rank repairable failures
 last. Yet failure routing has heterogeneous value: raw routing on the
 failure score beats random clearly on HotpotQA ($+0.024$), slightly on
 FiQA ($+0.008$ $[+0.002,+0.013]$), and not detectably on DBPedia
-($+0.002$ $[-0.004,+0.007]$; all exploratory), whose $400$ queries
-cannot exclude an effect a third of HotpotQA's. High QPP accuracy
+($+0.002$ $[-0.004,+0.007]$; all exploratory). High QPP accuracy
 neither guarantees nor precludes intervention value; benefit alignment
 and the cost of the signal decide. Most of what failure routing
 loses is not recovered by a better rule: within the ten-bin policy
-class, calibration adds little over ranking by $S$ (except by
-abstaining on ArguAna), and even an optimistic in-sample policy, a
+class, calibration adds little over ranking by $S$ except by abstaining,
+and even an optimistic in-sample policy, a
 diagnostic rather than deployable performance, leaves
 $65$--$93\%$ of the oracle--random gap ($65$--$99\%$ cross-fitted).
 A spline on the continuous score adds little more (Section~\ref{sec:routing}),
@@ -520,22 +519,21 @@ four untouched; three ($430$, $648$, $400$ test queries) are
 underpowered for differences below about $0.015$;
 under dense retrieval, retriever strength and domain are confounded,
 and the dense QE labels include the reranker. TripClick's labels are
-click-derived and sparse. The cost weight $\kappa$ is illustrative, latencies are single-machine (median, P95 check), and probes cover reranking only. Exploratory intervals and p-values are
-uncorrected across analyses. All pre-committed results are reported.
+click-derived and sparse. $\kappa$ is illustrative, latencies are single-machine medians, and
+probes cover reranking only. Exploratory p-values are uncorrected
+across analyses. All pre-committed results are reported.
 
 \section{Conclusion}
 
 QPP predicts whether a ranking is poor; selective retrieval needs to
-know whether an intervention helps. We bound the gain failure-restricted
-policies cannot reach and show that learned failure scores often
-misrank intervention opportunities, partly because severe failures
-can be unreachable for a fixed-pool reranker, though on some corpora
-they still route usefully. The score-only policies we test recover
-little, extra observation's value depends on the
-intervention's baseline benefit and cost, and a negligible-cost
-benefit model can replace an expensive failure gate. Selective
-retrieval should be evaluated by intervention benefit, routing gain,
-and computation cost, not by failure-detection accuracy alone.
+know whether an intervention helps. Learned failure scores often
+misrank intervention opportunities, partly because severe failures can
+be unreachable for a fixed-pool reranker, though on some corpora they
+still route usefully. Tested score-only policies recover little, and a
+negligible-cost benefit model can replace the expensive gate.
+Selective retrieval should be evaluated by
+intervention benefit, routing gain, and computation cost, not by
+failure-detection accuracy alone.
 
 \section*{Ethical Considerations}
 
