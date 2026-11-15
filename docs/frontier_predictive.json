@@ -1,0 +1,111 @@
+{
+  "_note": "EXPLORATORY (post-review): predictive value of each scripts/83 information set, separate from its decision value: helped AUC (Delta > 0) and Spearman with Delta on test, for Z0_free (score list + query length), Z0_full (telemetry + score list), Zp (Z0_free + Probe-10), Z1 (Zp + post-action). Same data, models and folds as scripts/83. Point estimates; aggregates only to docs/frontier_predictive.json. ",
+  "nq": {
+    "Z0_free": {
+      "helped_auc": 0.575,
+      "spearman": 0.132
+    },
+    "Z0_full": {
+      "helped_auc": 0.5703,
+      "spearman": 0.1171
+    },
+    "Zp": {
+      "helped_auc": 0.6571,
+      "spearman": 0.2749
+    },
+    "Z1": {
+      "helped_auc": 0.6724,
+      "spearman": 0.3172
+    }
+  },
+  "tripclick": {
+    "Z0_free": {
+      "helped_auc": 0.4795,
+      "spearman": -0.0217
+    },
+    "Z0_full": {
+      "helped_auc": 0.4925,
+      "spearman": 0.0029
+    },
+    "Zp": {
+      "helped_auc": 0.5296,
+      "spearman": 0.0253
+    },
+    "Z1": {
+      "helped_auc": 0.5393,
+      "spearman": 0.0806
+    }
+  },
+  "arguana": {
+    "Z0_free": {
+      "helped_auc": 0.4941,
+      "spearman": 0.058
+    },
+    "Z0_full": {
+      "helped_auc": 0.5001,
+      "spearman": 0.0804
+    },
+    "Zp": {
+      "helped_auc": 0.4541,
+      "spearman": 0.0724
+    },
+    "Z1": {
+      "helped_auc": 0.4559,
+      "spearman": 0.0839
+    }
+  },
+  "fiqa": {
+    "Z0_free": {
+      "helped_auc": 0.5281,
+      "spearman": 0.0445
+    },
+    "Z0_full": {
+      "helped_auc": 0.5144,
+      "spearman": 0.0096
+    },
+    "Zp": {
+      "helped_auc": 0.5625,
+      "spearman": 0.103
+    },
+    "Z1": {
+      "helped_auc": 0.6054,
+      "spearman": 0.1752
+    }
+  },
+  "dbpedia": {
+    "Z0_free": {
+      "helped_auc": 0.58,
+      "spearman": 0.1612
+    },
+    "Z0_full": {
+      "helped_auc": 0.6123,
+      "spearman": 0.2009
+    },
+    "Zp": {
+      "helped_auc": 0.6156,
+      "spearman": 0.2269
+    },
+    "Z1": {
+      "helped_auc": 0.6362,
+      "spearman": 0.31
+    }
+  },
+  "hotpotqa": {
+    "Z0_free": {
+      "helped_auc": 0.6783,
+      "spearman": 0.3262
+    },
+    "Z0_full": {
+      "helped_auc": 0.6868,
+      "spearman": 0.3437
+    },
+    "Zp": {
+      "helped_auc": 0.7294,
+      "spearman": 0.4171
+    },
+    "Z1": {
+      "helped_auc": 0.7521,
+      "spearman": 0.4604
+    }
+  }
+}
