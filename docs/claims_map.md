@@ -18,3 +18,7 @@ Every number in the WSDM draft (`paper_wsdm/main.tex`) comes from a committed sc
 | Cheap benefit gate vs S, paired +0.001 [−0.0002, 0.003], 0.3 ms/query; 75% of always-rerank gain at 50% (§8) | exploratory | `scripts/82_cheap_gate_check.py`; `scripts/81_actionability.py` (`cost`) | `docs/cheap_gate_check.json`, `docs/actionability.json` |
 | Probe routing (§7) | exploratory (`configs/partial_probe_protocol.json`) | `scripts/58_probe_scores.py`, `scripts/60_partial_probe.py` | repository docs |
 | Routing table and cost curves (moved out of the paper) | pre-committed / exploratory | — | `docs/routing_table.tex`, `docs/probe_cost_figure.tex` |
+| Score-only spline policy vs raw S (§7): ArguAna +0.035 (Holm), TripClick +0.009; abstention drives gains | exploratory (`configs/observability_frontier_protocol.json`, amended inner salt) | `scripts/83_observability_frontier.py` (A) | `docs/observability_frontier.json` |
+| Observability increments Z0 → Zp → Z1 at matched budgets; Z1 keep-or-revert vs always rerank (§7) | exploratory | `scripts/83_observability_frontier.py` (B) | `docs/observability_frontier.json` |
+| Probe at equal median latency vs free-feature model; inner-fold balance (§7) | exploratory, post-review | `scripts/84_frontier_cost_check.py` | `docs/frontier_cost_check.json` |
+| Failure-threshold sensitivity, tau <= 0.3 (§6) | exploratory | `scripts/83_observability_frontier.py` (C) | `docs/observability_frontier.json` |
