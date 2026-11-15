@@ -1,0 +1,34 @@
+{
+  "name": "score_only_policy_observability_frontier_failure_threshold",
+  "written": "2026-11-15",
+  "status": "EXPLORATORY. All test sets have been inspected. Fixed here and committed before any quantity below is computed; every setting and quantity is reported regardless of outcome.",
+  "data": "Reranking (A, B) and reranking + PRF (C) on NQ, TripClick, ArguAna, FiQA, DBPedia, HotpotQA, with the training data and test splits of configs/actionability_protocol.json (NQ, TripClick: train on validation; ArguAna, FiQA, HotpotQA: train + validation; DBPedia: other four folds per test fold). S on test = the deployed learned failure gate's score.",
+  "A_score_only_calibrated_policy": {
+    "question": "Does a flexible score-only policy, calibrated without test labels, recover materially more than ranking by S?",
+    "training_scores": "Out-of-fold S on the training data: 5 folds by sha256(query_id + ':42') mod 5, the scripts/54 fit_failure model (median imputer, standard scaler, logistic regression, max_iter 2000, seed 42) on the deployed gate's features (NQ, TripClick: the 8 t0 features; BEIR: the 10 pre-action features), target F.",
+    "calibration": "m_hat(s) = E[Delta | S = s] by SplineTransformer(n_knots 6, degree 3, knots 'quantile', extrapolation 'linear') + Ridge(alpha 1.0), fit on (out-of-fold S, Delta) of the training data only. Fixed; no tuning. May be non-monotone.",
+    "policies_on_test": "Spline_S_abstain: top floor(b n) by m_hat(S), skipping m_hat <= 0. Spline_S_exact: top floor(b n) by m_hat(S). Raw_S: top floor(b n) by S. TenBin_xfit: cross-fitted ten-bin reference (scripts/81 regret lo; uses test labels of other folds). Mono_full: scripts/81 full-feature benefit model. Random: b mean(Delta). Oracle.",
+    "metrics": "Budget-averaged gain over b in {10, 25, 50, 75}%; share of the oracle-random gap. Paired bootstrap over test queries, 10,000 resamples, seed 42 (calibration fixed, fit on training data).",
+    "primary": "Spline_S_abstain - Raw_S per setting, Holm over the six settings at 0.05. Secondary: Spline_S_exact - Raw_S, Mono_full - Spline_S_abstain, Spline_S_abstain - Random.",
+    "claim_limit": "An estimate for this policy class, not V_S*."
+  },
+  "B_observability_frontier": {
+    "information_sets": {
+      "Z0_cheap": "scripts/81 cheap features (BM25 score list + query length)",
+      "Z0_full": "scripts/81 full pre-action features (telemetry + deep score list)",
+      "Zp": "Z0_cheap + the nine Probe-10 features (scripts/60 probe_features, k = 10)",
+      "Z1": "Zp + the six post-action features of the reranked list (scripts/49 post_features)"
+    },
+    "model": "One LightGBM regressor of Delta per information set, the scripts/81 fixed configuration, trained on the training data; no tuning.",
+    "value": "Z0 and Zp: rerank the top floor(b n) test queries by prediction, b in {10, 25, 50, 75}%, budget-averaged. Z1 (the full reranking is already paid): keep the reranked list for the top floor(b n) by prediction at the same b (matched comparison), and separately keep it wherever the prediction is > 0 (unconstrained). Always rerank and oracle as references.",
+    "increments": "Zp - Z0_cheap, Z1 - Zp, Z0_full - Z0_cheap at matched b, paired bootstrap (10,000, seed 42).",
+    "cost": "Median seconds per query: reranking and Probe-10 as measured on 50 validation queries (results/*/latency.json, results/probes/latency.json); incremental telemetry only where measured beyond BM25 (HotpotQA, docs/hotpotqa_latency_split.json), otherwise reported as not measured. Cost at b: Z0_cheap b c_rr; Z0_full c_tel + b c_rr; Zp c_probe + b c_rr; Z1 c_rr."
+  },
+  "C_failure_threshold_sensitivity": {
+    "thresholds": "F_tau = 1[nDCG@10 of BM25 <= tau], tau in {0, 0.1, 0.2, 0.3}; tau = 0 is the primary definition.",
+    "settings": "Reranking and PRF on the six corpora (12 settings).",
+    "quantities": "With the deployed S: AUC(F_tau, S), AUC(Delta > 0, S), their difference with bootstrap CI; within-F_tau helped AUC (if at least 20 helped and 20 not helped); failure-restricted oracle share E[F_tau (Delta)+] / E[(Delta)+] with CI; P(Delta < 0 | F_tau) (zero by construction only at tau = 0). With a gate refit on F_tau (fit_failure on the training data): AUC(F_tau) and AUC(Delta > 0) on test. Bootstrap 10,000, seed 42.",
+    "caveat": "For tau > 0 failing queries can be harmed; the no-harm property and the perfect-gate result of Section 3 hold only at tau = 0."
+  },
+  "outputs": "Rounded aggregates only to docs/observability_frontier.json. Script: scripts/83_observability_frontier.py."
+}
