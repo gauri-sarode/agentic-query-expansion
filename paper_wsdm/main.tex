@@ -285,14 +285,14 @@ shares. The share follows how often an
 intervention rescues a failing query relative to how often it helps a
 healthy one: reranking rescues $17$--$61\%$ of failing queries, so up
 to half its headroom lies there; LLM QE rescues $6$--$15\%$ and PRF
-almost never. The rest sits in healthy queries the intervention also
-often harms, which only benefit prediction can separate.
+almost never. The rest sits in healthy queries, often also harmed,
+which only benefit prediction can separate.
 
 \textbf{The learned failure gate also selects poorly.} At a $10\%$
 budget it realises at most $34\%$ of the capped failure-restricted
 oracle's gain, and its gain is negative in five of the first eleven
-settings. Among failing queries its score ranks
-the rescued ones no better than chance (Table~\ref{tab:auc}).
+settings, and among failing queries it ranks the rescued no better
+than chance.
 
 
 \section{Detection vs.\ Benefit}
@@ -348,7 +348,7 @@ intervals above zero (exploratory; such failures can be harmed).
 \textbf{Benefit predictors do better but are mostly weak}
 (helped AUC $\le0.58$; NQ probe $0.65$; HotpotQA B1 $0.67$, probe
 $0.73$), beating the failure score by $+0.07$ to $+0.17$ on NQ
-reranking and ArguAna QE and reranking, and also on NQ PRF.
+reranking, NQ PRF, and ArguAna QE and reranking.
 
 
 \textbf{Why: reachability} (exploratory on four corpora;
@@ -443,7 +443,7 @@ test labels, tests whether a more flexible map from the same score
 recovers what the ten-bin policy misses; it does not estimate the
 unrestricted optimum. It beats ranking by $S$ only by abstaining where
 reranking hurts (ArguAna $+0.035$ $[0.014,0.053]$, Holm-significant;
-TripClick $+0.009$); without abstention it matches raw ranking, it is
+TripClick $+0.009$, Holm $p=0.09$); without abstention it matches raw ranking, it is
 worse on FiQA ($-0.011$), and a full-feature benefit model beats it on
 NQ, DBPedia, and HotpotQA.
 
@@ -482,17 +482,19 @@ the same test queries; contrasts are paired over them
 $Z_0^{\text{free}}$ to $Z_1$ on five corpora (NQ $0.58\to0.67$,
 HotpotQA $0.68\to0.75$), not on ArguAna; full $Z_0$ changes it by
 $-0.01$ (FiQA) to $+0.03$ (DBPedia) and adds decision value only on
-HotpotQA ($+0.002$ $[0.001,0.003]$). At a fixed share, $Z_p$ helps on NQ and HotpotQA, $Z_1$ further on
-four corpora.
+HotpotQA ($+0.002$ $[0.001,0.003]$). At a fixed share, $Z_p$ helps on NQ and HotpotQA ($+0.014$,
+$+0.008$), $Z_1$ further on four corpora ($+0.003$ to $+0.009$).
 \emph{Decision at fixed latency:} $c_{\text{probe}}$ is the per-query
 latency of acquiring probe features for every query ($10$--$16\%$ of
 $c_{\text{rerank}}$; medians on the same 50 validation queries), and
 the $Z_0^{\text{free}}$ policy reranks $\lfloor(b+c_{\text{probe}}/c_{\text{rerank}})n\rfloor$
 queries where $Z_p$ reranks $\lfloor bn\rfloor$. The probe then loses
-wherever reranking helps on average and gains only on TripClick;
-keeping a rerank only where $Z_1$ predicts a gain helps where
-reranking often harms but costs where it usually helps, by reverting
-beneficial reranks. Extra observation improves prediction more
+wherever reranking helps on average (NQ, FiQA, DBPedia, HotpotQA:
+$-0.010$ to $-0.016$) and gains only on TripClick ($+0.007$; ArguAna
+$+0.010$, n.s.); keeping a rerank only where $Z_1$ predicts a gain
+helps where reranking often harms (TripClick $+0.025$, ArguAna
+$+0.056$) but costs where it usually helps, by reverting beneficial
+reranks (NQ $-0.007$, DBPedia $-0.004$). Extra observation improves prediction more
 consistently than decisions; its decision value depends on how hard
 the default action is to beat and on the signal's cost.
 
