@@ -39,7 +39,8 @@ routing value of failure scores varies by corpus: clear on HotpotQA,
 against our pre-registered prediction, small or uncertain elsewhere.
 There, a benefit model on BM25 score-list features is comparable at
 negligible cost, while the failure gate's telemetry costs more than
-reranking. Better use of the score recovers little beyond abstaining.
+reranking. The score-only policies we test recover little beyond
+abstaining.
 Additional observation improves prediction, but its decision value
 depends on the intervention's baseline benefit and the signal's cost.
 Selective retrieval should be evaluated by intervention benefit,
@@ -76,8 +77,8 @@ observable telemetry, with an exact decomposition of the gain no
 policy acting only on failing queries can capture, at zero and
 positive cost, and a split of a score policy's regret into information
 and policy parts (Section~\ref{sec:framework}).
-\textbf{(C2)} Evidence on six corpora, four pre-registered and
-untouched, that the targets differ and that the difference has
+\textbf{(C2)} Evidence on six corpora (four pre-registered and
+untouched, two inspected during development) that the targets differ and that the difference has
 measurable consequences: the uncapped \emph{failure-only ceiling} is
 $8$--$57\%$ of the oracle's gain, and failure scores rank helped
 queries far below how they rank failing ones.
@@ -218,7 +219,8 @@ $\Delta$ of the $k$ nearest training queries under frozen
 validation (NQ, TripClick), on training splits with validation
 selection (ArguAna, FiQA, HotpotQA), or by cross-fitting (DBPedia),
 and scored once on test; intervals are paired bootstraps
-over queries ($10^4$ resamples). We call the deployed detector,
+over queries ($10^4$ resamples; Figure~\ref{fig:profile}'s bands
+$2{,}000$). We call the deployed detector,
 used to route, the \emph{learned failure gate}, and any model of
 $\Delta$ a \emph{benefit predictor}.
 
@@ -465,12 +467,15 @@ first 10 candidates, $10$--$16\%$ of a reranking call), and $Z_1$
 ($Z_p$ plus post-action features of the reranked list).
 \emph{Prediction:} helped AUC rises from $Z_0^{\text{free}}$ to $Z_1$
 on five corpora (NQ $0.58\to0.67$, HotpotQA $0.68\to0.75$), not on
-ArguAna; full $Z_0$ is within $\pm0.03$ of $Z_0^{\text{free}}$.
+ArguAna; full $Z_0$ changes it by $-0.01$ to $+0.03$.
 \emph{Decision at a fixed share reranked:} $Z_p$ adds up to $+0.014$
 (significant on NQ, HotpotQA), $Z_1$ a further $+0.003$ to $+0.009$
-(significant on four corpora), full over free $Z_0$ only $+0.002$ on
-HotpotQA. \emph{Decision at fixed latency:} the probe loses to spending
-its time reranking more queries wherever reranking helps on average
+(significant on four corpora); full over free $Z_0$ adds $+0.002$
+$[0.001,0.003]$ on HotpotQA, and intervals span zero elsewhere.
+\emph{Decision at fixed latency}, where the $Z_0^{\text{free}}$ policy
+spends the probe's latency on reranking a further
+$c_{\text{probe}}/c_{\text{rerank}}$ of queries: the probe loses
+wherever reranking helps on average
 (NQ, FiQA, DBPedia, HotpotQA: $-0.010$ to $-0.016$), and gains on
 TripClick ($+0.007$ $[0.001,0.012]$; ArguAna $+0.010$, n.s.). Once
 reranking is paid, keeping it only where $Z_1$ predicts a gain beats
@@ -524,8 +529,9 @@ QPP predicts whether a ranking is poor; selective retrieval needs to
 know whether an intervention helps. We bound the gain failure-restricted
 policies cannot reach and show that learned failure scores often
 misrank intervention opportunities, partly because severe failures
-can be unreachable for a fixed-pool reranker. Better use of the score
-recovers little, extra observation's value depends on the
+can be unreachable for a fixed-pool reranker, though on some corpora
+they still route usefully. The score-only policies we test recover
+little, extra observation's value depends on the
 intervention's baseline benefit and cost, and a negligible-cost
 benefit model can replace an expensive failure gate. Selective
 retrieval should be evaluated by intervention benefit, routing gain,
