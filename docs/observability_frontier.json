@@ -1,0 +1,1904 @@
+{
+  "_note": "EXPLORATORY (configs/observability_frontier_protocol.json, committed before computing). Aggregates only.",
+  "cost_median_s": {
+    "nq": {
+      "rerank": 0.4796,
+      "probe_10": 0.0517
+    },
+    "tripclick": {
+      "rerank": 1.1136,
+      "probe_10": 0.106
+    },
+    "arguana": {
+      "rerank": 1.2635,
+      "probe_10": 0.1329
+    },
+    "fiqa": {
+      "rerank": 0.837,
+      "probe_10": 0.1328
+    },
+    "dbpedia": {
+      "rerank": 0.1732,
+      "probe_10": 0.0237
+    },
+    "hotpotqa": {
+      "rerank": 0.2184,
+      "probe_10": 0.0298,
+      "telemetry_incremental": 2.779
+    }
+  },
+  "nq": {
+    "n_test": 2052,
+    "A": {
+      "value": {
+        "Spline_S_abstain": 0.0916,
+        "Spline_S_exact": 0.0916,
+        "Raw_S": 0.0921,
+        "Mono_full": 0.1019,
+        "Random": 0.09
+      },
+      "oracle": 0.1931,
+      "TenBin_xfit_reference": 0.0906,
+      "share_of_oracle_minus_random": {
+        "Spline_S_abstain": 0.0155,
+        "Spline_S_exact": 0.0155,
+        "Raw_S": 0.0202,
+        "Mono_full": 0.1152,
+        "Random": 0.0
+      },
+      "contrasts": {
+        "Spline_S_abstain - Raw_S": {
+          "estimate": -0.0005,
+          "ci": [
+            -0.0079,
+            0.0081
+          ],
+          "p": 0.978
+        },
+        "Spline_S_exact - Raw_S": {
+          "estimate": -0.0005,
+          "ci": [
+            -0.0079,
+            0.0081
+          ],
+          "p": 0.978
+        },
+        "Mono_full - Spline_S_abstain": {
+          "estimate": 0.0103,
+          "ci": [
+            0.0028,
+            0.0163
+          ],
+          "p": 0.0042
+        },
+        "Spline_S_abstain - Random": {
+          "estimate": 0.0016,
+          "ci": [
+            -0.0027,
+            0.0069
+          ],
+          "p": 0.3934
+        }
+      }
+    },
+    "B": {
+      "value_budget_avg": {
+        "Z0_cheap": 0.1035,
+        "Z0_full": 0.1019,
+        "Zp": 0.1179,
+        "Z1": 0.1241,
+        "Z1_keep_unconstrained": 0.2185,
+        "Always": 0.2251
+      },
+      "oracle": 0.1931,
+      "random": 0.09,
+      "increments": {
+        "Zp - Z0_cheap": {
+          "estimate": 0.0143,
+          "ci": [
+            0.01,
+            0.0195
+          ],
+          "p": 0.0001
+        },
+        "Z1 - Zp": {
+          "estimate": 0.0062,
+          "ci": [
+            0.0023,
+            0.01
+          ],
+          "p": 0.001
+        },
+        "Z0_full - Z0_cheap": {
+          "estimate": -0.0017,
+          "ci": [
+            -0.0046,
+            0.0015
+          ],
+          "p": 0.3234
+        },
+        "Z1_keep_unconstrained - Always": {
+          "estimate": -0.0066,
+          "ci": [
+            -0.0096,
+            -0.0037
+          ],
+          "p": 0.0001
+        }
+      }
+    },
+    "C": {
+      "rerank": {
+        "tau=0.0": {
+          "P_F": 0.4907,
+          "AUC_F_S": 0.6801,
+          "AUC_helped_S": 0.4814,
+          "gap": {
+            "estimate": 0.1987,
+            "ci": [
+              0.1628,
+              0.2341
+            ]
+          },
+          "within_F_helped_AUC": 0.3708,
+          "ceiling_share": {
+            "estimate": 0.5684,
+            "ci": [
+              0.5349,
+              0.6007
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.6896,
+            "AUC_helped": 0.4805
+          }
+        },
+        "tau=0.1": {
+          "P_F": 0.4907,
+          "AUC_F_S": 0.6801,
+          "AUC_helped_S": 0.4814,
+          "gap": {
+            "estimate": 0.1987,
+            "ci": [
+              0.1628,
+              0.2341
+            ]
+          },
+          "within_F_helped_AUC": 0.3708,
+          "ceiling_share": {
+            "estimate": 0.5684,
+            "ci": [
+              0.5349,
+              0.6007
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.6896,
+            "AUC_helped": 0.4805
+          }
+        },
+        "tau=0.2": {
+          "P_F": 0.5034,
+          "AUC_F_S": 0.6794,
+          "AUC_helped_S": 0.4814,
+          "gap": {
+            "estimate": 0.1979,
+            "ci": [
+              0.1623,
+              0.2335
+            ]
+          },
+          "within_F_helped_AUC": 0.37,
+          "ceiling_share": {
+            "estimate": 0.5882,
+            "ci": [
+              0.5546,
+              0.6206
+            ]
+          },
+          "P_harmed_given_F": 0.001,
+          "refit_gate": {
+            "AUC_F": 0.6886,
+            "AUC_helped": 0.4821
+          }
+        },
+        "tau=0.3": {
+          "P_F": 0.537,
+          "AUC_F_S": 0.6862,
+          "AUC_helped_S": 0.4814,
+          "gap": {
+            "estimate": 0.2048,
+            "ci": [
+              0.17,
+              0.2386
+            ]
+          },
+          "within_F_helped_AUC": 0.3762,
+          "ceiling_share": {
+            "estimate": 0.6395,
+            "ci": [
+              0.6075,
+              0.6708
+            ]
+          },
+          "P_harmed_given_F": 0.0064,
+          "refit_gate": {
+            "AUC_F": 0.6963,
+            "AUC_helped": 0.4819
+          }
+        }
+      },
+      "prf": {
+        "tau=0.0": {
+          "P_F": 0.4907,
+          "AUC_F_S": 0.6801,
+          "AUC_helped_S": 0.4493,
+          "gap": {
+            "estimate": 0.2308,
+            "ci": [
+              0.1847,
+              0.2767
+            ]
+          },
+          "within_F_helped_AUC": 0.3397,
+          "ceiling_share": {
+            "estimate": 0.3183,
+            "ci": [
+              0.2474,
+              0.3917
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.6896,
+            "AUC_helped": 0.4515
+          }
+        },
+        "tau=0.1": {
+          "P_F": 0.4907,
+          "AUC_F_S": 0.6801,
+          "AUC_helped_S": 0.4493,
+          "gap": {
+            "estimate": 0.2308,
+            "ci": [
+              0.1847,
+              0.2767
+            ]
+          },
+          "within_F_helped_AUC": 0.3397,
+          "ceiling_share": {
+            "estimate": 0.3183,
+            "ci": [
+              0.2474,
+              0.3917
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.6896,
+            "AUC_helped": 0.4515
+          }
+        },
+        "tau=0.2": {
+          "P_F": 0.5034,
+          "AUC_F_S": 0.6794,
+          "AUC_helped_S": 0.4493,
+          "gap": {
+            "estimate": 0.23,
+            "ci": [
+              0.1836,
+              0.2758
+            ]
+          },
+          "within_F_helped_AUC": 0.3522,
+          "ceiling_share": {
+            "estimate": 0.3337,
+            "ci": [
+              0.2624,
+              0.4065
+            ]
+          },
+          "P_harmed_given_F": 0.0068,
+          "refit_gate": {
+            "AUC_F": 0.6886,
+            "AUC_helped": 0.454
+          }
+        },
+        "tau=0.3": {
+          "P_F": 0.537,
+          "AUC_F_S": 0.6862,
+          "AUC_helped_S": 0.4493,
+          "gap": {
+            "estimate": 0.2368,
+            "ci": [
+              0.1913,
+              0.2818
+            ]
+          },
+          "within_F_helped_AUC": 0.3848,
+          "ceiling_share": {
+            "estimate": 0.387,
+            "ci": [
+              0.314,
+              0.4619
+            ]
+          },
+          "P_harmed_given_F": 0.0191,
+          "refit_gate": {
+            "AUC_F": 0.6963,
+            "AUC_helped": 0.4543
+          }
+        }
+      }
+    }
+  },
+  "tripclick": {
+    "n_test": 1175,
+    "A": {
+      "value": {
+        "Spline_S_abstain": -0.0006,
+        "Spline_S_exact": -0.0073,
+        "Raw_S": -0.0093,
+        "Mono_full": -0.011,
+        "Random": -0.0111
+      },
+      "oracle": 0.0582,
+      "TenBin_xfit_reference": -0.0055,
+      "share_of_oracle_minus_random": {
+        "Spline_S_abstain": 0.1518,
+        "Spline_S_exact": 0.0556,
+        "Raw_S": 0.0254,
+        "Mono_full": 0.0014,
+        "Random": 0.0
+      },
+      "contrasts": {
+        "Spline_S_abstain - Raw_S": {
+          "estimate": 0.0088,
+          "ci": [
+            0.0014,
+            0.0156
+          ],
+          "p": 0.0178
+        },
+        "Spline_S_exact - Raw_S": {
+          "estimate": 0.0021,
+          "ci": [
+            -0.0038,
+            0.0069
+          ],
+          "p": 0.5732
+        },
+        "Mono_full - Spline_S_abstain": {
+          "estimate": -0.0104,
+          "ci": [
+            -0.0182,
+            -0.0026
+          ],
+          "p": 0.008
+        },
+        "Spline_S_abstain - Random": {
+          "estimate": 0.0105,
+          "ci": [
+            0.0043,
+            0.0166
+          ],
+          "p": 0.0008
+        }
+      }
+    },
+    "B": {
+      "value_budget_avg": {
+        "Z0_cheap": -0.0118,
+        "Z0_full": -0.011,
+        "Zp": -0.0083,
+        "Z1": -0.0042,
+        "Z1_keep_unconstrained": -0.0031,
+        "Always": -0.0278
+      },
+      "oracle": 0.0582,
+      "random": -0.0111,
+      "increments": {
+        "Zp - Z0_cheap": {
+          "estimate": 0.0034,
+          "ci": [
+            -0.0016,
+            0.0084
+          ],
+          "p": 0.1866
+        },
+        "Z1 - Zp": {
+          "estimate": 0.0041,
+          "ci": [
+            -0.0003,
+            0.0085
+          ],
+          "p": 0.0708
+        },
+        "Z0_full - Z0_cheap": {
+          "estimate": 0.0008,
+          "ci": [
+            -0.0027,
+            0.0039
+          ],
+          "p": 0.7398
+        },
+        "Z1_keep_unconstrained - Always": {
+          "estimate": 0.0246,
+          "ci": [
+            0.0125,
+            0.037
+          ],
+          "p": 0.0001
+        }
+      }
+    },
+    "C": {
+      "rerank": {
+        "tau=0.0": {
+          "P_F": 0.4502,
+          "AUC_F_S": 0.6493,
+          "AUC_helped_S": 0.4668,
+          "gap": {
+            "estimate": 0.1825,
+            "ci": [
+              0.1293,
+              0.2353
+            ]
+          },
+          "within_F_helped_AUC": 0.4385,
+          "ceiling_share": {
+            "estimate": 0.5249,
+            "ci": [
+              0.4438,
+              0.5996
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.6687,
+            "AUC_helped": 0.4525
+          }
+        },
+        "tau=0.1": {
+          "P_F": 0.4502,
+          "AUC_F_S": 0.6493,
+          "AUC_helped_S": 0.4668,
+          "gap": {
+            "estimate": 0.1825,
+            "ci": [
+              0.1293,
+              0.2353
+            ]
+          },
+          "within_F_helped_AUC": 0.4385,
+          "ceiling_share": {
+            "estimate": 0.5249,
+            "ci": [
+              0.4438,
+              0.5996
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.6683,
+            "AUC_helped": 0.4523
+          }
+        },
+        "tau=0.2": {
+          "P_F": 0.4774,
+          "AUC_F_S": 0.6493,
+          "AUC_helped_S": 0.4668,
+          "gap": {
+            "estimate": 0.1824,
+            "ci": [
+              0.1306,
+              0.2346
+            ]
+          },
+          "within_F_helped_AUC": 0.4286,
+          "ceiling_share": {
+            "estimate": 0.5745,
+            "ci": [
+              0.4955,
+              0.6489
+            ]
+          },
+          "P_harmed_given_F": 0.0232,
+          "refit_gate": {
+            "AUC_F": 0.6634,
+            "AUC_helped": 0.4534
+          }
+        },
+        "tau=0.3": {
+          "P_F": 0.5234,
+          "AUC_F_S": 0.6566,
+          "AUC_helped_S": 0.4668,
+          "gap": {
+            "estimate": 0.1898,
+            "ci": [
+              0.1374,
+              0.2405
+            ]
+          },
+          "within_F_helped_AUC": 0.4389,
+          "ceiling_share": {
+            "estimate": 0.6028,
+            "ci": [
+              0.5249,
+              0.6763
+            ]
+          },
+          "P_harmed_given_F": 0.0846,
+          "refit_gate": {
+            "AUC_F": 0.666,
+            "AUC_helped": 0.4589
+          }
+        }
+      },
+      "prf": {
+        "tau=0.0": {
+          "P_F": 0.4502,
+          "AUC_F_S": 0.6493,
+          "AUC_helped_S": 0.4879,
+          "gap": {
+            "estimate": 0.1614,
+            "ci": [
+              0.0826,
+              0.2406
+            ]
+          },
+          "within_F_helped_AUC": null,
+          "ceiling_share": {
+            "estimate": 0.0764,
+            "ci": [
+              0.0123,
+              0.1618
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.6687,
+            "AUC_helped": 0.4692
+          }
+        },
+        "tau=0.1": {
+          "P_F": 0.4502,
+          "AUC_F_S": 0.6493,
+          "AUC_helped_S": 0.4879,
+          "gap": {
+            "estimate": 0.1614,
+            "ci": [
+              0.0826,
+              0.2406
+            ]
+          },
+          "within_F_helped_AUC": null,
+          "ceiling_share": {
+            "estimate": 0.0764,
+            "ci": [
+              0.0123,
+              0.1618
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.6683,
+            "AUC_helped": 0.4679
+          }
+        },
+        "tau=0.2": {
+          "P_F": 0.4774,
+          "AUC_F_S": 0.6493,
+          "AUC_helped_S": 0.4879,
+          "gap": {
+            "estimate": 0.1613,
+            "ci": [
+              0.0824,
+              0.2399
+            ]
+          },
+          "within_F_helped_AUC": null,
+          "ceiling_share": {
+            "estimate": 0.0845,
+            "ci": [
+              0.0178,
+              0.1711
+            ]
+          },
+          "P_harmed_given_F": 0.0125,
+          "refit_gate": {
+            "AUC_F": 0.6634,
+            "AUC_helped": 0.4782
+          }
+        },
+        "tau=0.3": {
+          "P_F": 0.5234,
+          "AUC_F_S": 0.6566,
+          "AUC_helped_S": 0.4879,
+          "gap": {
+            "estimate": 0.1686,
+            "ci": [
+              0.0923,
+              0.2447
+            ]
+          },
+          "within_F_helped_AUC": null,
+          "ceiling_share": {
+            "estimate": 0.1576,
+            "ci": [
+              0.0715,
+              0.2614
+            ]
+          },
+          "P_harmed_given_F": 0.0309,
+          "refit_gate": {
+            "AUC_F": 0.666,
+            "AUC_helped": 0.484
+          }
+        }
+      }
+    }
+  },
+  "arguana": {
+    "n_test": 430,
+    "A": {
+      "value": {
+        "Spline_S_abstain": 0.0018,
+        "Spline_S_exact": -0.0291,
+        "Raw_S": -0.033,
+        "Mono_full": -0.0191,
+        "Random": -0.0285
+      },
+      "oracle": 0.0911,
+      "TenBin_xfit_reference": -0.0133,
+      "share_of_oracle_minus_random": {
+        "Spline_S_abstain": 0.2528,
+        "Spline_S_exact": -0.005,
+        "Raw_S": -0.0383,
+        "Mono_full": 0.0786,
+        "Random": 0.0
+      },
+      "contrasts": {
+        "Spline_S_abstain - Raw_S": {
+          "estimate": 0.0348,
+          "ci": [
+            0.0137,
+            0.0527
+          ],
+          "p": 0.0006
+        },
+        "Spline_S_exact - Raw_S": {
+          "estimate": 0.004,
+          "ci": [
+            -0.0123,
+            0.0198
+          ],
+          "p": 0.6348
+        },
+        "Mono_full - Spline_S_abstain": {
+          "estimate": -0.0208,
+          "ci": [
+            -0.037,
+            -0.0051
+          ],
+          "p": 0.0094
+        },
+        "Spline_S_abstain - Random": {
+          "estimate": 0.0302,
+          "ci": [
+            0.0154,
+            0.045
+          ],
+          "p": 0.0001
+        }
+      }
+    },
+    "B": {
+      "value_budget_avg": {
+        "Z0_cheap": -0.0237,
+        "Z0_full": -0.0191,
+        "Zp": -0.0207,
+        "Z1": -0.0159,
+        "Z1_keep_unconstrained": -0.0152,
+        "Always": -0.0711
+      },
+      "oracle": 0.0911,
+      "random": -0.0285,
+      "increments": {
+        "Zp - Z0_cheap": {
+          "estimate": 0.003,
+          "ci": [
+            -0.0103,
+            0.0145
+          ],
+          "p": 0.7414
+        },
+        "Z1 - Zp": {
+          "estimate": 0.0049,
+          "ci": [
+            -0.005,
+            0.0137
+          ],
+          "p": 0.3802
+        },
+        "Z0_full - Z0_cheap": {
+          "estimate": 0.0047,
+          "ci": [
+            -0.0066,
+            0.0136
+          ],
+          "p": 0.4806
+        },
+        "Z1_keep_unconstrained - Always": {
+          "estimate": 0.0559,
+          "ci": [
+            0.024,
+            0.0886
+          ],
+          "p": 0.0004
+        }
+      }
+    },
+    "C": {
+      "rerank": {
+        "tau=0.0": {
+          "P_F": 0.214,
+          "AUC_F_S": 0.6506,
+          "AUC_helped_S": 0.4329,
+          "gap": {
+            "estimate": 0.2178,
+            "ci": [
+              0.1294,
+              0.3051
+            ]
+          },
+          "within_F_helped_AUC": 0.3354,
+          "ceiling_share": {
+            "estimate": 0.3774,
+            "ci": [
+              0.2687,
+              0.4841
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.6579,
+            "AUC_helped": 0.4517
+          }
+        },
+        "tau=0.1": {
+          "P_F": 0.214,
+          "AUC_F_S": 0.6506,
+          "AUC_helped_S": 0.4329,
+          "gap": {
+            "estimate": 0.2178,
+            "ci": [
+              0.1294,
+              0.3051
+            ]
+          },
+          "within_F_helped_AUC": 0.3354,
+          "ceiling_share": {
+            "estimate": 0.3774,
+            "ci": [
+              0.2687,
+              0.4841
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.6579,
+            "AUC_helped": 0.4517
+          }
+        },
+        "tau=0.2": {
+          "P_F": 0.214,
+          "AUC_F_S": 0.6506,
+          "AUC_helped_S": 0.4329,
+          "gap": {
+            "estimate": 0.2178,
+            "ci": [
+              0.1294,
+              0.3051
+            ]
+          },
+          "within_F_helped_AUC": 0.3354,
+          "ceiling_share": {
+            "estimate": 0.3774,
+            "ci": [
+              0.2687,
+              0.4841
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.6579,
+            "AUC_helped": 0.4517
+          }
+        },
+        "tau=0.3": {
+          "P_F": 0.2442,
+          "AUC_F_S": 0.6367,
+          "AUC_helped_S": 0.4329,
+          "gap": {
+            "estimate": 0.2039,
+            "ci": [
+              0.1203,
+              0.2862
+            ]
+          },
+          "within_F_helped_AUC": 0.3862,
+          "ceiling_share": {
+            "estimate": 0.4046,
+            "ci": [
+              0.2951,
+              0.5103
+            ]
+          },
+          "P_harmed_given_F": 0.0476,
+          "refit_gate": {
+            "AUC_F": 0.6511,
+            "AUC_helped": 0.4526
+          }
+        }
+      },
+      "prf": {
+        "tau=0.0": {
+          "P_F": 0.214,
+          "AUC_F_S": 0.6506,
+          "AUC_helped_S": 0.5404,
+          "gap": {
+            "estimate": 0.1103,
+            "ci": [
+              -0.0497,
+              0.2734
+            ]
+          },
+          "within_F_helped_AUC": null,
+          "ceiling_share": {
+            "estimate": 0.1842,
+            "ci": [
+              0.0,
+              0.519
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.6579,
+            "AUC_helped": 0.5484
+          }
+        },
+        "tau=0.1": {
+          "P_F": 0.214,
+          "AUC_F_S": 0.6506,
+          "AUC_helped_S": 0.5404,
+          "gap": {
+            "estimate": 0.1103,
+            "ci": [
+              -0.0497,
+              0.2734
+            ]
+          },
+          "within_F_helped_AUC": null,
+          "ceiling_share": {
+            "estimate": 0.1842,
+            "ci": [
+              0.0,
+              0.519
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.6579,
+            "AUC_helped": 0.5484
+          }
+        },
+        "tau=0.2": {
+          "P_F": 0.214,
+          "AUC_F_S": 0.6506,
+          "AUC_helped_S": 0.5404,
+          "gap": {
+            "estimate": 0.1103,
+            "ci": [
+              -0.0497,
+              0.2734
+            ]
+          },
+          "within_F_helped_AUC": null,
+          "ceiling_share": {
+            "estimate": 0.1842,
+            "ci": [
+              0.0,
+              0.519
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.6579,
+            "AUC_helped": 0.5484
+          }
+        },
+        "tau=0.3": {
+          "P_F": 0.2442,
+          "AUC_F_S": 0.6367,
+          "AUC_helped_S": 0.5404,
+          "gap": {
+            "estimate": 0.0964,
+            "ci": [
+              -0.0611,
+              0.2584
+            ]
+          },
+          "within_F_helped_AUC": null,
+          "ceiling_share": {
+            "estimate": 0.1918,
+            "ci": [
+              0.0,
+              0.5264
+            ]
+          },
+          "P_harmed_given_F": 0.0286,
+          "refit_gate": {
+            "AUC_F": 0.6511,
+            "AUC_helped": 0.5498
+          }
+        }
+      }
+    }
+  },
+  "fiqa": {
+    "n_test": 648,
+    "A": {
+      "value": {
+        "Spline_S_abstain": 0.0371,
+        "Spline_S_exact": 0.0371,
+        "Raw_S": 0.048,
+        "Mono_full": 0.041,
+        "Random": 0.0401
+      },
+      "oracle": 0.1031,
+      "TenBin_xfit_reference": 0.0433,
+      "share_of_oracle_minus_random": {
+        "Spline_S_abstain": -0.046,
+        "Spline_S_exact": -0.046,
+        "Raw_S": 0.126,
+        "Mono_full": 0.0147,
+        "Random": 0.0
+      },
+      "contrasts": {
+        "Spline_S_abstain - Raw_S": {
+          "estimate": -0.0108,
+          "ci": [
+            -0.0202,
+            -0.0015
+          ],
+          "p": 0.0226
+        },
+        "Spline_S_exact - Raw_S": {
+          "estimate": -0.0108,
+          "ci": [
+            -0.0202,
+            -0.0015
+          ],
+          "p": 0.0226
+        },
+        "Mono_full - Spline_S_abstain": {
+          "estimate": 0.0038,
+          "ci": [
+            -0.0043,
+            0.0129
+          ],
+          "p": 0.3376
+        },
+        "Spline_S_abstain - Random": {
+          "estimate": -0.0029,
+          "ci": [
+            -0.0093,
+            0.0027
+          ],
+          "p": 0.2816
+        }
+      }
+    },
+    "B": {
+      "value_budget_avg": {
+        "Z0_cheap": 0.0428,
+        "Z0_full": 0.041,
+        "Zp": 0.0453,
+        "Z1": 0.054,
+        "Z1_keep_unconstrained": 0.0986,
+        "Always": 0.1001
+      },
+      "oracle": 0.1031,
+      "random": 0.0401,
+      "increments": {
+        "Zp - Z0_cheap": {
+          "estimate": 0.0025,
+          "ci": [
+            -0.003,
+            0.0084
+          ],
+          "p": 0.34
+        },
+        "Z1 - Zp": {
+          "estimate": 0.0086,
+          "ci": [
+            0.0029,
+            0.0141
+          ],
+          "p": 0.002
+        },
+        "Z0_full - Z0_cheap": {
+          "estimate": -0.0018,
+          "ci": [
+            -0.0061,
+            0.0021
+          ],
+          "p": 0.3512
+        },
+        "Z1_keep_unconstrained - Always": {
+          "estimate": -0.0015,
+          "ci": [
+            -0.0043,
+            0.001
+          ],
+          "p": 0.2516
+        }
+      }
+    },
+    "C": {
+      "rerank": {
+        "tau=0.0": {
+          "P_F": 0.5123,
+          "AUC_F_S": 0.7152,
+          "AUC_helped_S": 0.5206,
+          "gap": {
+            "estimate": 0.1946,
+            "ci": [
+              0.1293,
+              0.2596
+            ]
+          },
+          "within_F_helped_AUC": 0.56,
+          "ceiling_share": {
+            "estimate": 0.4595,
+            "ci": [
+              0.3855,
+              0.5327
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.7162,
+            "AUC_helped": 0.5206
+          }
+        },
+        "tau=0.1": {
+          "P_F": 0.5201,
+          "AUC_F_S": 0.7218,
+          "AUC_helped_S": 0.5206,
+          "gap": {
+            "estimate": 0.2012,
+            "ci": [
+              0.1363,
+              0.2656
+            ]
+          },
+          "within_F_helped_AUC": 0.563,
+          "ceiling_share": {
+            "estimate": 0.4756,
+            "ci": [
+              0.4023,
+              0.5491
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.7233,
+            "AUC_helped": 0.5181
+          }
+        },
+        "tau=0.2": {
+          "P_F": 0.5694,
+          "AUC_F_S": 0.7287,
+          "AUC_helped_S": 0.5206,
+          "gap": {
+            "estimate": 0.2081,
+            "ci": [
+              0.1448,
+              0.2708
+            ]
+          },
+          "within_F_helped_AUC": 0.5348,
+          "ceiling_share": {
+            "estimate": 0.5487,
+            "ci": [
+              0.4777,
+              0.6206
+            ]
+          },
+          "P_harmed_given_F": 0.0217,
+          "refit_gate": {
+            "AUC_F": 0.7319,
+            "AUC_helped": 0.5169
+          }
+        },
+        "tau=0.3": {
+          "P_F": 0.6451,
+          "AUC_F_S": 0.7452,
+          "AUC_helped_S": 0.5206,
+          "gap": {
+            "estimate": 0.2246,
+            "ci": [
+              0.1627,
+              0.2848
+            ]
+          },
+          "within_F_helped_AUC": 0.5254,
+          "ceiling_share": {
+            "estimate": 0.653,
+            "ci": [
+              0.5844,
+              0.7189
+            ]
+          },
+          "P_harmed_given_F": 0.0478,
+          "refit_gate": {
+            "AUC_F": 0.7481,
+            "AUC_helped": 0.5241
+          }
+        }
+      },
+      "prf": {
+        "tau=0.0": {
+          "P_F": 0.5123,
+          "AUC_F_S": 0.7152,
+          "AUC_helped_S": 0.4602,
+          "gap": {
+            "estimate": 0.2551,
+            "ci": [
+              0.1561,
+              0.3547
+            ]
+          },
+          "within_F_helped_AUC": null,
+          "ceiling_share": {
+            "estimate": 0.2845,
+            "ci": [
+              0.111,
+              0.4533
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.7162,
+            "AUC_helped": 0.4629
+          }
+        },
+        "tau=0.1": {
+          "P_F": 0.5201,
+          "AUC_F_S": 0.7218,
+          "AUC_helped_S": 0.4602,
+          "gap": {
+            "estimate": 0.2617,
+            "ci": [
+              0.1627,
+              0.3612
+            ]
+          },
+          "within_F_helped_AUC": null,
+          "ceiling_share": {
+            "estimate": 0.2845,
+            "ci": [
+              0.111,
+              0.4533
+            ]
+          },
+          "P_harmed_given_F": 0.003,
+          "refit_gate": {
+            "AUC_F": 0.7233,
+            "AUC_helped": 0.4644
+          }
+        },
+        "tau=0.2": {
+          "P_F": 0.5694,
+          "AUC_F_S": 0.7287,
+          "AUC_helped_S": 0.4602,
+          "gap": {
+            "estimate": 0.2685,
+            "ci": [
+              0.1703,
+              0.3669
+            ]
+          },
+          "within_F_helped_AUC": null,
+          "ceiling_share": {
+            "estimate": 0.3979,
+            "ci": [
+              0.2237,
+              0.5713
+            ]
+          },
+          "P_harmed_given_F": 0.0244,
+          "refit_gate": {
+            "AUC_F": 0.7319,
+            "AUC_helped": 0.4672
+          }
+        },
+        "tau=0.3": {
+          "P_F": 0.6451,
+          "AUC_F_S": 0.7452,
+          "AUC_helped_S": 0.4602,
+          "gap": {
+            "estimate": 0.285,
+            "ci": [
+              0.1896,
+              0.3804
+            ]
+          },
+          "within_F_helped_AUC": 0.4667,
+          "ceiling_share": {
+            "estimate": 0.6373,
+            "ci": [
+              0.4694,
+              0.7885
+            ]
+          },
+          "P_harmed_given_F": 0.0455,
+          "refit_gate": {
+            "AUC_F": 0.7481,
+            "AUC_helped": 0.4713
+          }
+        }
+      }
+    }
+  },
+  "dbpedia": {
+    "n_test": 400,
+    "A": {
+      "value": {
+        "Spline_S_abstain": 0.0526,
+        "Spline_S_exact": 0.0526,
+        "Raw_S": 0.0554,
+        "Mono_full": 0.0617,
+        "Random": 0.0539
+      },
+      "oracle": 0.1069,
+      "TenBin_xfit_reference": 0.0547,
+      "share_of_oracle_minus_random": {
+        "Spline_S_abstain": -0.0232,
+        "Spline_S_exact": -0.0232,
+        "Raw_S": 0.0284,
+        "Mono_full": 0.1473,
+        "Random": 0.0
+      },
+      "contrasts": {
+        "Spline_S_abstain - Raw_S": {
+          "estimate": -0.0027,
+          "ci": [
+            -0.01,
+            0.0046
+          ],
+          "p": 0.4972
+        },
+        "Spline_S_exact - Raw_S": {
+          "estimate": -0.0027,
+          "ci": [
+            -0.01,
+            0.0046
+          ],
+          "p": 0.4972
+        },
+        "Mono_full - Spline_S_abstain": {
+          "estimate": 0.009,
+          "ci": [
+            0.0006,
+            0.0159
+          ],
+          "p": 0.0346
+        },
+        "Spline_S_abstain - Random": {
+          "estimate": -0.0012,
+          "ci": [
+            -0.0069,
+            0.0047
+          ],
+          "p": 0.6982
+        }
+      }
+    },
+    "B": {
+      "value_budget_avg": {
+        "Z0_cheap": 0.0605,
+        "Z0_full": 0.0617,
+        "Zp": 0.0633,
+        "Z1": 0.07,
+        "Z1_keep_unconstrained": 0.1308,
+        "Always": 0.1346
+      },
+      "oracle": 0.1069,
+      "random": 0.0539,
+      "increments": {
+        "Zp - Z0_cheap": {
+          "estimate": 0.0028,
+          "ci": [
+            -0.0019,
+            0.0077
+          ],
+          "p": 0.2346
+        },
+        "Z1 - Zp": {
+          "estimate": 0.0067,
+          "ci": [
+            0.0016,
+            0.0119
+          ],
+          "p": 0.01
+        },
+        "Z0_full - Z0_cheap": {
+          "estimate": 0.0012,
+          "ci": [
+            -0.003,
+            0.0042
+          ],
+          "p": 0.749
+        },
+        "Z1_keep_unconstrained - Always": {
+          "estimate": -0.0039,
+          "ci": [
+            -0.0074,
+            -0.001
+          ],
+          "p": 0.0036
+        }
+      }
+    },
+    "C": {
+      "rerank": {
+        "tau=0.0": {
+          "P_F": 0.215,
+          "AUC_F_S": 0.7586,
+          "AUC_helped_S": 0.4277,
+          "gap": {
+            "estimate": 0.3308,
+            "ci": [
+              0.246,
+              0.4155
+            ]
+          },
+          "within_F_helped_AUC": 0.4783,
+          "ceiling_share": {
+            "estimate": 0.2142,
+            "ci": [
+              0.153,
+              0.2789
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.7683,
+            "AUC_helped": 0.4267
+          }
+        },
+        "tau=0.1": {
+          "P_F": 0.3075,
+          "AUC_F_S": 0.7389,
+          "AUC_helped_S": 0.4277,
+          "gap": {
+            "estimate": 0.3111,
+            "ci": [
+              0.2323,
+              0.3913
+            ]
+          },
+          "within_F_helped_AUC": 0.448,
+          "ceiling_share": {
+            "estimate": 0.3352,
+            "ci": [
+              0.267,
+              0.4055
+            ]
+          },
+          "P_harmed_given_F": 0.0081,
+          "refit_gate": {
+            "AUC_F": 0.7481,
+            "AUC_helped": 0.4611
+          }
+        },
+        "tau=0.2": {
+          "P_F": 0.4325,
+          "AUC_F_S": 0.7629,
+          "AUC_helped_S": 0.4277,
+          "gap": {
+            "estimate": 0.3352,
+            "ci": [
+              0.2608,
+              0.4107
+            ]
+          },
+          "within_F_helped_AUC": 0.403,
+          "ceiling_share": {
+            "estimate": 0.5356,
+            "ci": [
+              0.4635,
+              0.605
+            ]
+          },
+          "P_harmed_given_F": 0.0347,
+          "refit_gate": {
+            "AUC_F": 0.7742,
+            "AUC_helped": 0.4615
+          }
+        },
+        "tau=0.3": {
+          "P_F": 0.54,
+          "AUC_F_S": 0.7904,
+          "AUC_helped_S": 0.4277,
+          "gap": {
+            "estimate": 0.3626,
+            "ci": [
+              0.2853,
+              0.4382
+            ]
+          },
+          "within_F_helped_AUC": 0.3748,
+          "ceiling_share": {
+            "estimate": 0.6629,
+            "ci": [
+              0.5972,
+              0.7242
+            ]
+          },
+          "P_harmed_given_F": 0.0694,
+          "refit_gate": {
+            "AUC_F": 0.7838,
+            "AUC_helped": 0.4445
+          }
+        }
+      },
+      "prf": {
+        "tau=0.0": {
+          "P_F": 0.215,
+          "AUC_F_S": 0.7586,
+          "AUC_helped_S": 0.4215,
+          "gap": {
+            "estimate": 0.337,
+            "ci": [
+              0.2351,
+              0.4366
+            ]
+          },
+          "within_F_helped_AUC": null,
+          "ceiling_share": {
+            "estimate": 0.0,
+            "ci": [
+              0.0,
+              0.0
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.7683,
+            "AUC_helped": 0.428
+          }
+        },
+        "tau=0.1": {
+          "P_F": 0.3075,
+          "AUC_F_S": 0.7389,
+          "AUC_helped_S": 0.4215,
+          "gap": {
+            "estimate": 0.3173,
+            "ci": [
+              0.2189,
+              0.415
+            ]
+          },
+          "within_F_helped_AUC": null,
+          "ceiling_share": {
+            "estimate": 0.075,
+            "ci": [
+              0.0014,
+              0.1838
+            ]
+          },
+          "P_harmed_given_F": 0.0488,
+          "refit_gate": {
+            "AUC_F": 0.7481,
+            "AUC_helped": 0.4394
+          }
+        },
+        "tau=0.2": {
+          "P_F": 0.4325,
+          "AUC_F_S": 0.7629,
+          "AUC_helped_S": 0.4215,
+          "gap": {
+            "estimate": 0.3414,
+            "ci": [
+              0.2412,
+              0.4381
+            ]
+          },
+          "within_F_helped_AUC": null,
+          "ceiling_share": {
+            "estimate": 0.129,
+            "ci": [
+              0.0242,
+              0.262
+            ]
+          },
+          "P_harmed_given_F": 0.104,
+          "refit_gate": {
+            "AUC_F": 0.7742,
+            "AUC_helped": 0.4283
+          }
+        },
+        "tau=0.3": {
+          "P_F": 0.54,
+          "AUC_F_S": 0.7904,
+          "AUC_helped_S": 0.4215,
+          "gap": {
+            "estimate": 0.3688,
+            "ci": [
+              0.2727,
+              0.4654
+            ]
+          },
+          "within_F_helped_AUC": 0.3411,
+          "ceiling_share": {
+            "estimate": 0.4007,
+            "ci": [
+              0.2194,
+              0.5973
+            ]
+          },
+          "P_harmed_given_F": 0.125,
+          "refit_gate": {
+            "AUC_F": 0.7838,
+            "AUC_helped": 0.4203
+          }
+        }
+      }
+    }
+  },
+  "hotpotqa": {
+    "n_test": 7405,
+    "A": {
+      "value": {
+        "Spline_S_abstain": 0.0732,
+        "Spline_S_exact": 0.0732,
+        "Raw_S": 0.073,
+        "Mono_full": 0.0761,
+        "Random": 0.0495
+      },
+      "oracle": 0.1154,
+      "TenBin_xfit_reference": 0.0725,
+      "share_of_oracle_minus_random": {
+        "Spline_S_abstain": 0.3592,
+        "Spline_S_exact": 0.3592,
+        "Raw_S": 0.356,
+        "Mono_full": 0.4039,
+        "Random": 0.0
+      },
+      "contrasts": {
+        "Spline_S_abstain - Raw_S": {
+          "estimate": 0.0002,
+          "ci": [
+            -0.0001,
+            0.0005
+          ],
+          "p": 0.2324
+        },
+        "Spline_S_exact - Raw_S": {
+          "estimate": 0.0002,
+          "ci": [
+            -0.0001,
+            0.0005
+          ],
+          "p": 0.2324
+        },
+        "Mono_full - Spline_S_abstain": {
+          "estimate": 0.0029,
+          "ci": [
+            0.0016,
+            0.0046
+          ],
+          "p": 0.0001
+        },
+        "Spline_S_abstain - Random": {
+          "estimate": 0.0237,
+          "ci": [
+            0.0219,
+            0.0253
+          ],
+          "p": 0.0001
+        }
+      }
+    },
+    "B": {
+      "value_budget_avg": {
+        "Z0_cheap": 0.0745,
+        "Z0_full": 0.0761,
+        "Zp": 0.0822,
+        "Z1": 0.0855,
+        "Z1_keep_unconstrained": 0.1235,
+        "Always": 0.1238
+      },
+      "oracle": 0.1154,
+      "random": 0.0495,
+      "increments": {
+        "Zp - Z0_cheap": {
+          "estimate": 0.0076,
+          "ci": [
+            0.0061,
+            0.0087
+          ],
+          "p": 0.0001
+        },
+        "Z1 - Zp": {
+          "estimate": 0.0033,
+          "ci": [
+            0.0025,
+            0.0043
+          ],
+          "p": 0.0001
+        },
+        "Z0_full - Z0_cheap": {
+          "estimate": 0.0016,
+          "ci": [
+            0.0006,
+            0.0025
+          ],
+          "p": 0.0006
+        },
+        "Z1_keep_unconstrained - Always": {
+          "estimate": -0.0002,
+          "ci": [
+            -0.0012,
+            0.0007
+          ],
+          "p": 0.6212
+        }
+      }
+    },
+    "C": {
+      "rerank": {
+        "tau=0.0": {
+          "P_F": 0.1111,
+          "AUC_F_S": 0.8852,
+          "AUC_helped_S": 0.643,
+          "gap": {
+            "estimate": 0.2423,
+            "ci": [
+              0.2257,
+              0.2587
+            ]
+          },
+          "within_F_helped_AUC": 0.3728,
+          "ceiling_share": {
+            "estimate": 0.2488,
+            "ci": [
+              0.2296,
+              0.2684
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.8876,
+            "AUC_helped": 0.6433
+          }
+        },
+        "tau=0.1": {
+          "P_F": 0.1111,
+          "AUC_F_S": 0.8852,
+          "AUC_helped_S": 0.643,
+          "gap": {
+            "estimate": 0.2423,
+            "ci": [
+              0.2257,
+              0.2587
+            ]
+          },
+          "within_F_helped_AUC": 0.3728,
+          "ceiling_share": {
+            "estimate": 0.2488,
+            "ci": [
+              0.2296,
+              0.2684
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.8876,
+            "AUC_helped": 0.6433
+          }
+        },
+        "tau=0.2": {
+          "P_F": 0.1303,
+          "AUC_F_S": 0.8789,
+          "AUC_helped_S": 0.643,
+          "gap": {
+            "estimate": 0.2359,
+            "ci": [
+              0.2199,
+              0.252
+            ]
+          },
+          "within_F_helped_AUC": 0.3468,
+          "ceiling_share": {
+            "estimate": 0.3056,
+            "ci": [
+              0.2856,
+              0.3264
+            ]
+          },
+          "P_harmed_given_F": 0.0041,
+          "refit_gate": {
+            "AUC_F": 0.8807,
+            "AUC_helped": 0.6467
+          }
+        },
+        "tau=0.3": {
+          "P_F": 0.1784,
+          "AUC_F_S": 0.8698,
+          "AUC_helped_S": 0.643,
+          "gap": {
+            "estimate": 0.2268,
+            "ci": [
+              0.2117,
+              0.2419
+            ]
+          },
+          "within_F_helped_AUC": 0.3349,
+          "ceiling_share": {
+            "estimate": 0.435,
+            "ci": [
+              0.4139,
+              0.4557
+            ]
+          },
+          "P_harmed_given_F": 0.0197,
+          "refit_gate": {
+            "AUC_F": 0.8715,
+            "AUC_helped": 0.6512
+          }
+        }
+      },
+      "prf": {
+        "tau=0.0": {
+          "P_F": 0.1111,
+          "AUC_F_S": 0.8852,
+          "AUC_helped_S": 0.5274,
+          "gap": {
+            "estimate": 0.3578,
+            "ci": [
+              0.3309,
+              0.3842
+            ]
+          },
+          "within_F_helped_AUC": null,
+          "ceiling_share": {
+            "estimate": 0.0347,
+            "ci": [
+              0.0171,
+              0.0542
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.8876,
+            "AUC_helped": 0.5261
+          }
+        },
+        "tau=0.1": {
+          "P_F": 0.1111,
+          "AUC_F_S": 0.8852,
+          "AUC_helped_S": 0.5274,
+          "gap": {
+            "estimate": 0.3578,
+            "ci": [
+              0.3309,
+              0.3842
+            ]
+          },
+          "within_F_helped_AUC": null,
+          "ceiling_share": {
+            "estimate": 0.0347,
+            "ci": [
+              0.0171,
+              0.0542
+            ]
+          },
+          "P_harmed_given_F": 0.0,
+          "refit_gate": {
+            "AUC_F": 0.8876,
+            "AUC_helped": 0.5261
+          }
+        },
+        "tau=0.2": {
+          "P_F": 0.1303,
+          "AUC_F_S": 0.8789,
+          "AUC_helped_S": 0.5274,
+          "gap": {
+            "estimate": 0.3515,
+            "ci": [
+              0.3247,
+              0.3779
+            ]
+          },
+          "within_F_helped_AUC": null,
+          "ceiling_share": {
+            "estimate": 0.0373,
+            "ci": [
+              0.0196,
+              0.0568
+            ]
+          },
+          "P_harmed_given_F": 0.0207,
+          "refit_gate": {
+            "AUC_F": 0.8807,
+            "AUC_helped": 0.5352
+          }
+        },
+        "tau=0.3": {
+          "P_F": 0.1784,
+          "AUC_F_S": 0.8698,
+          "AUC_helped_S": 0.5274,
+          "gap": {
+            "estimate": 0.3424,
+            "ci": [
+              0.3158,
+              0.3684
+            ]
+          },
+          "within_F_helped_AUC": 0.3697,
+          "ceiling_share": {
+            "estimate": 0.0957,
+            "ci": [
+              0.0669,
+              0.1261
+            ]
+          },
+          "P_harmed_given_F": 0.0454,
+          "refit_gate": {
+            "AUC_F": 0.8715,
+            "AUC_helped": 0.5445
+          }
+        }
+      }
+    }
+  },
+  "A_primary_holm": {
+    "arguana": {
+      "p": 0.0006,
+      "p_holm": 0.0036,
+      "reject": true
+    },
+    "tripclick": {
+      "p": 0.0178,
+      "p_holm": 0.089,
+      "reject": false
+    },
+    "fiqa": {
+      "p": 0.0226,
+      "p_holm": 0.0904,
+      "reject": false
+    },
+    "hotpotqa": {
+      "p": 0.2324,
+      "p_holm": 0.6972,
+      "reject": false
+    },
+    "dbpedia": {
+      "p": 0.4972,
+      "p_holm": 0.9944,
+      "reject": false
+    },
+    "nq": {
+      "p": 0.978,
+      "p_holm": 0.9944,
+      "reject": false
+    }
+  }
+}
